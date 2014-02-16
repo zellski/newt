@@ -1,0 +1,20 @@
+Odc_Init.o: Odc_Init.C
+Luxo.o: Luxo.C Luxo.h ../include/World.h ../include/Creature.h \
+  ../include/AnchorPoint.h ../include/Primitives.h ../include/RigidBody.h \
+  ../include/BodyPoint.h ../include/DOF.h ../include/Constraints.h \
+  ../include/Stage.h ../include/Link.h ../include/Muscle.h \
+  ../include/Constant.h ../include/Fun.h ../include/Impulse.h \
+  ../include/Single.h ../include/Hat.h ../include/Hermite.h
+Snake.o: Snake.C Snake.h ../include/World.h ../include/Creature.h \
+  ../include/AnchorPoint.h ../include/Primitives.h ../include/RigidBody.h \
+  ../include/BodyPoint.h ../include/Link.h ../include/Constraints.h \
+  ../include/DOF.h ../include/Stage.h ../include/Muscle.h \
+  ../include/Constant.h ../include/Fun.h ../include/Force.h \
+  ../include/Impulse.h ../include/Hermite.h ../include/Hat.h \
+  ../include/PWL.h
+Needle.o: Needle.C Needle.h ../include/World.h ../include/Constraints.h \
+  ../include/Creature.h ../include/AnchorPoint.h ../include/Primitives.h \
+  ../include/RigidBody.h ../include/BodyPoint.h ../include/Link.h \
+  ../include/DOF.h ../include/Stage.h ../include/Muscle.h \
+  ../include/Constant.h ../include/Fun.h ../include/Hermite.h \
+  ../include/Impulse.h

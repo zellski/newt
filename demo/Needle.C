@@ -17,7 +17,7 @@
 # include "Stage.h"
 # include "Impulse.h"
 
-void Needle::setup(int k, Omu_Vector &x, Omu_Vector &u, Omu_Vector &c) {
+void Needle::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec &c) {
    W = new World(-9.81);
 
    DOF *X = new DOF(W, "X");
@@ -35,32 +35,39 @@ void Needle::setup(int k, Omu_Vector &x, Omu_Vector &u, Omu_Vector &c) {
 
    // now establish interval representations
 
+//   Stage *I1 = new Stage(W, 4, 1);
    Stage *I1 = new Stage(W, 4, 0.1, 2, 0.5);
-   new Constant(I1, X, 0);
+   new Hermite(I1, X, 0, 0);
    new Hermite(I1, Y, 1, 0);
    new Hermite(I1, Alpha, 8*M_PI/17, 8*M_PI/17);
 
+//   Stage *I2 = new Stage(W, 4, 1);
    Stage *I2 = new Stage(W, 4, 0.1, 2, 0.3);
-   new Hermite(I2, X, 0, -1);
-   new Constant(I2, Y, 0);
+   new Hermite(I2, X, 0, 0);
+   new Hermite(I2, Y, 0, -1);
    new Hermite(I2, Alpha, 8*M_PI/17, 0);
 
-   Stage *I3 = new Stage(W, 1, 0.1);
+   Stage *I3 = new Stage(W, 3, 0.1);
    new Hermite(I3, X, -1, -1);
    new Constant(I3, Y, 0);
    new Constant(I3, Alpha, 0);
 
-   new Impulse(I1, P1Top, 0, 1);
-   new Link(I1, I2);
+     new Impulse(I1, P1Top, 0, 1);
+     new Link(I1, I2);
 
-   new Impulse(I2, P1Bot, 0, 1);
-   new Link(I2, I3);
+     new Impulse(I2, P1Bot, 0, 1);
+     new Link(I2, I3);
 
-   new ValConstraint(I1, 0, 0, Alpha->qVal, 8*M_PI/17);
-   new ValConstraint(I1, 0, 0, Alpha->qDot, 0);
+     new ValConstraint(I1, 0, 0, Alpha->qVal, 8*M_PI/17);
+     new ValConstraint(I1, 0, 0, Alpha->qDot, 0);
 
-   new ValConstraint(I1, 0, 0, Y->qVal, 1);
-   new ValConstraint(I1, 0, 0, Y->qDot, 0);
+     new ValConstraint(I1, 0, 0, Y->qVal, 1);
+     new ValConstraint(I1, 0, 0, Y->qDot, 0);
+
+     new ValConstraint(I1, 0, 0, X->qVal, 0);
+     new ValConstraint(I1, 0, 0, X->qDot, 0);
+
+//     new ValConstraint(I2, 0, 0, Alpha->qDot, 0.1);
 
    W->Initialize(x, c);
 }

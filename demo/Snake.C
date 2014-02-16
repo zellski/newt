@@ -23,7 +23,7 @@
 # define LINKS	3
 # define PI	M_PI
 
-void Snake::setup(int k, Omu_Vector &x, Omu_Vector &u, Omu_Vector &c) {
+void Snake::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec &c) {
    DOF *Angles[LINKS];
    ThinRod *Rods[LINKS];
 

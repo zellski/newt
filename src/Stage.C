@@ -14,6 +14,7 @@ Stage::Stage(World *w, int n, double t) :
    Forces(),
    Impulses(),
    Cons(),
+   Min(-1), Max(-1), Start(-1), // not used
    N(n),
    T(t),
    h(t/n),
@@ -83,7 +84,7 @@ int Stage::Register(Impulse *I) {
    return Impulses.size() - 1;
 }
 
-void Stage::Initialize(Omu_Vector &x, Omu_Vector &c) {
+void Stage::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    cerr << "For stage " << sIx << ":\n";
    cerr << " * Initializing DOFReps.\n";
    if (tIx >= 0) {
@@ -108,26 +109,26 @@ void Stage::Update(const adoublev &x, adoublev &c, adouble &f0) {
    if (tIx >= 0) {
       T = x[tIx];
       h = T/N;
-      cerr << "Stage " << sIx << ": T == " << T;
-      if (T <= Min || T >= Max) {
-	 cerr << " (bumping)";
-      }
-      cerr << "\n";
+//      cerr << "Stage " << sIx << ": T == " << T;
+//      if (T <= Min || T >= Max) {
+//	 cerr << " (bumping)";
+//      }
+//      cerr << "\n";
 
    }
    // now integrate the FEMequation constraints
-   cerr << " - Integrating FEM Equations: ";
+//   cerr << " - Integrating FEM Equations: ";
    FEMEquations(x, c, f0);
-   cerr << " done.\n";
+//   cerr << " done.\n";
 
    // then sweep through all constraints slightly redundantly (for now)
-   cerr << " - Calling Evaluate in all constraints: ";
+//   cerr << " - Calling Evaluate in all constraints: ";
    for (vector<Constraint *> :: const_iterator p = Cons.begin();
 	p != Cons.end(); p++) {
       (*p)->Evaluate(x, c);
-      cerr << ".";
+//      cerr << ".";
    }
-   cerr << " done.\n";
+//   cerr << " done.\n";
 }
 
 void Stage::SnapShot(const adoublev &x, int slice, double t) {
@@ -166,7 +167,7 @@ static const double weights[] = { 1, 4, 2, 4, 2, 4, 2, 4, 2, 4, 1 };
 
 void Stage::FEMEquations(const adoublev &x, adoublev &c, adouble &f0) {
    for (int slice = 0; slice < N; slice ++) {
-      cerr << "(* " << slice << " *)";
+//      cerr << "(* " << slice << " *)";
       /* slice is an interval of time, over which we wish to integrate */
       for (int sample = 0; sample < SAMPLES; sample ++) {
 	 const double t = (double) sample/(SAMPLES-1);

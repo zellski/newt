@@ -1,7 +1,7 @@
 # ifndef CONSTRAINTS_H
 # define CONSTRAINTS_H
 
-# include <Omu_Vector.h>
+# include <Omu_Variables.h>
 # include <adouble.h>
 
 class World;
@@ -12,7 +12,7 @@ class RigidBody;
 
 class Constraint {
 public:
-   virtual void Initialize(Omu_Vector &x, Omu_Vector &c) = 0;
+   virtual void Initialize(Omu_VariableVec &x, Omu_VariableVec &c) = 0;
    virtual void Evaluate(const adoublev &x, adoublev &c) = 0;
 };
 
@@ -34,7 +34,7 @@ public:
    ValConstraint(Stage *const s, int n, double loct, const adouble &watch,
 		 const adouble &diff);
 
-   void Initialize(Omu_Vector &x, Omu_Vector &c);
+   void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
    void Evaluate(const adoublev &x, adoublev &c);
 };
 
@@ -56,7 +56,7 @@ public:
    VecConstraint(Stage *const s, int n, double loct, const adoublev &watch,
 		 const adoublev &diff);
 
-   void Initialize(Omu_Vector &x, Omu_Vector &c);
+   void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
    void Evaluate(const adoublev &x, adoublev &c);
 };
 

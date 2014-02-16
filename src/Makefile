@@ -2,9 +2,9 @@
 
 .SUFFIXES: .c .C .o .so
 
-# Change this according to where Omuses is installed.
+# Change this to point to include directories for HQP, Omuses, AdolC, etc
 
-OMU_INCDIR = /usr/local/include/omuses
+NEWT_INCLUDES = -I/usr/local/include/hqp -I/usr/local/include/hqp/adolc
 
 # Change these according to your system!
 
@@ -12,11 +12,9 @@ CXX = g++
 CC = gcc
 LD = gcc -shared -o
 
-CFLAGS = -g -O2 -fPIC -I../include -I${OMU_INCDIR}
+CFLAGS = -g -O2 -fPIC -I../include ${NEWT_INCLUDES}
 
-#
 # machine independent part
-#
 
 SRCS = World.C \
 	Impulse.C \
@@ -33,14 +31,16 @@ SRCS = World.C \
 	Hermite.C \
 	RigidBody.C \
 	AnchorPoint.C \
-	Visualizer.C
+	RIBVisualizer.C
+#	VRMLVisualizer.C
 
 OBJS = $(SRCS:.C=.o)
 
-RESULT = libnewt.so
+libnewt.so: $(OBJS) Makefile
+	$(LD) libnewt.so $(OBJS)
 
-lib: $(OBJS) Makefile
-	$(LD) $(RESULT) $(OBJS)
+depend:
+	$(CXX) -MM $(CFLAGS) $(SRCS) > .depend
 
 .C.o:
 	$(CXX) -c $(CFLAGS) $<
@@ -51,53 +51,4 @@ lib: $(OBJS) Makefile
 clean:
 	rm -f $(RESULT) *.o *~
 
-
-AnchorPoint.o: AnchorPoint.C ../include/Stage.h \
- ../include/AnchorPoint.h ../include/BodyPoint.h \
- ../include/Constraints.h
-Constraints.o: Constraints.C ../include/Stage.h ../include/DOF.h \
- ../include/Constraints.h ../include/AnchorPoint.h \
- ../include/RigidBody.h
-Creature.o: Creature.C ../include/Creature.h ../include/AnchorPoint.h \
- ../include/World.h ../include/DOF.h ../include/Constraints.h \
- ../include/Stage.h ../include/RigidBody.h ../include/BodyPoint.h
-DOF.o: DOF.C ../include/DOF.h ../include/Constraints.h \
- ../include/Stage.h ../include/World.h ../include/Fun.h
-Force.o: Force.C ../include/Fun.h ../include/DOF.h \
- ../include/Constraints.h ../include/Stage.h ../include/Force.h \
- ../include/AnchorPoint.h
-Hat.o: Hat.C ../include/Hat.h ../include/Fun.h ../include/DOF.h \
- ../include/Constraints.h ../include/Stage.h ../include/World.h
-Hermite.o: Hermite.C ../include/Hermite.h ../include/Fun.h \
- ../include/DOF.h ../include/Constraints.h ../include/Stage.h \
- ../include/World.h
-Impulse.o: Impulse.C ../include/Impulse.h ../include/AnchorPoint.h \
- ../include/Stage.h
-Link.o: Link.C ../include/Link.h ../include/Constraints.h \
- ../include/Creature.h ../include/AnchorPoint.h ../include/Impulse.h \
- ../include/World.h ../include/Stage.h ../include/DOF.h \
- ../include/Fun.h
-Muscle.o: Muscle.C ../include/Fun.h ../include/DOF.h \
- ../include/Constraints.h ../include/Stage.h ../include/Muscle.h
-PWC.o: PWC.C ../include/PWC.h ../include/Fun.h ../include/DOF.h \
- ../include/Constraints.h ../include/Stage.h ../include/World.h
-PWL.o: PWL.C ../include/PWL.h ../include/Fun.h ../include/DOF.h \
- ../include/Constraints.h ../include/Stage.h ../include/World.h
-Primitives.o: Primitives.C ../include/Primitives.h \
- ../include/RigidBody.h ../include/BodyPoint.h \
- ../include/AnchorPoint.h ../include/DOF.h ../include/Constraints.h \
- ../include/Stage.h ../include/World.h
-RigidBody.o: RigidBody.C ../include/RigidBody.h ../include/BodyPoint.h \
- ../include/AnchorPoint.h ../include/Impulse.h ../include/DOF.h \
- ../include/Constraints.h ../include/Stage.h ../include/World.h
-Stage.o: Stage.C ../include/Stage.h ../include/World.h \
- ../include/Constraints.h ../include/Creature.h \
- ../include/AnchorPoint.h ../include/Impulse.h ../include/Force.h \
- ../include/Muscle.h ../include/DOF.h ../include/Fun.h
-Visualizer.o: Visualizer.C ../include/Visualizer.h ../include/DOF.h \
- ../include/Constraints.h ../include/Stage.h ../include/World.h \
- ../include/Creature.h ../include/AnchorPoint.h ../include/BodyPoint.h \
- ../include/Primitives.h ../include/RigidBody.h
-World.o: World.C ../include/World.h ../include/Stage.h \
- ../include/DOF.h ../include/Constraints.h ../include/Creature.h \
- ../include/AnchorPoint.h ../include/Fun.h ../include/Visualizer.h
+include .depend

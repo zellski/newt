@@ -1,9 +1,11 @@
 # ifndef STAGE_H
 # define STAGE_H
 
-# include <vector>
 # include <adouble.h>
-# include <Omu_Vector.h>
+# include <Omu_Variables.h>
+
+# include <vector>
+using namespace std;
 
 class World;
 class Muscle;
@@ -48,7 +50,7 @@ public:
    void SnapShot(const adoublev &x, int slice, double t);
    void FEMEquations(const adoublev &x, adoublev &c, adouble &f0);
 
-   void Initialize(Omu_Vector &x, Omu_Vector &c);
+   void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
 };
 
 # endif

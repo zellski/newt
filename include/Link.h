@@ -1,10 +1,13 @@
 # ifndef LINK_H
 # define LINK_H
 
-# include <map>
-# include <Omu_Vector.h>
+
+# include <Omu_Variables.h>
 # include <adouble.h>
 # include "Constraints.h"
+
+# include <map>
+using namespace std;
 
 class Stage;
 
@@ -15,7 +18,7 @@ private:
    int cIx;
 public:
    Link(Stage *const a, Stage *const b);
-   void Initialize(Omu_Vector &x, Omu_Vector &c) {}
+   void Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {}
    void Evaluate(const adoublev &x, adoublev &c);
 };
 

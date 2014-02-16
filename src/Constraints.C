@@ -53,7 +53,7 @@ ValConstraint::ValConstraint(Stage *const s, int n, double loct,
 
 
 
-void ValConstraint::Initialize(Omu_Vector &x, Omu_Vector &c) {
+void ValConstraint::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    c.min[cIx] = Min; c.max[cIx] = Max;
 }
 
@@ -114,7 +114,7 @@ VecConstraint::VecConstraint(Stage *const s, int n, double loct,
    S->Register(this);
 }
 
-void VecConstraint::Initialize(Omu_Vector &x, Omu_Vector &c) {
+void VecConstraint::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    c.min[cIx+0] = MinX; c.max[cIx+0] = MaxX;
    c.min[cIx+1] = MinY; c.max[cIx+1] = MaxY;
 }

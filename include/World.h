@@ -1,9 +1,11 @@
 # ifndef WORLD_H
 # define WORLD_H
 
-# include <Omu_Vector.h>
+# include <Omu_Variables.h>
 # include <vector>
 # include <adouble.h>
+
+using namespace std;
 
 class DOF;
 class Constraint;
@@ -17,14 +19,14 @@ public:
    vector<DOF *> DOFs;
    vector<Stage *> Stages;
 
-   int xIx, cIx;	// allocation indices into Omu_Vector x and c
+   int xIx, cIx;	// allocation indices into Omu_VariableVec x and c
 
    const double G;
 
    World(double g);
 
    void Update(const adoublev &x, adoublev &c, adouble &f0);
-   void Initialize(Omu_Vector &x, Omu_Vector &c);
+   void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
 
    int claimVars(int n);
    int claimCons(int n);

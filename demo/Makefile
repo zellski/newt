@@ -3,20 +3,20 @@
 .SUFFIXES: .c .C .o .so
 
 # objects to link with to create an executable
-MACH_OBJS = -ltcl8.0 -ldl -lm
+MACH_OBJS = -ltcl8.4 -ldl -lm
 
-# Change these according to where Omuses is installed.
+# Change this to point to include directories for HQP, Omuses, AdolC, etc
 
-OMU_INCDIR = /usr/local/include/omuses
-OMU_LIBDIR = /usr/local/lib
+NEWT_INCLUDES = -I/usr/local/include/hqp -I/usr/local/include/hqp/adolc
+NEWT_LINKS = -L/usr/local/lib
 
 # Change these according to your system!
 
 CXX = g++
 CC = gcc
 
-CFLAGS = -g -O2 -I../include -I${OMU_INCDIR}
-LDFLAGS = -L../src -L${OMU_LIBDIR}
+CFLAGS = -g -O2 -I../include ${NEWT_INCLUDES}
+LDFLAGS = -L../src -Wl,-R../src ${NEWT_LINKS}
 
 #
 # machine independent part
@@ -31,9 +31,15 @@ OBJS = $(SRCS:.C=.o) Odc_Main.o
 
 RESULT = odc
 
-all: $(OBJS) Makefile
+odc:	always $(OBJS) Makefile
 	$(CXX) -o $(RESULT) $(LDFLAGS) $(OBJS) \
 	-lomu -lhqp -lnewt $(MACH_OBJS)
+
+always:
+	cd ../src; make
+
+depend:
+	$(CXX) -MM $(CFLAGS) $(SRCS) > .depend
 
 .C.o:
 	$(CXX) -c $(CFLAGS) $<
@@ -44,10 +50,5 @@ all: $(OBJS) Makefile
 clean:
 	rm -f $(RESULT) *.o *~
 
-$(OBJS): ../include/World.h ../include/Creature.h \
- ../include/AnchorPoint.h ../include/Primitives.h \
- ../include/RigidBody.h ../include/BodyPoint.h ../include/DOF.h \
- ../include/Constraints.h ../include/Stage.h ../include/Link.h \
- ../include/Muscle.h ../include/Constant.h ../include/Fun.h \
- ../include/Impulse.h ../include/Hat.h \
- ../include/Hermite.h ../include/PWL.h ../include/PWC.h
+include .depend
+# DO NOT DELETE

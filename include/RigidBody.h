@@ -1,9 +1,11 @@
 # ifndef RIGIDBODY_H
 # define RIGIDBODY_H
 
+# include <adouble.h>
+
 # include <string>
 # include <map>
-# include <adouble.h>
+using namespace std;
 
 class BodyPoint;
 class World;

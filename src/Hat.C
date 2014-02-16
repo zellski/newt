@@ -45,7 +45,7 @@ void Hat::SnapShot(const adoublev &x, int slice, double t) {
 }
 
 
-void Hat::Initialize(Omu_Vector &x, Omu_Vector &c) {
+void Hat::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    for (int i = 0; i <= S->N; i ++) {
       x.min[xIx + i] = Min;
       x.max[xIx + i] = Max;
@@ -61,11 +61,11 @@ void Hat::IntegrateFEM(adoublev &c, adouble qM, adouble qC,
 
    if (slice != 0) {
       // skip left-most hat function
-      cerr << "<" << (eIx+slice-1) << ">";
+//      cerr << "<" << (eIx+slice-1) << ">";
       c[eIx+slice-1] += weight * (sDot(1, 0, t)*qM + sVal(1, 0, t)*qC);
    }
    if (slice != S->N-1) {
-      cerr << "[" << (eIx+slice) << "]";
+//      cerr << "[" << (eIx+slice) << "]";
       // and right-most too
       c[eIx+slice] += weight * (sDot(0, 0, t)*qM + sVal(0, 0, t)*qC);
    }

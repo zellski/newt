@@ -1,7 +1,8 @@
-# ifndef VISUALIZER_H
-# define VISUALIZER_H
+# ifndef RIBVISUALIZER_H
+# define RIBVISUALIZER_H
 
-# include <fstream.h>
+# include <fstream>
+using namespace std;
 
 class adoublev;
 class World;
@@ -11,7 +12,7 @@ class BodyPoint;
 class AnchorPoint;
 class RigidBody;
 
-class Visualizer {
+class RIBVisualizer {
 public:
    const World *W;
 private:

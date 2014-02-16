@@ -35,7 +35,7 @@ public:
    virtual bool isConstant() = 0;
 
    virtual void SnapShot(const adoublev &x, int slice, double t) = 0;
-   virtual void Initialize(Omu_Vector &, Omu_Vector &) {}
+   virtual void Initialize(Omu_VariableVec &, Omu_VariableVec &) {}
    virtual void IntegrateFEM(adoublev &c, adouble lhs, adouble rhs,
 			     int slice, double t, double weight) const {}
 

@@ -1,7 +1,7 @@
 # ifndef HAT_H
 # define HAT_H
 
-# include <Omu_Vector.h>
+# include <Omu_Variables.h>
 # include <adouble.h>
 # include "Fun.h"
 
@@ -26,7 +26,7 @@ public:
 
    bool isConstant() { return false; }
 
-   void Initialize(Omu_Vector &x, Omu_Vector &c);
+   void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
 
    void IntegrateFEM(adoublev &c, adouble lhs, adouble rhs,
 		     int slice, double t, double weight) const;

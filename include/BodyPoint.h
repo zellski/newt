@@ -1,6 +1,7 @@
 # ifndef BODYPOINT_H
 # define BODYPOINT_H
 
+# include <assert.h>
 # include <adouble.h>
 # include "AnchorPoint.h"
 

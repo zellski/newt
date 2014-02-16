@@ -42,7 +42,7 @@ void Link::Evaluate(const adoublev &x, adoublev &c) {
 	  !D->DOFReps[B->sIx]->isConstant()) {
 	 c[ix ++] = D->qVal;
 	 c[ix ++] = D->qMomentum + D->JVal;
-	 cerr << "Hi! Here, D->JVal is " << D->JVal << "!\n";
+//	 cerr << "Hi! Here, D->JVal is " << D->JVal << "!\n";
       }
    }
    B->SnapShot(x, 0, 0);

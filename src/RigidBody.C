@@ -5,7 +5,7 @@
 # include "World.h"
 
 BodyPoint *RigidBody::MakePoint(const char *const S,
-				double x, double y, double z = 0) {
+				double x, double y, double z) {
    assert(!Points[S]);
    return Points[S] = new BodyPoint(S, this, x, y, z);
 }
@@ -47,10 +47,10 @@ void RigidBody::DistImpulse(const adoublev &x) {
       FlipInto(P->Val, tmp);
       JVal += P->TotJ * tmp;
       TotJ += P->TotJ;
-      cerr << "Added JVal " << P->TotJ*tmp << " and TotJ " << P->TotJ << "\n";
+//      cerr << "Added JVal " << P->TotJ*tmp << " and TotJ " << P->TotJ << "\n";
    }
    Angle->JVal += JVal - tmp*TotJ;
-   cerr << "Finally, Angle->Jval: " << JVal - tmp*TotJ << "...\n";
+//   cerr << "Finally, Angle->Jval: " << JVal - tmp*TotJ << "...\n";
 }
 
 

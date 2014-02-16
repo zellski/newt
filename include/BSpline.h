@@ -1,5 +1,5 @@
-# ifndef HERMITE_H
-# define HERMITE_H
+# ifndef BSPLINE_H
+# define BSPLINE_H
 
 # include <Omu_Variables.h>
 # include <adouble.h>
@@ -8,12 +8,12 @@
 /*
 **	This is a basis of cubic piecewise polynomials, of width and
 **	depth two; largely uncoupled and with good control over value
-**	and first-derivate interpolation; "Hermite Cubics"
+**	and first-derivate interpolation; "BSpline Cubics"
 */
 
 class Stage;
 
-class Hermite: public Fun, public Constraint {
+class BSpline: public Fun, public Constraint {
 private:
    static const double ScaleCoef[2][2][4];
 protected:
@@ -24,10 +24,10 @@ protected:
    double sDot(int width, int depth, double t) const;
    double sBis(int width, int depth, double t) const;
 public:
-   Hermite(Stage *const s, double from=0, double to=0);
-   Hermite(Stage *const s, double from, double to, double min, double max);
-   Hermite(Stage *const s, DOF *const D, double from=0, double to=0);
-   Hermite(Stage *const s, DOF *const D, double from, double to,
+   BSpline(Stage *const s, double from=0, double to=0);
+   BSpline(Stage *const s, double from, double to, double min, double max);
+   BSpline(Stage *const s, DOF *const D, double from=0, double to=0);
+   BSpline(Stage *const s, DOF *const D, double from, double to,
 	   double min, double max);
 
    bool isConstant() { return false; }

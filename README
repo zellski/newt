@@ -5,7 +5,7 @@ This is NewT, an implementation of the Spacetime Constraints paradigm for
 the synthesis of realistic-looking motion. It is fully described in a thesis
 report, available at
 
-    http://alyx.com/~zell/exjobb
+    http://alyx.com/~zell/thesis
 
 where you probably got this code, too. All mathematical motivation is
 included in that report, and little of it will be repeated here.
@@ -53,7 +53,7 @@ Installation
 The code presented here absolutely relies on the HQP/Omuses optimization
 package bundle written by Rüdiger Franke. It is available at
 
-    ftp://olymp.systemtechnik.tu-ilmenau.de/pub/tools/omuses/omuses1.5.tar.gz
+    http://hqp.sourceforge.net/
 
 and is distributed under the Gnu Library General Public License, and is thus
 a full source-code release. This package must be compiled and installed before
@@ -67,18 +67,14 @@ to tinker with the Makefile. This is practically guaranteed to be the case.
 
 Then, type 'make' in the newt/demo subdirectory. This will compile a number
 of animation scenarios. If compilation is successful, the resulting binary
-is called 'odc'.
+is called 'odc'. This binary in turn is run by a TCL program called 'run'.
 
 ---
 
-Finally, it is advisable to fetch the Blue Moon Rendering Tools by Larry
-Gritz, currently available at
+The code output RenderMan format and you will need a renderer for it. For a
+summary of such programs, see:
 
-    http://www.seas.gwu.edu/student/gritz/bmrt.html
-
-which contains the binaries necessary to translate the RenderMan output of
-the code into pretty pictures. Of course, Pixar's RenderMan program will do
-that even better, but that costs... a lot more.
+    http://www.faqs.org/faqs/graphics/renderman-faq/
 
 
 
@@ -97,7 +93,7 @@ The RenderMan output ends up in the file
 
 	newt/res/snapshot.dat
 
-and using the Blue Moon Rendering Tools (BMRT), you display it with e.g.
+and using e.g. the Blue Moon Rendering Tools (BMRT), you display it with e.g.
 
 	rendribv snapshot.dat
 
@@ -113,7 +109,7 @@ for a DOF named "Alpha"; other files are written for other DOF.
 
 The first three can be quite useful for visualisation. The format is
 constructed to work with Gnu Octave. It is quite possible they also work
-with Matlab although this has not been tested.
+with Matlab.
 
 
 Roll Your Own
@@ -212,7 +208,7 @@ There are big plans and there are smaller plans. The ones of importance:
    precomputed scalar products between basis functions. Overall, the speed
    improvement should be somewhere between impressive and overwhelming.
 
-   This is the most likely change for a version 1.1
+   This is the most likely major change for a version 1.1
 
 
  - Completely redesign the class structure, use proper OO techniques and
@@ -236,11 +232,6 @@ There are big plans and there are smaller plans. The ones of importance:
  - Tighten up consistency checks during the scenario construction
    so that it becomes next to impossible to set things up wrong
  - Rewrite force/impulse handling
-
-
-Last but not least:
-
- - Improve this tragically inferior README file.
 
 
 Pär Winzell

@@ -1,10 +1,12 @@
 # ifndef DOF_H
 # define DOF_H
 
-# include <map>
 # include <adouble.h>
 # include "Constraints.h"
 # include "Stage.h"
+
+# include <map>
+using namespace std;
 
 class World;
 class Fun;

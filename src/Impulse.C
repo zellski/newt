@@ -31,7 +31,7 @@ void Impulse::SnapShot(const adoublev &x) {
       JVec[0] = x[xIx] * vx;
       JVec[1] = x[xIx] * vy;
       P->TotJ += JVec;
-      cerr << "Impulsing AnchorPoint " << P->Name << " in direction ("
-	   << vx << ", " << vy << ") magnitude " << x[xIx] << "..\n";
+//      cerr << "Impulsing AnchorPoint " << P->Name << " in direction ("
+//	   << vx << ", " << vy << ") magnitude " << x[xIx] << "..\n";
    }
 }

@@ -2,8 +2,10 @@
 # define ANCHORPOINT_H
 
 # include <stdio.h>
-# include <vector>
 # include <adouble.h>
+
+# include <vector>
+using namespace std;
 
 /*
 **	This class represents a point in the World to which other

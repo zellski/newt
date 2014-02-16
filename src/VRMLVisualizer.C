@@ -1,4 +1,4 @@
-# include "Visualizer.h"
+# include "VRMLVisualizer.h"
 # include "DOF.h"
 # include "Stage.h"
 # include "World.h"
@@ -6,9 +6,9 @@
 # include "BodyPoint.h"
 # include "Primitives.h"
 
-void Visualizer::Generate(World *const W, const adoublev &x, int frames) {
+void VRMLVisualizer::Generate(World *const W, const adoublev &x, int frames) {
    static char buf[256];
-   static ofstream RIB;
+   static ofstream VRML;
    static ofstream TOut;
    static ofstream *qOut, *QOut, *qDot, *qC, *qM;
 
@@ -52,22 +52,24 @@ void Visualizer::Generate(World *const W, const adoublev &x, int frames) {
       qM[i].open(buf);
       qM[i] << "qM" << D->Name << " = [ \n";
    }
-   rename("../res/snapshot.dat", "../res/snapshot.foo");
-   RIB.open("../res/snapshot.dat");
-   RIB << "Projection \"perspective\" \"fov\" 45\n"
-       << "PixelSamples 1 1\n"
-       << "Translate 0 0 7\n"
-       << "LightSource \"ambientlight\" 1 \"intensity\" 0.4\n"
-       << "LightSource \"distantlight\" 1 \"from\" [0 1 -4] \"to\" [0 0 0] \"intensity\" 0.8 \n";
 
+   rename("../res/snapshot.dat", "../res/snapshot.foo");
+   VRML.open("../res/snapshot.dat");
+   VRML << "#VRML V2.0 utf8\n\n"
+	<< "Group {\n"
+	<< "children [\n"
+	<< "DEF Clock TimeSensor {\n"
+	<< "cycleInterval 3\n"
+	<< "loop TRUE\n"
+	<< "},\n";
 
    // sweep through the full time-interval at a constant step
-
 
    double tBase = 0;
    vector<Stage *>::const_iterator S = W->Stages.begin();
 
-   for (int frame = 0; frame <= frames; frame ++) {
+//   for (int frame = 0; frame <= frames; frame ++) {
+   int frame = 10;
       double t = T*frame/frames;
 
       if (frame < frames) {
@@ -101,24 +103,14 @@ void Visualizer::Generate(World *const W, const adoublev &x, int frames) {
 	 qM[i] << value(D->qMomentum) << "\n";
       }
 
-      RIB << "FrameBegin " << frame << "\n"
-	  << "Display \"frame" << frame << ".tiff\" \"file\" \"rgb\"\n"
-	  << "WorldBegin\n"
-	  << "AttributeBegin\n"
-	  << "Color [1 .45 .06]\n"
-	  << "Surface \"shinymetal\" \"Kd\" 0.2 \"Ks\" 0.8 \"roughness\" 0.5\n";
-
       for (uint i = 0; i < W->Creatures.size(); i ++) {
-	 Render(W->Creatures[i], RIB);
+	 Render(W->Creatures[i], VRML);
       }
+//   }
 
-      RIB << "AttributeEnd\n"
-	  << "WorldEnd\n"
-	  << "FrameEnd\n";
-   }
+   VRML << "]}\n";
+   VRML.close();
 
-
-   RIB.close();
    TOut << "];\n";
    TOut.close();
    for (uint i = 0; i < W->DOFs.size(); i ++) {
@@ -144,41 +136,49 @@ void Visualizer::Generate(World *const W, const adoublev &x, int frames) {
    cerr << "Rendering done.\n";
 }
 
-void Visualizer::Render(const Creature *C, ofstream &RIB) {
-   RIB << "TransformBegin\n";
-   RIB << "Translate " << value(C->X->qVal) << " " << value(C->Y->qVal) << " 0\n";
-   Render((const AnchorPoint *) C, RIB);
-   RIB << "TransformEnd\n";
+void VRMLVisualizer::Render(const Creature *C, ofstream &VRML) {
+   VRML << "DEF Pos" << (PosCnt+++) << " PositionInterpolator {\n" ...
+
+	<< "Transform {\n"
+	<< "translation " << value(C->X->qVal) << " " << value(C->Y->qVal) << " 0\n";
+   Render((const AnchorPoint *) C, VRML);
+   VRML << "}\n";
 }
 
-void Visualizer::Render(const BodyPoint *P, ofstream &RIB) {
+void VRMLVisualizer::Render(const BodyPoint *P, ofstream &VRML) {
    RigidBody *Mom = P->Parent;
-   RIB << "Rotate " << 180*value(Mom->Angle->qVal)/M_PI << " 0 0 1\n";
-   RIB << "Translate " << -value(P->LocPos[0]) << " " << -value(P->LocPos[1]) << " 0\n";
-   Render(Mom, RIB);
-
+   VRML << "Transform {\n"
+	<< "rotation 0 0 1 " << value(Mom->Angle->qVal) << "\n"
+	<< "children Transform {\n"
+	<< "translation " << -value(P->LocPos[0]) << " " << -value(P->LocPos[1]) << " 0\n"
+	<< "children [\n";
+   Render(Mom, VRML);
    for (PointMap::const_iterator p = Mom->Points.begin();
 	p != Mom->Points.end(); p ++) {
-      RIB << "TransformBegin\n";
-      RIB << "Translate " << value(((*p).second)->LocPos[0]) << " " << value(((*p).second)->LocPos[1]) << " 0\n";      
-      Render((const AnchorPoint *) ((*p).second), RIB);
-      RIB << "TransformEnd\n";
+      const BodyPoint *Q = (*p).second;
+      if (Q->AttachedPoints.begin() != Q->AttachedPoints.end()) {
+	 VRML << "Transform {\n";
+	 VRML << "translation " << value(Q->LocPos[0]) << " " << value(Q->LocPos[1]) << " 0\n";      
+	 Render((const AnchorPoint *) Q, VRML);
+	 VRML << "}\n";
+      }
    }
+   VRML << "]}}\n";
 }
 
-void Visualizer::Render(const AnchorPoint *P, ofstream &RIB) {
+void VRMLVisualizer::Render(const AnchorPoint *P, ofstream &VRML) {
+   VRML << "children [\n";
    for (vector<BodyPoint *>::const_iterator p = P->AttachedPoints.begin();
 	p != P->AttachedPoints.end(); p ++) {
-      RIB << "TransformBegin\n";
-      Render(*p, RIB);
-      RIB << "TransformEnd\n";
+      Render(*p, VRML);
    }
+   VRML << "]\n";
 }
 
 
 // OK, this has to be redone :-)
 
-void Visualizer::Render(const RigidBody *B, ofstream &RIB) {
+void VRMLVisualizer::Render(const RigidBody *B, ofstream &VRML) {
    const Sphere *S = (const Sphere *) B;
    const ThinRod *T = (const ThinRod *) B;
    const Disk *D = (const Disk *) B;
@@ -186,27 +186,22 @@ void Visualizer::Render(const RigidBody *B, ofstream &RIB) {
 
    switch(B->BodyType()) {
    case BODY_SPHERE:
-      RIB << "Sphere " << S->Radius << " " << -S->Radius << " " << S->Radius << " 360\n";
+      VRML << "Shape {\n"
+	   << "geometry Sphere { radius " << S->Radius << " }\n"
+	   << "appearance Appearance { material Material { diffuseColor 1 0 0 } }\n"
+	   << "}\n";
       break;
    case BODY_THINROD:
-      RIB << "Rotate 90 0 1 0\n"
-	  << "Cylinder " << T->Radius << " " << -.5*T->Length << " " << .5*T->Length << " 360\n"
-	  << "Rotate -90 0 1 0\n";
+      VRML << "Transform {\n"
+	   << "rotation 0 0 1 " << (M_PI/2) << "\n"
+	   << "children Shape {\n"
+	   << "geometry Cylinder { radius " << T->Radius << " height " << T->Length << " }}}\n";
       break;
    case BODY_DISK:
-      RIB << "Rotate 90 -1 0 0\n"
-	  << "Rotate 90 0 1 0\n"
-	  << "Cylinder " << D->Radius << " " << -.5*D->Height << " " << .5*D->Height << " 360\n"
-	  << "Disk " << .5*D->Height << " " << D->Radius << " 360\n"
-	  << "Rotate -90 0 1 0\n"
-	  << "Rotate -90 -1 0 0\n";
-      break;
-   case BODY_CYLINDER:
-      RIB << "Rotate 90 -1 0 0\n"
-	  << "Rotate 90 0 1 0\n"
-	  << "Cylinder " << C->Radius << " " << -.5*C->Height << " " << .5*C->Height << " 360\n"
-	  << "Rotate -90 0 1 0\n"
-	  << "Rotate -90 -1 0 0\n";
+      VRML << "Transform {\n"
+	   << "rotation 0 0 1 " << (M_PI/2) << "\n"
+	   << "children Shape {\n"
+	   << "geometry Cylinder { radius " << D->Radius << " height " << D->Height << " }}}\n";
       break;
    default:
       cerr << "I don't know how to render RigidBody " << B->Name << "!\n";

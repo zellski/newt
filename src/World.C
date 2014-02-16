@@ -3,7 +3,8 @@
 # include "DOF.h"
 # include "Creature.h"
 # include "Fun.h"
-# include "Visualizer.h"
+# include "VRMLVisualizer.h"
+# include "RIBVisualizer.h"
 
 World::World(double g) :
    Creatures(),
@@ -53,10 +54,12 @@ void World::Update(const adoublev &x, adoublev &c, adouble &f0) {
    for (uint i = 0; i < Stages.size(); i ++) {
       Stages[i]->Update(x, c, f0);
    }
-   Visualizer::Generate(this, x, 100);
+   RIBVisualizer::Generate(this, x, 100);
+   //   VRMLVisualizer::Generate(this, x, 100);
+
 }
 
-void World::Initialize(Omu_Vector &x, Omu_Vector &c) {
+void World::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    cerr << " * Allocating " << xIx << " ix for DOFs, "
 	<< cIx << " for Constraints.\n";
    x.alloc(xIx);

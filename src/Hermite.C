@@ -86,7 +86,7 @@ void Hermite::SnapShot(const adoublev &x, int slice, double t) {
    Bis /= (S->h * S->h);
 }
 
-void Hermite::Initialize(Omu_Vector &x, Omu_Vector &c) {
+void Hermite::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    if (cIx >= 0) {
       cerr << "Constraining indices [" << cIx << " - " << cIx+4*S->N << "] to lie between [" << Min << " - " << Max << "]\n";
       for (int i = 0; i < S->N; i ++) {

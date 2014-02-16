@@ -1,7 +1,7 @@
 # ifndef PWL_H
 # define PWL_H
 
-# include <Omu_Vector.h>
+# include <Omu_Variables.h>
 # include <adouble.h>
 # include "Fun.h"
 
