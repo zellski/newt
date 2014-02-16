@@ -1,19 +1,16 @@
-# This Makefile is basically stolen from the HQP/Omuses package.
-
 .SUFFIXES: .c .C .o .so
 
-# Change this to point to include directories for HQP, Omuses, AdolC, etc
-
-NEWT_INCLUDES = -I/usr/local/include/hqp -I/usr/local/include/hqp/adolc
-
 # Change these according to your system!
+
+ADOLC_BASE = /usr/local
+HQP_BASE = /usr/local
 
 CXX = g++
 CC = gcc
 
 LD = gcc -shared -o
 
-CFLAGS = -g -O3 -march=pentium4 -fPIC -I../include ${NEWT_INCLUDES}
+CFLAGS = -g -O3 -fPIC -I../include -I${HQP_BASE}/include/hqp -I${ADOLC_BASE}/include/adolc
 
 # machine independent part
 
