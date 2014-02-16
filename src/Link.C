@@ -1,8 +1,8 @@
+# include "Stage.h"
 # include "Link.h"
 # include "Creature.h"
 # include "Impulse.h"
 # include "World.h"
-# include "Stage.h"
 # include "DOF.h"
 # include "Fun.h"
 

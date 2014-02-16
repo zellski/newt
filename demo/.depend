@@ -1,20 +1,102 @@
-Odc_Init.o: Odc_Init.C
-Luxo.o: Luxo.C Luxo.h ../include/World.h ../include/Creature.h \
-  ../include/AnchorPoint.h ../include/Primitives.h ../include/RigidBody.h \
-  ../include/BodyPoint.h ../include/DOF.h ../include/Constraints.h \
-  ../include/Stage.h ../include/Link.h ../include/Muscle.h \
-  ../include/Constant.h ../include/Fun.h ../include/Impulse.h \
-  ../include/Single.h ../include/Hat.h ../include/Hermite.h
-Snake.o: Snake.C Snake.h ../include/World.h ../include/Creature.h \
-  ../include/AnchorPoint.h ../include/Primitives.h ../include/RigidBody.h \
-  ../include/BodyPoint.h ../include/Link.h ../include/Constraints.h \
-  ../include/DOF.h ../include/Stage.h ../include/Muscle.h \
-  ../include/Constant.h ../include/Fun.h ../include/Force.h \
-  ../include/Impulse.h ../include/Hermite.h ../include/Hat.h \
-  ../include/PWL.h
-Needle.o: Needle.C Needle.h ../include/World.h ../include/Constraints.h \
+# 1 "/home/zell/newt/demo//"
+Odc_Init.o: Odc_Init.C /usr/local/include/hqp/If_String.h \
+  /usr/local/include/hqp/If_Variable.h \
+  /usr/local/include/hqp/If_Element.h /usr/local/include/hqp/If.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/If_ListElement.h
+# 1 "/home/zell/newt/demo//"
+Needle.o: Needle.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h Needle.h \
+  /usr/local/include/hqp/Omu_Program.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/Omu_Variables.h \
+  /usr/local/include/hqp/Omu_Dependents.h \
+  /usr/local/include/hqp/If_Class.h /usr/local/include/hqp/If_id.h \
+  /usr/local/include/hqp/If_List.h \
+  /usr/local/include/hqp/If_ListElement.h ../include/World.h \
+  ../include/Constraints.h ../include/Creature.h ../include/AnchorPoint.h \
+  ../include/Primitives.h ../include/RigidBody.h ../include/BodyPoint.h \
+  ../include/Link.h ../include/Constraints.h ../include/DOF.h \
+  ../include/Stage.h ../include/Muscle.h ../include/Constant.h \
+  ../include/Fun.h ../include/DOF.h ../include/Hermlet.h \
+  ../include/Impulse.h ../include/SimpsonIntegrator.h \
+  ../include/Integrator.h ../include/GaussianIntegrator.h
+# 1 "/home/zell/newt/demo//"
+Luxo.o: Luxo.C ../include/Stage.h /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h Luxo.h \
+  /usr/local/include/hqp/Omu_Program.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/Omu_Variables.h \
+  /usr/local/include/hqp/Omu_Dependents.h \
+  /usr/local/include/hqp/If_Class.h /usr/local/include/hqp/If_id.h \
+  /usr/local/include/hqp/If_List.h \
+  /usr/local/include/hqp/If_ListElement.h ../include/World.h \
   ../include/Creature.h ../include/AnchorPoint.h ../include/Primitives.h \
-  ../include/RigidBody.h ../include/BodyPoint.h ../include/Link.h \
-  ../include/DOF.h ../include/Stage.h ../include/Muscle.h \
-  ../include/Constant.h ../include/Fun.h ../include/Hermite.h \
-  ../include/Impulse.h
+  ../include/RigidBody.h ../include/BodyPoint.h ../include/DOF.h \
+  ../include/Constraints.h ../include/Stage.h ../include/Link.h \
+  ../include/Muscle.h ../include/Constant.h ../include/Fun.h \
+  ../include/DOF.h ../include/Impulse.h ../include/Single.h \
+  ../include/Hat.h ../include/Hermlet.h ../include/SimpsonIntegrator.h \
+  ../include/Integrator.h ../include/GaussianIntegrator.h
+# 1 "/home/zell/newt/demo//"
+Human.o: Human.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h Human.h \
+  /usr/local/include/hqp/Omu_Program.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/Omu_Variables.h \
+  /usr/local/include/hqp/Omu_Dependents.h \
+  /usr/local/include/hqp/If_Class.h /usr/local/include/hqp/If_id.h \
+  /usr/local/include/hqp/If_List.h \
+  /usr/local/include/hqp/If_ListElement.h ../include/World.h \
+  ../include/Creature.h ../include/AnchorPoint.h ../include/Primitives.h \
+  ../include/RigidBody.h ../include/BodyPoint.h ../include/DOF.h \
+  ../include/Constraints.h ../include/Stage.h ../include/Link.h \
+  ../include/Muscle.h ../include/Force.h ../include/Constant.h \
+  ../include/Fun.h ../include/DOF.h ../include/Impulse.h \
+  ../include/Single.h ../include/Hat.h ../include/PWC.h ../include/PWL.h \
+  ../include/Hermlet.h ../include/GaussianIntegrator.h \
+  ../include/Integrator.h

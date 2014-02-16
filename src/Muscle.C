@@ -1,6 +1,6 @@
+# include "Stage.h"
 # include "Fun.h"
 # include "Muscle.h"
-# include "Stage.h"
 # include "DOF.h"
 
 Muscle::Muscle(Stage *const s, DOF *const d, Fun *const f, double weight) :

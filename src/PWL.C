@@ -1,8 +1,8 @@
+# include "Stage.h"
 # include <adouble.h>
 # include "PWL.h"
 # include "World.h"
 # include "DOF.h"
-# include "Stage.h"
 
 PWL::PWL(Stage *const s) :
    Fun(s),

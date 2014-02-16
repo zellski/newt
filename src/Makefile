@@ -10,9 +10,10 @@ NEWT_INCLUDES = -I/usr/local/include/hqp -I/usr/local/include/hqp/adolc
 
 CXX = g++
 CC = gcc
+
 LD = gcc -shared -o
 
-CFLAGS = -g -O2 -fPIC -I../include ${NEWT_INCLUDES}
+CFLAGS = -g -O3 -march=pentium4 -fPIC -I../include ${NEWT_INCLUDES}
 
 # machine independent part
 
@@ -29,8 +30,11 @@ SRCS = World.C \
 	Hat.C \
 	Link.C \
 	Hermite.C \
+	Hermlet.C \
 	RigidBody.C \
 	AnchorPoint.C \
+	SimpsonIntegrator.C \
+	GaussianIntegrator.C \
 	RIBVisualizer.C
 #	VRMLVisualizer.C
 
@@ -52,3 +56,4 @@ clean:
 	rm -f $(RESULT) *.o *~
 
 include .depend
+# DO NOT DELETE

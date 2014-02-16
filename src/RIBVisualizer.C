@@ -1,16 +1,18 @@
 # include "RIBVisualizer.h"
-# include "DOF.h"
 # include "Stage.h"
+# include "DOF.h"
 # include "World.h"
 # include "Creature.h"
 # include "BodyPoint.h"
 # include "Primitives.h"
 
-void RIBVisualizer::Generate(World *const W, const adoublev &x, int frames) {
+using namespace std;
+
+void RIBVisualizer::Generate(World *const W, const adoublev &x) {
    static char buf[256];
-   static ofstream RIB;
-   static ofstream TOut;
-   static ofstream *qOut, *QOut, *qDot, *qC, *qM;
+   static std::ofstream RIB;
+   static std::ofstream TOut;
+   static std::ofstream *qOut, *QOut, *qDot, *qC, *qM;
 
    double T = 0;
 
@@ -24,12 +26,12 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x, int frames) {
 
 //   cerr << "Starting rendering...\n";
 
-   qOut = new ofstream[W->DOFs.size()];
-   qDot = new ofstream[W->DOFs.size()];
-   QOut = new ofstream[W->DOFs.size()];
+   qOut = new std::ofstream[W->DOFs.size()];
+   qDot = new std::ofstream[W->DOFs.size()];
+   QOut = new std::ofstream[W->DOFs.size()];
 
-   qC = new ofstream[W->DOFs.size()];
-   qM = new ofstream[W->DOFs.size()];
+   qC = new std::ofstream[W->DOFs.size()];
+   qM = new std::ofstream[W->DOFs.size()];
 
    TOut.open("../res/TDat.m");
    TOut << "T = [ \n";
@@ -63,31 +65,22 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x, int frames) {
 
    // sweep through the full time-interval at a constant step
 
-
    double tBase = 0;
    vector<Stage *>::const_iterator S = W->Stages.begin();
 
-   for (int frame = 0; frame <= frames; frame ++) {
-      double t = T*frame/frames;
-
-      if (frame < frames) {
-	 // did we skip into a new Stage? value(T) guaranteed > 0
-	 while (t > tBase + value((*S)->T)) {
-	    tBase += value((*S)->T);
-	    S ++;
-	 }
-	 double tt = (t - tBase)/value((*S)->h);
-	 if (tt >= (*S)->N) {
-	    (*S)->SnapShot(x, (*S)->N-1, 1);
-	 } else {
-	    (*S)->SnapShot(x, (int) tt, tt - (int) tt);
-	 }
-      } else {
-	 // hacky hacky hacky :)
-//	 cerr << "Doing hacky nonsense...\n";
-	 Stage *J = W->Stages[W->Stages.size()-1];
-	 J->SnapShot(x, J->N-1, 1);
-      }
+   int frame = 0;
+   for (double t = 0.0; t <= T; t += 0.01) {
+       // did we skip into a new Stage? value(T) guaranteed > 0
+       while (t > tBase + value((*S)->T)) {
+           tBase += value((*S)->T);
+           S ++;
+       }
+       double tt = (t - tBase)/value((*S)->h);
+       if (tt >= (*S)->N) {
+           (*S)->SnapShot(x, (*S)->N-1, 1);
+       } else {
+           (*S)->SnapShot(x, (int) tt, tt - (int) tt);
+       }
 
 //      TOut << value(W->T) << "\n";
       TOut << "0\n";
@@ -102,7 +95,9 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x, int frames) {
       }
 
       RIB << "FrameBegin " << frame << "\n"
-	  << "Display \"frame" << frame << ".tiff\" \"file\" \"rgb\"\n"
+	  << "Display \""
+          << (frame < 100 ? (frame < 10 ? "00" : "0") : "") << frame
+          << ".tiff\" \"file\" \"rgb\"\n"
 	  << "WorldBegin\n"
 	  << "AttributeBegin\n"
 	  << "Color [1 .45 .06]\n"
@@ -115,6 +110,7 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x, int frames) {
       RIB << "AttributeEnd\n"
 	  << "WorldEnd\n"
 	  << "FrameEnd\n";
+      frame ++;
    }
 
 
@@ -144,14 +140,14 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x, int frames) {
 //   cerr << "Rendering done.\n";
 }
 
-void RIBVisualizer::Render(const Creature *C, ofstream &RIB) {
+void RIBVisualizer::Render(const Creature *C, std::ofstream &RIB) {
    RIB << "TransformBegin\n";
    RIB << "Translate " << value(C->X->qVal) << " " << value(C->Y->qVal) << " 0\n";
    Render((const AnchorPoint *) C, RIB);
    RIB << "TransformEnd\n";
 }
 
-void RIBVisualizer::Render(const BodyPoint *P, ofstream &RIB) {
+void RIBVisualizer::Render(const BodyPoint *P, std::ofstream &RIB) {
    RigidBody *Mom = P->Parent;
    RIB << "Rotate " << 180*value(Mom->Angle->qVal)/M_PI << " 0 0 1\n";
    RIB << "Translate " << -value(P->LocPos[0]) << " " << -value(P->LocPos[1]) << " 0\n";
@@ -166,7 +162,7 @@ void RIBVisualizer::Render(const BodyPoint *P, ofstream &RIB) {
    }
 }
 
-void RIBVisualizer::Render(const AnchorPoint *P, ofstream &RIB) {
+void RIBVisualizer::Render(const AnchorPoint *P, std::ofstream &RIB) {
    for (vector<BodyPoint *>::const_iterator p = P->AttachedPoints.begin();
 	p != P->AttachedPoints.end(); p ++) {
       RIB << "TransformBegin\n";
@@ -178,7 +174,7 @@ void RIBVisualizer::Render(const AnchorPoint *P, ofstream &RIB) {
 
 // OK, this has to be redone :-)
 
-void RIBVisualizer::Render(const RigidBody *B, ofstream &RIB) {
+void RIBVisualizer::Render(const RigidBody *B, std::ofstream &RIB) {
    const Sphere *S = (const Sphere *) B;
    const ThinRod *T = (const ThinRod *) B;
    const Disk *D = (const Disk *) B;

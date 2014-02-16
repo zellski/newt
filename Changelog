@@ -1,0 +1,11 @@
+Dec 18th, 2004: *** 1.0.2 release
+
+ - Experimentally add stabilizing (dq/dt)^2 component to the objective
+ - Generalize numerical integration; implement Gaussian quadrature
+ - First humanoid model: demo/Human.C, demo/Human.h
+ - Implement Hermite Wavelet basis: src/Hermlet.C, include/Hermlet.h
+
+Nov 2004: *** 1.0.1 release
+ - Use std namespace; update STL usage; modernize code & makefiles
+
+1998: *** 1.0 release

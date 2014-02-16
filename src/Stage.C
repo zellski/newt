@@ -7,17 +7,21 @@
 # include "Muscle.h"
 # include "DOF.h"
 # include "Fun.h"
+# include "Integrator.h"
 
-Stage::Stage(World *w, int n, double t) :
+Stage::Stage(World *w, Integrator *i, int n, double t) :
    W(w),
    Muscles(),
    Forces(),
    Impulses(),
    Cons(),
+   integrator(i),
    Min(-1), Max(-1), Start(-1), // not used
    N(n),
    T(t),
    h(t/n),
+   speedContribution(0.0),
+   torqueContribution(0.0),
    sIx(w->Register(this)),
    tIx(-1)
 {
@@ -26,16 +30,20 @@ Stage::Stage(World *w, int n, double t) :
    assert(T > 0);
 };
 
-Stage::Stage(World *w, int n, double min, double max, double start) :
+Stage::Stage(World *w, Integrator *i,
+             int n, double min, double max, double start) :
    W(w),
    Muscles(),
    Forces(),
    Impulses(),
    Cons(),
    Min(min), Max(max), Start(start),
+   integrator(i),
    N(n),
    T(start),
    h(start/n),
+   speedContribution(0.0),
+   torqueContribution(0.0),
    sIx(w->Register(this)),
    tIx(w->claimVars(1))
 {
@@ -109,13 +117,15 @@ void Stage::Update(const adoublev &x, adoublev &c, adouble &f0) {
    if (tIx >= 0) {
       T = x[tIx];
       h = T/N;
-//      cerr << "Stage " << sIx << ": T == " << T;
-//      if (T <= Min || T >= Max) {
-//	 cerr << " (bumping)";
-//      }
-//      cerr << "\n";
+      cerr << "Stage " << sIx << ": T == " << value(T);
+      if (value(T) <= Min || value(T) >= Max) {
+	 cerr << " (bumping)";
+      }
+      cerr << "\n";
 
    }
+   speedContribution = torqueContribution = 0.0;
+
    // now integrate the FEMequation constraints
 //   cerr << " - Integrating FEM Equations: ";
    FEMEquations(x, c, f0);
@@ -129,6 +139,7 @@ void Stage::Update(const adoublev &x, adoublev &c, adouble &f0) {
 //      cerr << ".";
    }
 //   cerr << " done.\n";
+   cerr << "Stage [" << sIx << "]: speed/torque = " << (speedContribution/torqueContribution) << "\n";
 }
 
 void Stage::SnapShot(const adoublev &x, int slice, double t) {
@@ -158,35 +169,41 @@ void Stage::SnapShot(const adoublev &x, int slice, double t) {
    }
 }   
 
-//static const int SAMPLES = 3;
-//static const double weights[] = { 1, 4, 2 };
-//static const int SAMPLES = 7;
-//static const double weights[] = { 1, 4, 2, 4, 2, 4, 1 };
-static const int SAMPLES = 11;
-static const double weights[] = { 1, 4, 2, 4, 2, 4, 2, 4, 2, 4, 1 };
-
 void Stage::FEMEquations(const adoublev &x, adoublev &c, adouble &f0) {
    for (int slice = 0; slice < N; slice ++) {
-//      cerr << "(* " << slice << " *)";
-      /* slice is an interval of time, over which we wish to integrate */
-      for (int sample = 0; sample < SAMPLES; sample ++) {
-	 const double t = (double) sample/(SAMPLES-1);
-	 const double weight = weights[sample]/SAMPLES/3;
-
-	 SnapShot(x, slice, t);
-	 for (vector<DOF *> :: const_iterator p = W->DOFs.begin();
-	      p != W->DOFs.end(); p++) {
-	    adouble qC = (*p)->qCurvature + (*p)->QVal;
-	    adouble qM = (*p)->qMomentum;
-
-	    (*p)->DOFReps[sIx]->IntegrateFEM(c, qM, qC, slice, t, weight);
-	 }
-	 for (vector<Muscle *>::const_iterator m = Muscles.begin();
-	      m != Muscles.end(); m ++) {
-	    adouble foo = (*m)->MVal;
-	    foo = (*m)->Weight*foo*foo;
-	    f0 += weight * h * foo;
-	 }
-      }
+       integrator->integrate(this, slice, x, c, f0);
    }
 }
+
+void Stage::FEMPoint(const int slice, const double t, const double weight,
+                     const adoublev &x, adoublev &c, adouble &f0) {
+    SnapShot(x, slice, t);
+
+    for (vector<DOF *> :: const_iterator p = W->DOFs.begin();
+         p != W->DOFs.end(); p++) {
+        adouble qC = (*p)->qCurvature;
+        if (!W->ImplicitMuscles) {
+            qC += (*p)->QVal;
+        } else {
+            adouble foo = (*p)->QVal;
+            f0 += weight * h * foo * foo;
+        }
+        adouble qM = (*p)->qMomentum;
+
+        adouble foo = (*p)->qDot;
+        foo = foo * foo;
+        f0 += 5 * weight * h * foo;
+
+        speedContribution += 5 * weight * value(h) * value(foo);
+
+        (*p)->DOFReps[sIx]->IntegrateFEM(c, qM, qC, slice, t, weight);
+    }
+    for (vector<Muscle *>::const_iterator m = Muscles.begin();
+         m != Muscles.end(); m ++) {
+        adouble foo = (*m)->MVal;
+        foo = (*m)->Weight*foo*foo;
+        f0 += weight * h * foo;
+        torqueContribution += weight * value(h) * value(foo);
+    }
+}
+

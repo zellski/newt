@@ -1,6 +1,9 @@
-rendrib=/home/zell/projects/thesis/gfx/BMRT/bin/rendrib
+# From newt/res, do make -f RENDER/Makefile.
+
+rendrib=/home/zell/newt/BMRT2.6/bin/rendrib
+transcode=/usr/bin/transcode
 
 snapshot.mpg:	snapshot.dat
-	$(rendrib) -res 256 160 snapshot.dat
-	mogrify -format rgb *.tiff
-	transcode -g 256x160 -x rawlist=rgb,null -y ffmpeg -o test.foo -F mpeg4 -i filelist 
+	rm -rf *.tiff
+	$(rendrib) -res 512 512 snapshot.dat
+	$(transcode) -z --export_fps 25 -yffmpeg -Fmpeg4 -i 000.tiff -o snapshot.avi

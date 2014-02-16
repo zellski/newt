@@ -15,7 +15,7 @@ NEWT_LINKS = -L/usr/local/lib
 CXX = g++
 CC = gcc
 
-CFLAGS = -g -O2 -I../include ${NEWT_INCLUDES}
+CFLAGS =  -g -DOMU_WITH_ADOLC=1 -I../include ${NEWT_INCLUDES}
 LDFLAGS = -L../src -Wl,-R../src ${NEWT_LINKS}
 
 #
@@ -23,9 +23,11 @@ LDFLAGS = -L../src -Wl,-R../src ${NEWT_LINKS}
 #
 
 SRCS = 	Odc_Init.C \
-	Luxo.C \
-	Snake.C \
 	Needle.C \
+	Luxo.C \
+	Human.C \
+#	Snake.C \
+#	Trivial.C \
 
 OBJS = $(SRCS:.C=.o) Odc_Main.o
 

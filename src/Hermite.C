@@ -1,8 +1,8 @@
+# include "Stage.h"
 # include <adouble.h>
 # include "Hermite.h"
 # include "World.h"
 # include "DOF.h"
-# include "Stage.h"
 
 Hermite::Hermite(Stage *const s, double from, double to) :
    Fun(s,from,to),
@@ -10,6 +10,7 @@ Hermite::Hermite(Stage *const s, double from, double to) :
    cIx(-1),
    eIx(-1)
 {}
+
 
 Hermite::Hermite(Stage *const s, double from, double to,
 		 double min, double max) :
@@ -25,7 +26,7 @@ Hermite::Hermite(Stage *const s, DOF *const d, double from, double to) :
    Fun(s,d,from,to),
    xIx(S->claimVars(S->N*2+2)),
    cIx(-1),
-   eIx(S->claimCons(S->N*2))
+   eIx(S->W->ImplicitMuscles ? -1 : S->claimCons(S->N*2))
 {}
 
 Hermite::Hermite(Stage *const s, DOF *const d, double from, double to,
@@ -33,7 +34,7 @@ Hermite::Hermite(Stage *const s, DOF *const d, double from, double to,
    Fun(s,d,from,to,min,max),
    xIx(S->claimVars(S->N*2+2)),
    cIx(S->claimCons(S->N*2)),
-   eIx(S->claimCons(S->N*2))
+   eIx(S->W->ImplicitMuscles ? -1 : S->claimCons(S->N*2))
 {
    S->Register((Constraint *) this);
 }
@@ -114,7 +115,9 @@ void Hermite::Evaluate(const adoublev &x, adoublev &c) {
 
 void Hermite::IntegrateFEM(adoublev &c, adouble qM, adouble qC,
 			   int slice, double t, double weight) const {
-   assert(eIx >= 0);
+   if (eIx < 0) {
+      return;
+   }
 
    int ix = eIx + 2*slice - 1;
 

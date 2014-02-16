@@ -5,8 +5,8 @@
 # include "Constraints.h"
 # include "Stage.h"
 
-# include <map>
 using namespace std;
+# include <map>
 
 class World;
 class Fun;

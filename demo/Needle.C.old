@@ -2,7 +2,6 @@
 **	This is a thin rod falling onto a friction-less surface.
 */
 
-# include "Stage.h"
 # include <math.h>
 # include "Needle.h"
 # include "World.h"
@@ -14,14 +13,11 @@
 # include "DOF.h"
 # include "Muscle.h"
 # include "Constant.h"
-# include "Hermlet.h"
+# include "Hermite.h"
+# include "Stage.h"
 # include "Impulse.h"
-# include "SimpsonIntegrator.h"
-# include "GaussianIntegrator.h"
 
 void Needle::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec &c) {
-//    Integrator *i = new SimpsonIntegrator(7);
-    Integrator *i = new GaussianIntegrator(5);
    W = new World(-9.81);
 
    DOF *X = new DOF(W, "X");
@@ -40,19 +36,19 @@ void Needle::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVe
    // now establish interval representations
 
 //   Stage *I1 = new Stage(W, 4, 1);
-   Stage *I1 = new Stage(W, i, 16, 0.1, 2, 0.5);
-   new Hermlet(I1, X, 0, 0);
-   new Hermlet(I1, Y, 1, 0);
-   new Hermlet(I1, Alpha, 8*M_PI/17, 8*M_PI/17);
+   Stage *I1 = new Stage(W, 4, 0.1, 2, 0.5);
+   new Hermite(I1, X, 0, 0);
+   new Hermite(I1, Y, 1, 0);
+   new Hermite(I1, Alpha, 8*M_PI/17, 8*M_PI/17);
 
-//   Stage *I2 = new Stage(W, i, 4, 1);
-   Stage *I2 = new Stage(W, i, 16, 0.1, 2, 0.3);
-   new Hermlet(I2, X, 0, 0);
-   new Hermlet(I2, Y, 0, -1);
-   new Hermlet(I2, Alpha, 8*M_PI/17, 0);
+//   Stage *I2 = new Stage(W, 4, 1);
+   Stage *I2 = new Stage(W, 4, 0.1, 2, 0.3);
+   new Hermite(I2, X, 0, 0);
+   new Hermite(I2, Y, 0, -1);
+   new Hermite(I2, Alpha, 8*M_PI/17, 0);
 
-   Stage *I3 = new Stage(W, i, 8, 0.1);
-   new Hermlet(I3, X, -1, -1);
+   Stage *I3 = new Stage(W, 3, 0.1);
+   new Hermite(I3, X, -1, -1);
    new Constant(I3, Y, 0);
    new Constant(I3, Alpha, 0);
 
@@ -82,7 +78,6 @@ void Needle::update(int kk,
    W->Update(x, c, f0);
 }
 
-    
 
 // propagate the class to the command interface
 IF_CLASS_DEFINE("Needle", Needle, Omu_Program);

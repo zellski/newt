@@ -1,44 +1,343 @@
-World.o: World.C ../include/World.h ../include/Stage.h ../include/DOF.h \
-  ../include/Constraints.h ../include/Creature.h ../include/AnchorPoint.h \
-  ../include/Fun.h ../include/VRMLVisualizer.h ../include/RIBVisualizer.h
-Impulse.o: Impulse.C ../include/Impulse.h ../include/AnchorPoint.h \
-  ../include/Stage.h
-Force.o: Force.C ../include/Fun.h ../include/DOF.h \
-  ../include/Constraints.h ../include/Stage.h ../include/Force.h \
+# 1 "/home/zell/newt/src//"
+World.o: World.C ../include/RIBVisualizer.h ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/World.h \
+  ../include/DOF.h ../include/Constraints.h ../include/Stage.h \
+  ../include/Creature.h ../include/AnchorPoint.h ../include/Fun.h \
+  ../include/DOF.h
+# 1 "/home/zell/newt/src//"
+Impulse.o: Impulse.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/Impulse.h \
   ../include/AnchorPoint.h
-Stage.o: Stage.C ../include/Stage.h ../include/World.h \
+# 1 "/home/zell/newt/src//"
+Force.o: Force.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/Fun.h \
+  ../include/DOF.h ../include/Constraints.h ../include/Stage.h \
+  ../include/Force.h ../include/AnchorPoint.h
+# 1 "/home/zell/newt/src//"
+Stage.o: Stage.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/World.h \
   ../include/Constraints.h ../include/Creature.h ../include/AnchorPoint.h \
   ../include/Impulse.h ../include/Force.h ../include/Muscle.h \
-  ../include/DOF.h ../include/Fun.h
-Muscle.o: Muscle.C ../include/Fun.h ../include/DOF.h \
-  ../include/Constraints.h ../include/Stage.h ../include/Muscle.h
-Constraints.o: Constraints.C ../include/Stage.h ../include/DOF.h \
-  ../include/Constraints.h ../include/AnchorPoint.h \
-  ../include/RigidBody.h
-Primitives.o: Primitives.C ../include/Primitives.h ../include/RigidBody.h \
-  ../include/BodyPoint.h ../include/AnchorPoint.h ../include/DOF.h \
-  ../include/Constraints.h ../include/Stage.h ../include/World.h
-DOF.o: DOF.C ../include/DOF.h ../include/Constraints.h ../include/Stage.h \
-  ../include/World.h ../include/Fun.h
-Creature.o: Creature.C ../include/Creature.h ../include/AnchorPoint.h \
-  ../include/World.h ../include/DOF.h ../include/Constraints.h \
-  ../include/Stage.h ../include/RigidBody.h ../include/BodyPoint.h
-PWL.o: PWL.C ../include/PWL.h ../include/Fun.h ../include/DOF.h \
-  ../include/Constraints.h ../include/Stage.h ../include/World.h
-Hat.o: Hat.C ../include/Hat.h ../include/Fun.h ../include/DOF.h \
-  ../include/Constraints.h ../include/Stage.h ../include/World.h
-Link.o: Link.C ../include/Link.h ../include/Constraints.h \
-  ../include/Creature.h ../include/AnchorPoint.h ../include/Impulse.h \
-  ../include/World.h ../include/Stage.h ../include/DOF.h ../include/Fun.h
-Hermite.o: Hermite.C ../include/Hermite.h ../include/Fun.h \
+  ../include/DOF.h ../include/Constraints.h ../include/Stage.h \
+  ../include/Fun.h ../include/DOF.h ../include/Integrator.h
+# 1 "/home/zell/newt/src//"
+Muscle.o: Muscle.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/Fun.h \
+  ../include/DOF.h ../include/Constraints.h ../include/Stage.h \
+  ../include/Muscle.h ../include/DOF.h
+# 1 "/home/zell/newt/src//"
+Constraints.o: Constraints.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/DOF.h \
+  ../include/Constraints.h ../include/Stage.h ../include/AnchorPoint.h \
+  ../include/RigidBody.h ../include/Constraints.h
+# 1 "/home/zell/newt/src//"
+Primitives.o: Primitives.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/Primitives.h \
+  ../include/RigidBody.h ../include/RigidBody.h ../include/BodyPoint.h \
+  ../include/AnchorPoint.h ../include/DOF.h ../include/Constraints.h \
+  ../include/Stage.h ../include/World.h
+# 1 "/home/zell/newt/src//"
+DOF.o: DOF.C ../include/Stage.h /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/DOF.h \
+  ../include/Constraints.h ../include/Stage.h ../include/World.h \
+  ../include/Fun.h ../include/DOF.h
+# 1 "/home/zell/newt/src//"
+Creature.o: Creature.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/Creature.h \
+  ../include/AnchorPoint.h ../include/World.h ../include/DOF.h \
+  ../include/Constraints.h ../include/Stage.h ../include/RigidBody.h \
+  ../include/BodyPoint.h
+# 1 "/home/zell/newt/src//"
+PWL.o: PWL.C ../include/Stage.h /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/PWL.h \
+  ../include/Fun.h ../include/DOF.h ../include/Constraints.h \
+  ../include/Stage.h ../include/World.h ../include/DOF.h
+# 1 "/home/zell/newt/src//"
+Hat.o: Hat.C ../include/Stage.h /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/Hat.h \
+  ../include/Fun.h ../include/DOF.h ../include/Constraints.h \
+  ../include/Stage.h ../include/World.h ../include/DOF.h
+# 1 "/home/zell/newt/src//"
+Link.o: Link.C ../include/Stage.h /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/Link.h \
+  ../include/Constraints.h ../include/Creature.h ../include/AnchorPoint.h \
+  ../include/Impulse.h ../include/World.h ../include/DOF.h \
+  ../include/Stage.h ../include/Fun.h ../include/DOF.h
+# 1 "/home/zell/newt/src//"
+Hermite.o: Hermite.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/Hermite.h \
+  ../include/Fun.h ../include/DOF.h ../include/Constraints.h \
+  ../include/Stage.h ../include/World.h ../include/DOF.h
+# 1 "/home/zell/newt/src//"
+Hermlet.o: Hermlet.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/Hermlet.h \
+  ../include/Fun.h ../include/DOF.h ../include/Constraints.h \
+  ../include/Stage.h ../include/World.h ../include/DOF.h
+# 1 "/home/zell/newt/src//"
+RigidBody.o: RigidBody.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/RigidBody.h \
+  ../include/BodyPoint.h ../include/AnchorPoint.h ../include/Impulse.h \
   ../include/DOF.h ../include/Constraints.h ../include/Stage.h \
   ../include/World.h
-RigidBody.o: RigidBody.C ../include/RigidBody.h ../include/BodyPoint.h \
-  ../include/AnchorPoint.h ../include/Impulse.h ../include/DOF.h \
-  ../include/Constraints.h ../include/Stage.h ../include/World.h
-AnchorPoint.o: AnchorPoint.C ../include/Stage.h ../include/AnchorPoint.h \
-  ../include/BodyPoint.h ../include/Constraints.h
+# 1 "/home/zell/newt/src//"
+AnchorPoint.o: AnchorPoint.C ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/AnchorPoint.h \
+  ../include/BodyPoint.h ../include/AnchorPoint.h \
+  ../include/Constraints.h
+# 1 "/home/zell/newt/src//"
+SimpsonIntegrator.o: SimpsonIntegrator.C ../include/SimpsonIntegrator.h \
+  ../include/Integrator.h ../include/Stage.h \
+  /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h
+# 1 "/home/zell/newt/src//"
+GaussianIntegrator.o: GaussianIntegrator.C \
+  ../include/GaussianIntegrator.h ../include/Integrator.h \
+  ../include/Stage.h /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h
+# 1 "/home/zell/newt/src//"
 RIBVisualizer.o: RIBVisualizer.C ../include/RIBVisualizer.h \
-  ../include/DOF.h ../include/Constraints.h ../include/Stage.h \
-  ../include/World.h ../include/Creature.h ../include/AnchorPoint.h \
-  ../include/BodyPoint.h ../include/Primitives.h ../include/RigidBody.h
+  ../include/Stage.h /usr/local/include/hqp/adolc/adouble.h \
+  /usr/local/include/hqp/adolc/common.h \
+  /usr/local/include/hqp/adolc/dvlparms.h \
+  /usr/local/include/hqp/adolc/usrparms.h \
+  /usr/local/include/hqp/adolc/taputil.h \
+  /usr/local/include/hqp/adolc/avector.h \
+  /usr/local/include/hqp/Omu_Variables.h /usr/local/include/hqp/Omu_Vec.h \
+  /usr/local/include/hqp/Meschach.h \
+  /usr/local/include/hqp/meschach/matrix.h \
+  /usr/local/include/hqp/meschach/machine.h \
+  /usr/local/include/hqp/meschach/err.h \
+  /usr/local/include/hqp/meschach/meminfo.h \
+  /usr/local/include/hqp/meschach/sparse.h \
+  /usr/local/include/hqp/meschach/matrix.h ../include/DOF.h \
+  ../include/Constraints.h ../include/Stage.h ../include/World.h \
+  ../include/Creature.h ../include/AnchorPoint.h ../include/BodyPoint.h \
+  ../include/Primitives.h ../include/RigidBody.h

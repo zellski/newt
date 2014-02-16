@@ -1,7 +1,7 @@
+# include "Stage.h"
 # include "Fun.h"
 # include "Force.h"
 # include "AnchorPoint.h"
-# include "Stage.h"
 
 Force::Force(Stage *s, AnchorPoint *p, double sx, double sy, double mag) :
    S(s),

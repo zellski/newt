@@ -1,12 +1,13 @@
 # ifndef STAGE_H
 # define STAGE_H
 
+using namespace std;
+
+# include <vector>
 # include <adouble.h>
 # include <Omu_Variables.h>
 
-# include <vector>
-using namespace std;
-
+class Integrator;
 class World;
 class Muscle;
 class Constraint;
@@ -24,7 +25,11 @@ public:
    vector<Impulse *> Impulses;
    vector<Constraint *> Cons;
 
+   Integrator *integrator;
+
    const double Min, Max, Start;
+
+   double speedContribution, torqueContribution;
 
    const int N;
 
@@ -34,8 +39,8 @@ public:
    adouble T;
    adouble h;
 
-   Stage(World *w, int n, double t);
-   Stage(World *w, int n, double min, double max, double start);
+   Stage(World *w, Integrator *i, int n, double t);
+   Stage(World *w, Integrator *i, int n, double min, double max, double start);
 
    int Register(Muscle *M);
    int Register(Force *F);
@@ -49,6 +54,8 @@ public:
    void Update(const adoublev &x, adoublev &c, adouble &f0);
    void SnapShot(const adoublev &x, int slice, double t);
    void FEMEquations(const adoublev &x, adoublev &c, adouble &f0);
+   void FEMPoint(const int slice, const double t, const double weight,
+                 const adoublev &x, adoublev &c, adouble &f0);
 
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
 };

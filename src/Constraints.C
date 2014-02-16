@@ -1,5 +1,5 @@
-# include <adouble.h>
 # include "Stage.h"
+# include <adouble.h>
 # include "DOF.h"
 # include "Stage.h"
 # include "AnchorPoint.h"
@@ -35,23 +35,6 @@ ValConstraint::ValConstraint(Stage *const s, int n, double loct,
 	<< Min << ", " << Max << "]\n";
    S->Register(this);
 }
-
-ValConstraint::ValConstraint(Stage *const s, int n, double loct,
-			     const adouble &watch, const adouble &diff) :
-   S(s),
-   Slice(n),
-   t(loct),
-   Watch(watch),
-   WatchDiff(&diff),
-   Min(0), Max(0),
-   cIx(s->claimCons(1))
-{
-   cerr << "Constraint: [" << n << "/" << loct << "] -> ["
-	<< Min << ", " << Max << "]\n";
-   S->Register(this);
-}
-
-
 
 void ValConstraint::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    c.min[cIx] = Min; c.max[cIx] = Max;

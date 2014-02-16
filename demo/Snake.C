@@ -3,6 +3,7 @@
 */
 
 # include <math.h>
+# include "Stage.h"
 # include "Snake.h"
 # include "World.h"
 # include "Creature.h"
@@ -18,7 +19,6 @@
 # include "Hermite.h"
 # include "Hat.h"
 # include "PWL.h"
-# include "Stage.h"
 
 # define LINKS	3
 # define PI	M_PI
@@ -27,7 +27,7 @@ void Snake::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec
    DOF *Angles[LINKS];
    ThinRod *Rods[LINKS];
 
-   W = new World(-9.81);
+   W = new World(-9.81, true);
 
    DOF *X = new DOF(W, "X");
    DOF *Y = new DOF(W, "Y");
@@ -56,7 +56,7 @@ void Snake::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec
    new Constant(S1, Y, 0);
 
    for (int i = 0; i < LINKS; i ++) {
-      new Muscle(S1, Angles[i], new Hat(S1));
+//      new Muscle(S1, Angles[i], new Hat(S1));
    }
    new Hermite(S1, Angles[0], -PI/2, PI/2);
    for (int i = 1; i < LINKS; i ++) {

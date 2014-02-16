@@ -1,7 +1,7 @@
+# include "Stage.h"
 # include "DOF.h"
 # include "World.h"
 # include "Fun.h"
-# include "Stage.h"
 
 DOF::DOF(World *const w, const char *const S) :
    W(w),

@@ -1,0 +1,32 @@
+Major pieces of functionality planned for 1.1 and/or 1.2 --
+
+  - Implement a hierarchical/wavelet formulation of Hat/PWC/PWL for muscle
+    functions. Using a full Hermite there is often wasteful and expensive.
+
+  - Rid ourselves of the ADOL-C dependency. The system is currently slow
+    to the point where it is nearly useless -- ADOL-C ruins the complexity
+    of the process, which could well be quadratic in the DOF.
+
+  - As part of the state dumping process (which happens each iteration),
+    write all state variables in a form that can be read back by a model,
+    allowing continuation of a previous run, possibly after fiddling with
+    constraints, objective functions, etc.
+
+  - Read a model definition on start-up, possibly using some known
+    3D format. Possibly read scenario construction definitions also?
+
+  - Completely rewrite the Visualizer, which is currently an awful hack.
+
+
+Minor possible improvements along the way --
+
+  - Give all physical entities a name?
+  - Handle proper deallocation and class deconstruction?
+  - Tighten up consistency checks during the scenario construction
+    so that it becomes next to impossible to set things up wrong?
+  - Rewrite force/impulse handling?
+
+
+Conceivable future plans:
+
+  - Perhaps one day there will be some sort of graphical interface?

@@ -1,3 +1,4 @@
+# include "Stage.h"
 # include <math.h>
 # include "Primitives.h"
 # include "RigidBody.h"

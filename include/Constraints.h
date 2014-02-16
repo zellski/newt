@@ -31,8 +31,6 @@ public:
 		 double min, double max);
    ValConstraint(Stage *const s, int n, double loct, const adouble &watch,
 		 double val);
-   ValConstraint(Stage *const s, int n, double loct, const adouble &watch,
-		 const adouble &diff);
 
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
    void Evaluate(const adoublev &x, adoublev &c);

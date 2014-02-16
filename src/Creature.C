@@ -1,3 +1,4 @@
+# include "Stage.h"
 # include "Creature.h"
 # include "World.h"
 # include "DOF.h"

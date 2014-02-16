@@ -1,7 +1,9 @@
 # ifndef RIBVISUALIZER_H
 # define RIBVISUALIZER_H
 
+# include <iostream>
 # include <fstream>
+
 using namespace std;
 
 class adoublev;
@@ -23,7 +25,7 @@ private:
 
    static void Render(const RigidBody *B, ofstream &RIB);
 public:
-   static void Generate(World *const W, const adoublev &x, const int frames);
+   static void Generate(World *const W, const adoublev &x);
 };
 
 #endif

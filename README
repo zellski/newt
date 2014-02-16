@@ -5,7 +5,7 @@ This is NewT, an implementation of the Spacetime Constraints paradigm for
 the synthesis of realistic-looking motion. It is fully described in a thesis
 report, available at
 
-    http://alyx.com/~zell/thesis
+    http://www.alyx.com/zell/thesis
 
 where you probably got this code, too. All mathematical motivation is
 included in that report, and little of it will be repeated here.
@@ -17,30 +17,29 @@ Summary of Dynamics System
 In the current implementation, the virtual environment is very simple.
 The mechanics are planar, so bodies have zero depth. Animation subjects,
 "creatures", are constructed from rigid bodies, "limbs", that extend from
-the creature's root position in a tree topology. This system cannot handle
-cycles -- e.g. a model of a man with his hands clasped.
+the creature's root position in a tree topology. The system cannot handle
+cycles in the graph -- e.g. a model of a man with his hands clasped.
 
 The time-varying state of a creature with N limbs can then be described in
-N+2 variables, two cartesians X and Y to describe where in the plane the
+N+2 variables: two cartesians X and Y to describe where in the plane the
 root of the creature is, and N angles describing the attitude of each limb.
-These state-representing values are called degrees of freedom, "DOF", and as
-they change over a period of time, the creature moves. The goal of the
-paradigm is to create an animation, ie explicit descriptions of the DOF over
-time.
+These state-representing values are called degrees of freedom, "DOF", and
+as they change over a period of time, the creature moves. The goal of the
+paradigm is to create an animation, i.e. generate explicit descriptions of
+the DOF over time.
 
 To do this, we represent the DOF over time as linear combinations (sums) of
-basis functions. Many different bases are possible, a few are implemented
-here, but in practice we nearly always use the "Hermite" basis for DOF. To
-move, creatures also need muscles. The time-varying tension values of these
-are also represented explicitly in a function basis. A muscle sits at the
-joint between two limbs and produce a torque there.
+basis functions. Many useful bases exist, and a few are implemented here.
+To move, creatures also need muscles. The time-varying tension values of
+these are also represented explicitly in a function basis. A muscle sits at
+the joint between two limbs and produces a torque there.
 
 The time-interval of the animation may be split into "stages". Over each
 stage, the DOF and their rates-of-change are continuous, so motion is
 smooth. Between stages, impact may occur, which has the effect of producing
 angular velocity discontinuities. In other words, when a creature slams into
 e.g. a floor, there is an infinite force applied to the creature for an
-infinitely brief period of time. This singularity requires special handling,
+infinitesimal period of time. This singularity requires special handling,
 and is the main motivation behind the introduction of stages.
 
 This is a 30-line summary of a 50-page thesis. For understanding, go read
@@ -55,23 +54,23 @@ package bundle written by Rüdiger Franke. It is available at
 
     http://hqp.sourceforge.net/
 
-and is distributed under the Gnu Library General Public License, and is thus
-a full source-code release. This package must be compiled and installed before
-anything else can be done.
+and is distributed under the Gnu Library General Public License. Compile
+and install this package.
 
 ---
 
 Next, type 'make' in the newt/src subdirectory. If all goes well, the code
 will compile and turn into a library called libnewt.so. If not, you'll have
-to tinker with the Makefile. This is practically guaranteed to be the case.
+to tinker a bit with src/Makefile.
 
-Then, type 'make' in the newt/demo subdirectory. This will compile a number
-of animation scenarios. If compilation is successful, the resulting binary
-is called 'odc'. This binary in turn is run by a TCL program called 'run'.
+Finally, 'make' in the newt/demo subdirectory. This will compile a number
+of example creatures/scenarios into a binary called 'odc' which is then
+run through a TCL program called 'run'. Yes, a TCL installation is needed,
+but if you've installed HQP as per above, you already know that.
 
 ---
 
-The code output RenderMan format and you will need a renderer for it. For a
+The code outputs RenderMan format and you will need a renderer for it. For a
 summary of such programs, see:
 
     http://www.faqs.org/faqs/graphics/renderman-faq/
@@ -95,7 +94,8 @@ The RenderMan output ends up in the file
 
 and using e.g. the Blue Moon Rendering Tools (BMRT), you display it with e.g.
 
-	rendribv snapshot.dat
+	rgl snapshot.dat
+
 
 The other files are on the pattern
 
@@ -129,19 +129,20 @@ A few hints:
    and too chaotic. At the very least, add bounds that you -know- won't
    be broken, such as e.g. -10PI < AngularDOF < 10PI.
 
- * The initial values are likewise essential. These are supplied in the
-   e.g. Hermite() constructor, and currently only linear interpolation
+ * The initial values are likewise essential. These are supplied to the
+   constructor of e.g. Hermite() and currently only linear interpolation
    is supported. The initial values determine where in the search-space
    the optimization process starts, which in turn entirely determines
-   how it perceives the space. Different initial values will very often
-   lead to different solutions.
+   how it perceives the search space. Different initial values will very
+   often lead to different solutions. Remember that there is no such
+   thing as practical -global- optimization.
 
  * In most cases, keeping stages short helps convergence; alternatively,
    turn off gravity while experimenting. Long stages and high gravity
    makes for a chaotic search-space. Short stages removes potential fancy
    motions from consideration.
 
- * Experiment using Hat as well as Hermite representations for Muscles.
+ * Experiment using Hat as well as Hermlet representations for Muscles.
    Using Hat means clumsier control for the Creature, and the motion may
    look odd. On the other hand, convergence sometimes benefits greatly
    from this relationship between the DOF and Muscles (Assuming Hermites
@@ -152,87 +153,14 @@ A few hints:
 Rendering
 =========
 
-I have included a subdirectory newt/res/RENDER in the distribution, that
-contains the file 'mpeg.param'. This is a configuration file for the UCB
-MPEG video encoder. To create an mpeg stream from a snapshot.dat, this is
-an example of what I do on my Linux machine:
+I have included a subdirectory newt/res/RENDER in the distribution, with
+a makefile in it that assumes the existance of the BMRT renderer as well
+as the 'transcode' utility:
 
- * Tinker with snapshot.dat until it looks good in the BMRT previewer
+    http://www.theorie.physik.uni-goettingen.de/~ostreich/transcode/
 
- * Render all the frames using e.g.
-
-	rendrib -res 256 160 snapshot.dat
-
-
- * Convert the BMRT output (TIFF) to encoder input (YUV), with e.g.
-
-	for i in *.tiff; do
-		echo $i
-		convert $i `basename $i .tiff`.yuv
-	done
-
-   if you use a bash-like shell. The 'convert' program turns the TIFF
-   files into YUV files (and do a billion other conversions). The one
-   I use is part of the 'ImageMagick' program suite, but there surely
-   are countless other things that can perform such a conversion.
-
- * Then, run the encoder, e.g.
-
-	mpeg_encode mpeg.param
-
-
- * Finally, enjoy the newly created 'snapshot.mpg'.
-
-There is also a Makefile in this directory now, which contains exactly
-the procedure described above; just don't expect it to work without
-having the proper programs installed. :-)
-
-
-Future Plans
-============
-
-There are big plans and there are smaller plans. The ones of importance:
-
- - Perhaps one day there will be a graphical interface.
-
-
- - Rewrite the entire package in Java, because C++ is a filthy language.
-   This one is unlikely to happen within the decade.
-
-
- - Rid ourselves of the ADOL-C dependency. The system is currently slow
-   to the point where it is nearly useless -- ADOL-C ruins the complexity
-   of the process, which ought to be quadratic in the DOF.
-
-   Such a rewrite would yield other speed improvements as well, such as
-   precomputed scalar products between basis functions. Overall, the speed
-   improvement should be somewhere between impressive and overwhelming.
-
-   This is the most likely major change for a version 1.1
-
-
- - Completely redesign the class structure, use proper OO techniques and
-   ADT's. This could happen as an intermediate step to disentangling from
-   ADOL-C, encapsulating the functionality.
-
-
- - Support interactive and/or script-based scenario construction.
-
-
- - Rid ourselves of the Standard Template Library, which seems to be
-   anything but standard and in any case very irritating.
-
-
- - Completely rewrite the Visualizer, which is currently an awful hack,
-   that does not even give the user the slighest bit of camera control!
-
-
- - Give all physical entities a name
- - Handle proper deallocation and class deconstruction
- - Tighten up consistency checks during the scenario construction
-   so that it becomes next to impossible to set things up wrong
- - Rewrite force/impulse handling
-
+By default, it generates a MPEG4 stream, which most modern computers can
+view and which has excellent compression.
 
 Pär Winzell
 zell@alyx.com

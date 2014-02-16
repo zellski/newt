@@ -1,6 +1,6 @@
+# include "Stage.h"
 # include "Impulse.h"
 # include "AnchorPoint.h"
-# include "Stage.h"
 
 Impulse::Impulse(Stage *const s, AnchorPoint *p,
 		 double sx, double sy, double mag) :

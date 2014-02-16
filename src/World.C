@@ -1,16 +1,16 @@
-# include "World.h"
+# include "RIBVisualizer.h"
 # include "Stage.h"
+# include "World.h"
 # include "DOF.h"
 # include "Creature.h"
 # include "Fun.h"
-# include "VRMLVisualizer.h"
-# include "RIBVisualizer.h"
 
-World::World(double g) :
+World::World(double g, bool MuscleFlag) :
    Creatures(),
    DOFs(),
    Stages(),
    xIx(0), cIx(0),
+   ImplicitMuscles(MuscleFlag),
    G(g)
 {};
 
@@ -54,7 +54,7 @@ void World::Update(const adoublev &x, adoublev &c, adouble &f0) {
    for (uint i = 0; i < Stages.size(); i ++) {
       Stages[i]->Update(x, c, f0);
    }
-   RIBVisualizer::Generate(this, x, 100);
+   RIBVisualizer::Generate(this, x);
    //   VRMLVisualizer::Generate(this, x, 100);
 
 }
