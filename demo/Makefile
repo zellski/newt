@@ -41,7 +41,7 @@ always:
 	cd ../src; make
 
 depend:
-	$(CXX) -MM $(CFLAGS) $(SRCS) > .depend
+	$(CXX) -MM -MG -MP -I../include $(SRCS) > .depend
 
 .C.o:
 	$(CXX) -c $(CFLAGS) $<

@@ -44,7 +44,7 @@ libnewt.so: $(OBJS) Makefile
 	$(LD) libnewt.so $(OBJS)
 
 depend:
-	$(CXX) -MM $(CFLAGS) $(SRCS) > .depend
+	$(CXX) -MM -MG -MP -I../include $(SRCS) > .depend
 
 .C.o:
 	$(CXX) -c $(CFLAGS) $<
