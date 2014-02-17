@@ -1,0 +1,6 @@
+res/*.m
+demo/*.o
+src/*.o
+src/libnewt.so
+demo/odc
+res/snapshot.*
