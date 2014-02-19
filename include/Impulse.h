@@ -1,7 +1,6 @@
-# ifndef IMPULSE_H
-# define IMPULSE_H
+# pragma once
 
-# include <adouble.h>
+# include "AVec.h"
 
 class Stage;
 class AnchorPoint;
@@ -19,4 +18,3 @@ public:
 
    void SnapShot(const adoublev &x);
 };
-# endif

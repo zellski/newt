@@ -1,13 +1,11 @@
-# ifndef LINK_H
-# define LINK_H
-
-
-# include <Omu_Variables.h>
-# include <adouble.h>
-# include "Constraints.h"
+# pragma once
 
 # include <map>
-using namespace std;
+
+# include <Omu_Variables.h>
+
+# include "adolc.h"
+# include "Constraints.h"
 
 class Stage;
 
@@ -21,5 +19,3 @@ public:
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {}
    void Evaluate(const adoublev &x, adoublev &c);
 };
-
-# endif

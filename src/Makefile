@@ -20,7 +20,8 @@ LDFLAGS = -L${HQP_LIB} -L${ADOLC_LIB} -ladolc -lhqp -lomu -Wl,-install_name,@rpa
 
 # machine independent part
 
-SRCS = World.C \
+SRCS = AVec.C \
+	World.C \
 	Impulse.C \
 	Force.C \
 	Stage.C \

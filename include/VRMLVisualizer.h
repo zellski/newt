@@ -1,8 +1,6 @@
-# ifndef VRMLVISUALIZER_H
-# define VRMLVISUALIZER_H
+# pragma once
 
 # include <fstream>
-using namespace std;
 
 class adoublev;
 class World;
@@ -25,5 +23,3 @@ private:
 public:
    static void Generate(World *const W, const adoublev &x, const int frames);
 };
-
-#endif

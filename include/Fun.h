@@ -1,7 +1,6 @@
-# ifndef FUN_H
-# define FUN_H
+# pragma once
 
-# include <adouble.h>
+# include "adolc.h"
 # include "DOF.h"
 
 class Stage;
@@ -40,5 +39,3 @@ public:
 			     int slice, double t, double weight) const {}
 
 };
-
-# endif

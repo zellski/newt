@@ -1,11 +1,8 @@
-# ifndef WORLD_H
-# define WORLD_H
+# pragma once
 
-# include <Omu_Variables.h>
 # include <vector>
-# include <adouble.h>
-
-using namespace std;
+# include <Omu_Variables.h>
+# include "adolc.h"
 
 class DOF;
 class Constraint;
@@ -37,5 +34,3 @@ public:
    int Register(DOF *D);
    int Register(Stage *S);
 };
-
-# endif

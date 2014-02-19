@@ -1,10 +1,7 @@
-# ifndef RIBVISUALIZER_H
-# define RIBVISUALIZER_H
+# pragma once
 
 # include <iostream>
 # include <fstream>
-
-using namespace std;
 
 class adoublev;
 class World;
@@ -27,5 +24,3 @@ private:
 public:
    static void Generate(World *const W, const adoublev &x);
 };
-
-#endif

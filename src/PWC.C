@@ -1,4 +1,4 @@
-# include <adouble.h>
+# include "adolc.h"
 # include "PWC.h"
 # include "World.h"
 # include "DOF.h"

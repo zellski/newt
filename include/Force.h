@@ -1,7 +1,6 @@
-# ifndef FORCE_H
-# define FORCE_H
+# pragma once
 
-# include <adouble.h>
+# include "AVec.h"
 
 class Stage;
 class AnchorPoint;
@@ -20,5 +19,3 @@ public:
    Force(Stage *s, AnchorPoint *p, double sx, double sy, Fun *const f);
    void SnapShot(const adoublev &x, int slice, double t);
 };
-
-# endif

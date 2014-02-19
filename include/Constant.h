@@ -1,7 +1,6 @@
-# ifndef CONSTANT_H
-# define CONSTANT_H
+# pragma once
 
-# include <adouble.h>
+# include "adolc.h"
 # include "Fun.h"
 
 class Constant: public Fun {
@@ -19,5 +18,3 @@ public:
    void IntegrateFEM(adoublev &c, adouble lhs, adouble rhs,
 		     int slice, double t, double weight) const {};
 };
-
-#endif

@@ -1,8 +1,7 @@
-# ifndef CONSTRAINTS_H
-# define CONSTRAINTS_H
+# pragma once
 
 # include <Omu_Variables.h>
-# include <adouble.h>
+# include "adolc.h"
 
 class World;
 class Stage;
@@ -57,5 +56,3 @@ public:
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
    void Evaluate(const adoublev &x, adoublev &c);
 };
-
-# endif

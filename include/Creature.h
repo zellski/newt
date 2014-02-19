@@ -1,5 +1,4 @@
-# ifndef CREATURE_H
-# define CREATURE_H
+# pragma once
 
 # include "AnchorPoint.h"
 
@@ -18,5 +17,3 @@ public:
 
    void DistImpulse(const adoublev &x);
 };
-
-# endif

@@ -1,7 +1,6 @@
-# ifndef SINGLE_H
-# define SINGLE_H
+# pragma once
 
-# include <adouble.h>
+# include "adolc.h"
 # include "Fun.h"
 
 class Single: public Fun {
@@ -23,5 +22,3 @@ public:
    }
    bool isConstant() { return true; }
 };
-
-#endif

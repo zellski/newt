@@ -1,11 +1,7 @@
-# ifndef ANCHORPOINT_H
-# define ANCHORPOINT_H
-
-# include <stdio.h>
-# include <adouble.h>
+# pragma once
 
 # include <vector>
-using namespace std;
+# include "AVec.h"
 
 /*
 **	This class represents a point in the World to which other
@@ -34,4 +30,3 @@ public:
 
    void Attach(BodyPoint *const P);
 };
-# endif

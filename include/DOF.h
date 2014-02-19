@@ -1,12 +1,10 @@
-# ifndef DOF_H
-# define DOF_H
+# pragma once
 
-# include <adouble.h>
+# include <map>
+
+# include "adolc.h"
 # include "Constraints.h"
 # include "Stage.h"
-
-using namespace std;
-# include <map>
 
 class World;
 class Fun;
@@ -29,7 +27,3 @@ public:
 
    void SnapShot(const adoublev &x, int ival, int slice, double t);
 };
-
-# endif
-
-

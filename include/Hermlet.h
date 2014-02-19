@@ -1,8 +1,7 @@
-# ifndef HERMLET_H
-# define HERMLET_H
+# pragma once
 
 # include <Omu_Variables.h>
-# include <adouble.h>
+# include "adolc.h"
 # include "Fun.h"
 
 /*
@@ -56,5 +55,3 @@ public:
       }
    }
 };
-
-#endif

@@ -1,5 +1,4 @@
-# ifndef PRIMITIVES_H
-# define PRIMITIVES_H
+# pragma once
 
 # include "RigidBody.h"
 
@@ -53,6 +52,3 @@ public:
    Cylinder(World *const w, const char *const S, DOF *const d,
 	    double radius, double height, double density = 1);
 };
-
-# endif
-

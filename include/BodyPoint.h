@@ -1,8 +1,7 @@
-# ifndef BODYPOINT_H
-# define BODYPOINT_H
+# pragma once
 
 # include <assert.h>
-# include <adouble.h>
+# include "adolc.h"
 # include "AnchorPoint.h"
 
 class RigidBody;
@@ -23,5 +22,3 @@ public:
 	 LocPos[1] = y;
    }
 };
-
-# endif

@@ -1,8 +1,7 @@
-# ifndef PWL_H
-# define PWL_H
+# pragma once
 
 # include <Omu_Variables.h>
-# include <adouble.h>
+# include "adolc.h"
 # include "Fun.h"
 
 /*
@@ -20,5 +19,3 @@ public:
    void SnapShot(const adoublev &x, int slice, double t);
    bool isConstant() { return false; }
 };
-
-#endif

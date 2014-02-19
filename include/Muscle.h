@@ -1,7 +1,6 @@
-# ifndef MUSCLE_H
-# define MUSCLE_H
+# pragma once
 
-# include <adouble.h>
+# include "adolc.h"
 
 class Stage;
 class DOF;
@@ -20,4 +19,3 @@ public:
 
    void SnapShot(const adoublev &x, int slice, double t);
 };
-# endif

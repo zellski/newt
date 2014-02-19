@@ -1,11 +1,9 @@
-# ifndef RIGIDBODY_H
-# define RIGIDBODY_H
-
-# include <adouble.h>
+# pragma once
 
 # include <string>
 # include <map>
-using namespace std;
+
+# include "AVec.h"
 
 class BodyPoint;
 class World;
@@ -65,5 +63,3 @@ public:
       y[1] =  x[0];
    }
 };  
-# endif
-

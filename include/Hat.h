@@ -1,8 +1,7 @@
-# ifndef HAT_H
-# define HAT_H
+# pragma once
 
 # include <Omu_Variables.h>
-# include <adouble.h>
+# include "adolc.h"
 # include "Fun.h"
 
 /*
@@ -31,5 +30,3 @@ public:
    void IntegrateFEM(adoublev &c, adouble lhs, adouble rhs,
 		     int slice, double t, double weight) const;
 };
-
-#endif

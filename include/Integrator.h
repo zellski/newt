@@ -1,5 +1,6 @@
-# ifndef INTEGRATOR_H
-# define INTEGRATOR_H
+# pragma once
+
+# include "adolc.h"
 
 class Stage;
 class adoublev;
@@ -13,5 +14,3 @@ class Integrator {
                                        adoublev &c,
                                        adouble &f0) = 0;
 };
-
-# endif

@@ -1,5 +1,4 @@
-# ifndef GAUSSIAN_INTEGRATOR_H
-# define GAUSSIAN_INTEGRATOR_H
+# pragma once
 
 # include "Integrator.h"
 
@@ -16,5 +15,3 @@ class GaussianIntegrator : public Integrator {
                                               adoublev &c,
                                               adouble &f0);
 };
-
-# endif

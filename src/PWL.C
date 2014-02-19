@@ -1,5 +1,5 @@
 # include "Stage.h"
-# include <adouble.h>
+# include "adolc.h"
 # include "PWL.h"
 # include "World.h"
 # include "DOF.h"

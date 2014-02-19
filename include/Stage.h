@@ -1,11 +1,8 @@
-# ifndef STAGE_H
-# define STAGE_H
-
-using namespace std;
+# pragma once
 
 # include <vector>
-# include <adouble.h>
 # include <Omu_Variables.h>
+# include "adolc.h"
 
 class Integrator;
 class World;
@@ -59,5 +56,3 @@ public:
 
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
 };
-
-# endif

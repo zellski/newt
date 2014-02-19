@@ -1,5 +1,5 @@
 # include "Stage.h"
-# include <adouble.h>
+# include "adolc.h"
 # include "DOF.h"
 # include "Stage.h"
 # include "AnchorPoint.h"

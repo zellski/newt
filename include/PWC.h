@@ -1,8 +1,7 @@
-# ifndef PWC_H
-# define PWC_H
+# pragmaonce
 
 # include <Omu_Variables.h>
-# include <adouble.h>
+# include "adolc.h"
 # include "Fun.h"
 
 /*
@@ -23,5 +22,3 @@ public:
    adouble Dot(const adoublev &x, int slice, double t) const { return 0; }
    adouble Bis(const adoublev &x, int slice, double t) const { return 0; }
 };
-
-#endif
