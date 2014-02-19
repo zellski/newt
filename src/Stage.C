@@ -194,7 +194,7 @@ void Stage::FEMPoint(const int slice, const double t, const double weight,
         foo = foo * foo;
         f0 += 5 * weight * h * foo;
 
-        speedContribution += 5 * weight * value(h) * value(foo);
+        speedContribution += 5 * weight * h.value() * foo.value();
 
         (*p)->DOFReps[sIx]->IntegrateFEM(c, qM, qC, slice, t, weight);
     }
@@ -203,7 +203,7 @@ void Stage::FEMPoint(const int slice, const double t, const double weight,
         adouble foo = (*m)->MVal;
         foo = (*m)->Weight*foo*foo;
         f0 += weight * h * foo;
-        torqueContribution += weight * value(h) * value(foo);
+        torqueContribution += weight * h.value() * foo.value();
     }
 }
 
