@@ -190,20 +190,20 @@ void Stage::FEMPoint(const int slice, const double t, const double weight,
         }
         adouble qM = (*p)->qMomentum;
 
-        adouble foo = (*p)->qDot;
-        foo = foo * foo;
-        f0 += 5 * weight * h * foo;
+        adouble qDot = (*p)->qDot;
+        adouble qDotContrib = qDot * qDot;
+        f0 += 5 * weight * h * qDotContrib; // completely arbitrary; this is highly experimental
 
-        speedContribution += 5 * weight * h.value() * foo.value();
+        speedContribution += 5 * weight * h.value() * qDotContrib.value();
 
         (*p)->DOFReps[sIx]->IntegrateFEM(c, qM, qC, slice, t, weight);
     }
     for (vector<Muscle *>::const_iterator m = Muscles.begin();
          m != Muscles.end(); m ++) {
-        adouble foo = (*m)->MVal;
-        foo = (*m)->Weight*foo*foo;
-        f0 += weight * h * foo;
-        torqueContribution += weight * h.value() * foo.value();
+        adouble MVal = (*m)->MVal;
+        adouble MContrib = (*m)->Weight*MVal*MVal;
+        f0 += weight * h * MContrib;
+        torqueContribution += weight * h.value() * MContrib.value();
     }
 }
 
