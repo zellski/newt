@@ -117,8 +117,8 @@ void Stage::Update(const adoublev &x, adoublev &c, adouble &f0) {
    if (tIx >= 0) {
       T = x[tIx];
       h = T/N;
-      cerr << "Stage " << sIx << ": T == " << value(T);
-      if (value(T) <= Min || value(T) >= Max) {
+      cerr << "Stage " << sIx << ": T == " << T.value();
+      if (T.value() <= Min || T.value() >= Max) {
 	 cerr << " (bumping)";
       }
       cerr << "\n";

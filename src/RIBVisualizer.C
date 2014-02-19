@@ -18,10 +18,10 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x) {
 
    for (vector<Stage *> :: const_iterator S = W->Stages.begin();
 	S < W->Stages.end(); S ++) {
-      if (value((*S)->T) <= 0) {
+      if ((*S)->T.value() <= 0) {
 	 return;
       }
-      T += value((*S)->T);
+      T += (*S)->T.value();
    }
 
 //   cerr << "Starting rendering...\n";
@@ -71,11 +71,11 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x) {
    int frame = 0;
    for (double t = 0.0; t <= T; t += 0.01) {
        // did we skip into a new Stage? value(T) guaranteed > 0
-       while (t > tBase + value((*S)->T)) {
-           tBase += value((*S)->T);
+       while (t > tBase + (*S)->T.value()) {
+           tBase += (*S)->T.value();
            S ++;
        }
-       double tt = (t - tBase)/value((*S)->h);
+       double tt = (t - tBase)/((*S)->h).value();
        if (tt >= (*S)->N) {
            (*S)->SnapShot(x, (*S)->N-1, 1);
        } else {
@@ -86,12 +86,12 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x) {
       TOut << "0\n";
       for (uint i = 0; i < W->DOFs.size(); i ++) {
 	 DOF *D = W->DOFs[i];
-	 qOut[i] << value(D->qVal) << "\n";
-	 qDot[i] << value(D->qDot) << "\n";
-	 QOut[i] << value(D->QVal) << "\n";
+	 qOut[i] << (D->qVal).value() << "\n";
+	 qDot[i] << (D->qDot).value() << "\n";
+	 QOut[i] << (D->QVal).value() << "\n";
 
-	 qC[i] << value(D->qCurvature) << "\n";
-	 qM[i] << value(D->qMomentum) << "\n";
+	 qC[i] << D->qCurvature.value() << "\n";
+	 qM[i] << D->qMomentum.value()<< "\n";
       }
 
       RIB << "FrameBegin " << frame << "\n"
@@ -142,21 +142,21 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x) {
 
 void RIBVisualizer::Render(const Creature *C, std::ofstream &RIB) {
    RIB << "TransformBegin\n";
-   RIB << "Translate " << value(C->X->qVal) << " " << value(C->Y->qVal) << " 0\n";
+   RIB << "Translate " << C->X->qVal.value() << " " << C->Y->qVal.value() << " 0\n";
    Render((const AnchorPoint *) C, RIB);
    RIB << "TransformEnd\n";
 }
 
 void RIBVisualizer::Render(const BodyPoint *P, std::ofstream &RIB) {
    RigidBody *Mom = P->Parent;
-   RIB << "Rotate " << 180*value(Mom->Angle->qVal)/M_PI << " 0 0 1\n";
-   RIB << "Translate " << -value(P->LocPos[0]) << " " << -value(P->LocPos[1]) << " 0\n";
+   RIB << "Rotate " << 180*(Mom->Angle->qVal).value()/M_PI << " 0 0 1\n";
+   RIB << "Translate " << -(P->LocPos.x).value() << " " << -(P->LocPos.y).value() << " 0\n";
    Render(Mom, RIB);
 
    for (PointMap::const_iterator p = Mom->Points.begin();
 	p != Mom->Points.end(); p ++) {
       RIB << "TransformBegin\n";
-      RIB << "Translate " << value(((*p).second)->LocPos[0]) << " " << value(((*p).second)->LocPos[1]) << " 0\n";      
+      RIB << "Translate " << (((*p).second)->LocPos.x).value() << " " << (((*p).second)->LocPos.y).value() << " 0\n";      
       Render((const AnchorPoint *) ((*p).second), RIB);
       RIB << "TransformEnd\n";
    }

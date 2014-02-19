@@ -267,13 +267,13 @@ void Hermlet::SnapShot(const adoublev &x, int slice, double t) {
 
 void Hermlet::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    if (cIx >= 0) {
-      cerr << "Constraining indices [" << cIx << " - " << cIx+4*S->N << "] to lie between [" << Min << " - " << Max << "]\n";
+      cerr << "Constraining Hermlet indices [" << cIx << " - " << cIx+4*S->N << "] to lie between [" << Min << " - " << Max << "]\n";
       for (int i = 0; i < S->N; i ++) {
 	 c.min[cIx+i*2+0] = Min; c.max[cIx+i*2+0] = Max;
 	 c.min[cIx+i*2+1] = Min; c.max[cIx+i*2+1] = Max;
       }
    }
-   cerr << "Constraints [" << Min << ", " << Max << "] -> [" << -(Max-Min)/value(S->h) << ", " << (Max-Min)/value(S->h) << "]\n";
+   cerr << "Hermlet Constraints [" << Min << ", " << Max << "] -> [" << -(Max-Min)/S->h.value() << ", " << (Max-Min)/S->h.value() << "]\n";
 //   for (int i = 0; i <= S->N; i ++) {
 //      x.min[xIx+i*2+0] = Min;
 //      x.max[xIx+i*2+0] = Max;
