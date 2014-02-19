@@ -1,4 +1,4 @@
-# pragmaonce
+# pragma once
 
 # include <Omu_Variables.h>
 # include "adolc.h"
