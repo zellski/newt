@@ -23,11 +23,10 @@ SimpsonIntegrator::SimpsonIntegrator(int nn) : n(nn) {
     weights[0] = weights[n-1] = 1;
 }
 
-void SimpsonIntegrator::integrate(Stage *S,
-                                  const int slice,
-                                  const adoublev &x,
-                                  adoublev &c,
-                                  adouble &f0) {
+void SimpsonIntegrator::integrate(
+   Stage *S, const int slice, const adoublev &x,
+   adoublev &c, adouble &f0)
+{
     for (int sample = 0; sample < n; sample ++) {
         const double weight = weights[sample]/n/3;
         const double t = points[sample];

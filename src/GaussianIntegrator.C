@@ -56,11 +56,10 @@ GaussianIntegrator::GaussianIntegrator(int nn) : n(nn) {
 }
 
 
-void GaussianIntegrator::integrate(Stage *S,
-                                  const int slice,
-                                  const adoublev &x,
-                                  adoublev &c,
-                                  adouble &f0) {
+void GaussianIntegrator::integrate(
+   Stage *S, const int slice, const adoublev &x,
+   adoublev &c, adouble &f0)
+{
     for (int sample = 0; sample < n; sample ++) {
         const double weight = weights[sample]/2;
         const double t = points[sample];

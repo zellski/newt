@@ -8,10 +8,8 @@ class GaussianIntegrator : public Integrator {
     double *points;
 
   public:
-    GaussianIntegrator::GaussianIntegrator(int nn);
-    virtual void GaussianIntegrator::integrate(Stage *S,
-                                              const int slice,
-                                              const adoublev &x,
-                                              adoublev &c,
-                                              adouble &f0);
+    GaussianIntegrator(int nn);
+    virtual void integrate(
+       Stage *S, const int slice, const adoublev &x,
+       adoublev &c, adouble &f0);
 };

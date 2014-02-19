@@ -8,10 +8,8 @@ class SimpsonIntegrator : public Integrator {
     double *points;
 
   public:
-    SimpsonIntegrator::SimpsonIntegrator(int nn);
-    virtual void SimpsonIntegrator::integrate(Stage *S,
-                                              const int slice,
-                                              const adoublev &x,
-                                              adoublev &c,
-                                              adouble &f0);
+    SimpsonIntegrator(int nn);
+    virtual void integrate(
+       Stage *S, const int slice, const adoublev &x,
+       adoublev &c, adouble &f0);
 };
