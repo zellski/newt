@@ -15,8 +15,8 @@ Creature::Creature(World *const w, const char *const S, DOF *x, DOF *y) :
 // This is only called over stage transitions...
 
 void Creature::CleanSweep() {
-   TotF[0] = TotF[1] = 0;
-   TotJ[0] = TotJ[1] = 0;
+   TotF.zero();
+   TotJ.zero();
 
    for (vector<BodyPoint *>::const_iterator Q = AttachedPoints.begin();
 	Q != AttachedPoints.end(); Q ++) {
@@ -25,37 +25,37 @@ void Creature::CleanSweep() {
 }
 
 void Creature::DistImpulse(const adoublev &x) {
-   X->JVal = TotJ[0];
-   Y->JVal = TotJ[1];
+   X->JVal = TotJ.x;
+   Y->JVal = TotJ.y;
    for (vector<BodyPoint *>::const_iterator Q = AttachedPoints.begin();
 	Q != AttachedPoints.end(); Q ++) {
       RigidBody *R = (*Q)->Parent;
 
       R->DistImpulse(x);
 
-      X->JVal += R->TotJ[0];
-      Y->JVal += R->TotJ[1];
+      X->JVal += R->TotJ.x;
+      Y->JVal += R->TotJ.y;
    }
 }
 
 void Creature::BuildSweep(const adoublev &x) {
 //   cerr << "Creature named " << Name << ": recursion started.\n";
 
-   adoublev FlippedVal(2);
+   AVec FlippedVal;
 
    X->qMomentum = X->qCurvature = 0;
    Y->qMomentum = Y->qCurvature = 0;
 
-   Val[0] = X->qVal; Val[1] = Y->qVal;
-   Dot[0] = X->qDot; Dot[1] = Y->qDot;
-   Bis[0] = X->qBis; Bis[1] = Y->qBis;
+   Val.x = X->qVal; Val.y = Y->qVal;
+   Dot.x = X->qDot; Dot.y = Y->qDot;
+   Bis.x = X->qBis; Bis.y = Y->qBis;
 
-   FlippedVal[0] = -Val[1];
-   FlippedVal[1] =  Val[0];
+   FlippedVal.x = -Val.y;
+   FlippedVal.y =  Val.x;
 
    /* resultant force working on root */
-   X->QVal = TotF[0];
-   Y->QVal = TotF[1];
+   X->QVal = TotF.x;
+   Y->QVal = TotF.y;
 
    for (vector<BodyPoint *>::const_iterator Q = AttachedPoints.begin();
 	Q != AttachedPoints.end(); Q ++) {
@@ -74,10 +74,10 @@ void Creature::BuildSweep(const adoublev &x) {
 //      cerr << "Wrote qCurvature " << Y->qCurvature << " into DOF "
 //	   << Y->Name << "...\n";
 
-      X->qMomentum += R->KDot[0];
-      Y->qMomentum += R->KDot[1];
+      X->qMomentum += R->KDot.x;
+      Y->qMomentum += R->KDot.y;
 
-      X->QVal += R->TotF[0];
-      Y->QVal += R->TotF[1];
+      X->QVal += R->TotF.x;
+      Y->QVal += R->TotF.y;
    }
 }

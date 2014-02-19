@@ -12,8 +12,8 @@ class Force {
    const double vx, vy;
    Fun *const F;
 public:
-   adouble  FVal;
-   adoublev FVec;
+   adouble FVal;
+   AVec FVec;
 
    Force(Stage *s, AnchorPoint *p, double sx, double sy, double mag);
    Force(Stage *s, AnchorPoint *p, double sx, double sy, Fun *const f);

@@ -23,11 +23,11 @@ public:
    double TotM;
    adouble  UVal, UDot;
    adouble  PVal, PDot;
-   adoublev KVal, KDot, KBis;
-   adoublev rVal, rDot, rBis;
+   AVec     KVal, KDot, KBis;
+   AVec     rVal, rDot, rBis;
    adouble  AVal, ADot, ABis;
    adouble  FVal, JVal;
-   adoublev TotF, TotJ;
+   AVec     TotF, TotJ;
 
    adouble sinVal, cosVal;
 
@@ -38,10 +38,7 @@ public:
       Points(),
       Mass(M),
       ROG2(rog2),
-      Angle(d),
-      KVal(2), KDot(2), KBis(2),
-      rVal(2), rDot(2), rBis(2),
-      TotF(2), TotJ(2)
+      Angle(d)
    {};
 
    virtual int BodyType() const = 0;
@@ -54,12 +51,12 @@ public:
 
    void DistImpulse(const adoublev &x);
 
-   void RotateInto(const adoublev &x, adoublev &y) {
-      y[0] =  cosVal*x[0] - sinVal*x[1];
-      y[1] =  sinVal*x[0] + cosVal*x[1];
+   void RotateInto(const AVec &a, AVec &b) {
+      b.x =  cosVal*a.x - sinVal*a.y;
+      b.y =  sinVal*a.x + cosVal*a.y;
    }
-   void FlipInto(const adoublev &x, adoublev &y) {
-      y[0] = -x[1];
-      y[1] =  x[0];
+   void FlipInto(const AVec &a, AVec &b) {
+      b.x = -a.y;
+      b.y =  a.x;
    }
 };  

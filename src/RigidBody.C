@@ -23,15 +23,16 @@ void RigidBody::CleanSweep() {
 	   Q != P->AttachedPoints.end(); Q ++) {
 	 (*Q)->Parent->CleanSweep();
       }
-      P->TotF[0] = P->TotF[1] = P->TotJ[0] = P->TotJ[1] = 0;
+      P->TotF.zero();
+      P->TotJ.zero();
    }
 }
 
 void RigidBody::DistImpulse(const adoublev &x) {
-   adoublev tmp(2);
+   AVec tmp;
 
    JVal = 0;
-   TotJ[0] = TotJ[1] = 0;
+   TotJ.zero();
 
    for (PointMap::const_iterator p = Points.begin();
 	p != Points.end(); p ++) {
@@ -56,9 +57,9 @@ void RigidBody::DistImpulse(const adoublev &x) {
 
 
 void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
-   adoublev RIB(2), FIB(2), ROB(2), FOB(2);
-   adoublev dVal(2), dDot(2);
-   adoublev tmp(2);
+   AVec RIB, FIB, ROB, FOB;
+   AVec dVal, dDot;
+   AVec tmp;
 
    AVal += Angle->qVal;
    ADot += Angle->qDot;
@@ -95,7 +96,7 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
    }
 
    FVal = 0;
-   TotF[0] = TotF[1] = 0;
+   TotF.zero();
 
    TotM = Mass;
 
@@ -159,12 +160,12 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
    FlipInto(tmp, dVal);
 
    FlipInto(Entry->Dot, tmp);
-   Angle->qCurvature = W->G*dVal[1] - tmp*KDot;
+   Angle->qCurvature = W->G*dVal.y - tmp*KDot;
 
    FlipInto(Entry->Val, tmp);
    Angle->qMomentum = UVal + PVal - tmp*KDot;
    if (W->ImplicitMuscles) {
-      Angle->QVal += UDot + PDot - tmp*KBis - W->G*dVal[1];
+      Angle->QVal += UDot + PDot - tmp*KBis - W->G*dVal.y;
    }
 //   if (FVal - tmp*TotF != 0) {
 //      cerr << "FORCE: " << FVal - tmp*TotF << "\n";

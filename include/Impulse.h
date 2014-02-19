@@ -11,7 +11,7 @@ public:
    Stage *const S;
    AnchorPoint *P;
    const double vx, vy;
-   adoublev JVec;
+   AVec JVec;
 
    Impulse(Stage *const s, AnchorPoint *p, double sx, double sy, double mag);
    Impulse(Stage *const s, AnchorPoint *p, double sx, double sy);

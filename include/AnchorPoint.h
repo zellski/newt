@@ -23,8 +23,8 @@ class AnchorPoint {
 public:
    const char *const Name;
    vector<BodyPoint *> AttachedPoints;
-   adoublev TotF, TotJ;
-   adoublev Val, Dot, Bis;
+   AVec TotF, TotJ;
+   AVec Val, Dot, Bis;
 
    AnchorPoint(const char *const S);
 
