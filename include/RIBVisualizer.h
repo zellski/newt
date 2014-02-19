@@ -15,12 +15,12 @@ class RIBVisualizer {
 public:
    const World *W;
 private:
-   static void Render(const Creature *P, ofstream &RIB);
+   static void Render(const Creature *P, std::ofstream &RIB);
 
-   static void Render(const BodyPoint *P, ofstream &RIB);
-   static void Render(const AnchorPoint *P, ofstream &RIB);
+   static void Render(const BodyPoint *P, std::ofstream &RIB);
+   static void Render(const AnchorPoint *P, std::ofstream &RIB);
 
-   static void Render(const RigidBody *B, ofstream &RIB);
+   static void Render(const RigidBody *B, std::ofstream &RIB);
 public:
    static void Generate(World *const W, const adoublev &x);
 };
