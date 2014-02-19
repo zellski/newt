@@ -4,3 +4,5 @@ src/*.o
 src/libnewt.so
 demo/odc
 res/snapshot.*
+src/*.d
+demo/*.d

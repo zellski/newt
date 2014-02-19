@@ -2,15 +2,21 @@
 
 # Change these according to your system!
 
-ADOLC_BASE = /usr/local
-HQP_BASE = /usr/local
+ADOLC_INC = /usr/local/include/adolc
+ADOLC_LIB = /usr/local/lib64
+HQP_INC = /usr/local/include/hqp
+HQP_LIB = /usr/local/lib
 
 CXX = g++
 CC = gcc
 
-LD = gcc -shared -o
+LD = ${CXX} -shared -o
 
-CFLAGS = -g -O3 -fPIC -I../include -I${HQP_BASE}/include/hqp -I${ADOLC_BASE}/include/adolc
+DEPFLAGS = -MMD -MP
+INCFLAGS = -I../include -I${HQP_INC} -I${ADOLC_INC}
+CFLAGS = -g -O3 -fPIC -DOMU_WITH_ADOLC=1 ${DEPFLAGS} ${INCFLAGS}
+
+LDFLAGS = -L${HQP_LIB} -L${ADOLC_LIB} -ladolc -lhqp -lomu -Wl,-install_name,@rpath/libnewt.so -W,-rpath,../src
 
 # machine independent part
 
@@ -35,22 +41,16 @@ SRCS = World.C \
 	RIBVisualizer.C
 #	VRMLVisualizer.C
 
-OBJS = $(SRCS:.C=.o)
+OBJS=$(SRCS:.C=.o)
 
-libnewt.so: $(OBJS) Makefile
-	$(LD) libnewt.so $(OBJS)
-
-depend:
-	$(CXX) -MM -MG -MP -I../include $(SRCS) > .depend
+libnewt.so: $(OBJS)
+	$(LD) libnewt.so $(OBJS) ${LDFLAGS}
 
 .C.o:
 	$(CXX) -c $(CFLAGS) $<
 
-.c.o:
-	$(CC) -c $(CFLAGS) $<
-
 clean:
-	rm -f $(RESULT) *.o *~
+	rm -f libnewt.so *.o *~
 
-include .depend
-# DO NOT DELETE
+DEPS=$(SRCS:.C=.d)
+-include $(DEPS)
