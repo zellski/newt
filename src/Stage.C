@@ -139,7 +139,7 @@ void Stage::Update(const adoublev &x, adoublev &c, adouble &f0) {
 //      cerr << ".";
    }
 //   cerr << " done.\n";
-   cerr << "Stage [" << sIx << "]: speed/torque = " << (speedContribution/torqueContribution) << "\n";
+//   cerr << "Stage [" << sIx << "]: speed/torque = " << (speedContribution/torqueContribution) << "\n";
 }
 
 void Stage::SnapShot(const adoublev &x, int slice, double t) {
