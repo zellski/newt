@@ -53,7 +53,8 @@ qp_max_iters 5000
 
 #sqp_solver Powell
 sqp_solver Schittkowski
-sqp_qp_solver Mehrotra
+#sqp_qp_solver Mehrotra
+sqp_qp_solver Franke
 
 ## run the solver
 
