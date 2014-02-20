@@ -101,7 +101,7 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x) {
 	  << "WorldBegin\n"
 	  << "AttributeBegin\n"
 	  << "Color [1 .45 .06]\n"
-	  << "Surface \"shinymetal\" \"Kd\" 0.2 \"Ks\" 0.8 \"roughness\" 0.5\n";
+	  << "Surface \"metal\" \"Ka\" 0.5 \"Ks\" 0.8 \"roughness\" 0.5\n";
 
       for (uint i = 0; i < W->Creatures.size(); i ++) {
 	 Render(W->Creatures[i], RIB);
