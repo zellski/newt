@@ -32,8 +32,8 @@ SRCS = 	Odc_Init.C \
 	Needle.C \
 	Luxo.C \
 	Human.C \
-#	Snake.C \
-#	Trivial.C \
+	Snake.C \
+	Trivial.C
 
 OBJS = $(SRCS:.C=.o) Odc_Main.o
 
