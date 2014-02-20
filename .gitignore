@@ -6,3 +6,4 @@ res/snapshot.*
 src/*.d
 demo/*.d
 /res
+/render-*
