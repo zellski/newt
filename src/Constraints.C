@@ -49,7 +49,7 @@ void ValConstraint::Evaluate(const adoublev &x, adoublev &c) {
 }
 
 VecConstraint::VecConstraint(Stage *const s, int n, double loct,
-			     const adoublev &watch, double minx, double maxx,
+			     const AVec &watch, double minx, double maxx,
 			     double miny, double maxy) :
    S(s),
    Slice(n),
@@ -66,7 +66,7 @@ VecConstraint::VecConstraint(Stage *const s, int n, double loct,
 }
 
 VecConstraint::VecConstraint(Stage *const s, int n, double loct,
-			     const adoublev &watch, double xval, double yval) :
+			     const AVec &watch, double xval, double yval) :
    S(s),
    Slice(n),
    t(loct),
@@ -82,7 +82,7 @@ VecConstraint::VecConstraint(Stage *const s, int n, double loct,
 }
 
 VecConstraint::VecConstraint(Stage *const s, int n, double loct,
-			     const adoublev &watch, const adoublev &diff) :
+			     const AVec &watch, const AVec &diff) :
    S(s),
    Slice(n),
    t(loct),
@@ -106,12 +106,12 @@ void VecConstraint::Evaluate(const adoublev &x, adoublev &c) {
    S->SnapShot(x, Slice, t);
    cerr << "Forcing " << Watch << " into ([" << MinX << ", " << MaxX
 	<< "], [" << MinY << ", " << MaxY << "])..";
-   c[cIx+0] = Watch[0];
-   c[cIx+1] = Watch[1];
+   c[cIx+0] = Watch.x;
+   c[cIx+1] = Watch.y;
    if (WatchDiff) {
       cerr << "!!!!";
-      c[cIx+0] -= (*WatchDiff)[0];
-      c[cIx+1] -= (*WatchDiff)[1];
+      c[cIx+0] -= (*WatchDiff).x;
+      c[cIx+1] -= (*WatchDiff).y;
    }
    cerr << "\n";
 }

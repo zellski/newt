@@ -1,7 +1,7 @@
 # pragma once
 
 # include <Omu_Variables.h>
-# include "adolc.h"
+# include "AVec.h"
 
 class World;
 class Stage;
@@ -38,20 +38,20 @@ public:
 class VecConstraint: public Constraint {
 private:
    double MinX, MaxX, MinY, MaxY;
-   const adoublev &Watch;
-   const adoublev * const WatchDiff;
+   const AVec &Watch;
+   const AVec * const WatchDiff;
    const int Slice;
    const double t;
    const int cIx;
 public:
    Stage *const S;
 
-   VecConstraint(Stage *const s, int n, double loct, const adoublev &watch,
+   VecConstraint(Stage *const s, int n, double loct, const AVec &watch,
 		 double minx, double maxx, double miny, double maxy);
-   VecConstraint(Stage *const s, int n, double loct, const adoublev &watch,
+   VecConstraint(Stage *const s, int n, double loct, const AVec &watch,
 		 double xval, double yval);
-   VecConstraint(Stage *const s, int n, double loct, const adoublev &watch,
-		 const adoublev &diff);
+   VecConstraint(Stage *const s, int n, double loct, const AVec &watch,
+		 const AVec &diff);
 
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
    void Evaluate(const adoublev &x, adoublev &c);
