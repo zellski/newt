@@ -50,6 +50,7 @@ if [catch {prg_name $pname} result] {
 
 ## potentially go for a long long time
 qp_max_iters 5000
+sqp_max_iters 5000
 
 #sqp_solver Powell
 sqp_solver Schittkowski
