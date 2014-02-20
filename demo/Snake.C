@@ -17,17 +17,19 @@
 # include "Impulse.h"
 # include "Fun.h"
 # include "Hermite.h"
+# include "Hermlet.h"
 # include "Hat.h"
 # include "PWL.h"
+# include "GaussianIntegrator.h"
 
-# define LINKS	3
+# define LINKS 8
 # define PI	M_PI
 
 void Snake::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec &c) {
    DOF *Angles[LINKS];
    ThinRod *Rods[LINKS];
 
-   W = new World(-9.81, true);
+   W = new World(-9.81, false);
 
    DOF *X = new DOF(W, "X");
    DOF *Y = new DOF(W, "Y");
@@ -50,21 +52,24 @@ void Snake::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec
       Rods[i-1]->GetPoint("Bot")->Attach(Rods[i]->GetPoint("Top"));
    }
 
-   Stage *S1 = new Stage(W, 4, .5);
+   Integrator *i = new GaussianIntegrator(5);
+   Stage *S1 = new Stage(W, i, 16, 1);
 
    new Constant(S1, X, 0);
    new Constant(S1, Y, 0);
 
-   for (int i = 0; i < LINKS; i ++) {
-//      new Muscle(S1, Angles[i], new Hat(S1));
+   if (!W->ImplicitMuscles) {
+      for (int i = 0; i < LINKS; i ++) {
+         new Muscle(S1, Angles[i], new Hat(S1));
+      }
    }
-   new Hermite(S1, Angles[0], -PI/2, PI/2);
+   new Hat(S1, Angles[0], -PI/2, PI/2, -PI, PI);
    for (int i = 1; i < LINKS; i ++) {
-      new Hermite(S1, Angles[i], 0, 0, -PI, PI);
+      new Hat(S1, Angles[i], 0, 0, -PI/4, PI/4);
    }
    new ValConstraint(S1, 0, 0, Angles[0]->qVal, -M_PI/2);
    new ValConstraint(S1, 0, 0, Angles[0]->qDot, 0);
-   new ValConstraint(S1, S1->N-1, 1, Angles[0]->qVal, 0);
+   new ValConstraint(S1, S1->N-1, 1, Angles[0]->qVal, PI/2);
    new ValConstraint(S1, S1->N-1, 1, Angles[0]->qDot, 0);
    for (int i = 1; i < LINKS; i ++) {
       new ValConstraint(S1, 0, 0, Angles[i]->qVal, 0);
