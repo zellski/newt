@@ -20,6 +20,7 @@
 # include "Hermlet.h"
 # include "Hat.h"
 # include "PWL.h"
+# include "GaussianIntegrator.h"
 
 # define PI	M_PI
 
@@ -42,17 +43,18 @@ void Trivial::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableV
    W->Register(C);
    C->Attach(rod->GetPoint("Top"));
 
-   Stage *S1 = new Stage(W, 32, .5);
+   Integrator *i = new GaussianIntegrator(5);
+   Stage *S1 = new Stage(W, i, 32, 2);
 
    new Constant(S1, X, 0);
    new Constant(S1, Y, 0);
 
    if (!W->ImplicitMuscles) {
-      new Muscle(S1, alpha, new Hermite(S1));
+      new Muscle(S1, alpha, new Hat(S1));
    }
-   new Hermite(S1, alpha, -PI/2, PI/2);
+   new Hermlet(S1, alpha, -PI/2, PI/2);
    new ValConstraint(S1, 0, 0, alpha->qVal, -PI/2);
-   new ValConstraint(S1, 0, 0, alpha->qDot, 1);
+   new ValConstraint(S1, 0, 0, alpha->qDot, 0);
    new ValConstraint(S1, S1->N-1, 1, alpha->qVal, PI/2);
    new ValConstraint(S1, S1->N-1, 1, alpha->qDot, 0);
    W->Initialize(x, c);
