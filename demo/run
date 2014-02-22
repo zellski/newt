@@ -48,14 +48,14 @@ if [catch {prg_name $pname} result] {
 ## optimization stopping limit
 #sqp_eps 1e-6
 
-## potentially go for a long long time
-qp_max_iters 5000
-sqp_max_iters 5000
-
 #sqp_solver Powell
 sqp_solver Schittkowski
 #sqp_qp_solver Mehrotra
 sqp_qp_solver Franke
+
+## potentially go for a long long time
+qp_max_iters 5000
+sqp_max_iters 5000
 
 ## run the solver
 
