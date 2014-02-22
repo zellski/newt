@@ -15,7 +15,7 @@
 # include "Constant.h"
 # include "Impulse.h"
 # include "Single.h"
-# include "Hat.h"
+# include "Hermite.h"
 # include "Hermlet.h"
 # include "SimpsonIntegrator.h"
 # include "GaussianIntegrator.h"
@@ -26,10 +26,14 @@
 # define GAMMA_REST	-6*PI/11
 # define DELTA_REST	-1*PI/11
 
+# define STAGE_PIECES 8
+# define LEAP_LENGTH 1.0
+
 void Luxo::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec &c) {
    W = new World(-9.81);
 
    // Integrator *i = new SimpsonIntegrator(25);
+//   Integrator *i = new GaussianIntegrator(10);
    Integrator *i = new GaussianIntegrator(10);
 
    // Luxo has six degrees of freedom
@@ -68,20 +72,20 @@ void Luxo::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec 
    L1Top->Attach(L2Bot);
    L2Top->Attach(HeadBot);
 
-   Stage *S1 = new Stage(W, i, 8, .2);
+   Stage *S1 = new Stage(W, i, STAGE_PIECES, .2);
 
-   new Muscle(S1, Beta,  new Hermlet(S1), 1);
-   new Muscle(S1, Gamma, new Hermlet(S1), 1);
-   new Muscle(S1, Delta, new Hermlet(S1), 1);
+   new Muscle(S1, Beta,  new Hermite(S1), 2);
+   new Muscle(S1, Gamma, new Hermite(S1), 1);
+   new Muscle(S1, Delta, new Hermite(S1), 2);
 
    // and Luxo is nailed to the floor so he can gather leap-momentum
-   new Constant(S1, X, -1.5);
+   new Constant(S1, X, -LEAP_LENGTH/2.0);
    new Constant(S1, Y, 0);
    new Constant(S1, Alpha, PI/2);
 
-   new Hermlet(S1, Beta, BETA_REST, PI/11, -2*PI/11, 4*PI/11);
-   new Hermlet(S1, Gamma, GAMMA_REST, -3*PI/11, -7*PI/11, 0);
-   new Hermlet(S1, Delta, DELTA_REST, DELTA_REST, -2*PI/11, 0);
+   new Hermite(S1, Beta, BETA_REST, PI/11, -2*PI/11, 4*PI/11);
+   new Hermite(S1, Gamma, GAMMA_REST, -3*PI/11, -7*PI/11, 0);
+   new Hermite(S1, Delta, DELTA_REST, DELTA_REST, -2*PI/11, 0);
 
    new ValConstraint(S1, 0, 0, Beta->qVal, BETA_REST);
    new ValConstraint(S1, 0, 0, Beta->qDot, 0);
@@ -91,20 +95,20 @@ void Luxo::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec 
    new ValConstraint(S1, 0, 0, Delta->qDot, 0);
 
    // In the second stage, Luxo flies -- this can take longer,
-   Stage *S2 = new Stage(W, i, 16, .8);
+   Stage *S2 = new Stage(W, i, STAGE_PIECES * 2, .3);
 
-   new Muscle(S2, Beta, new Hermlet(S2), 1);
-   new Muscle(S2, Gamma, new Hermlet(S2), 1);
-   new Muscle(S2, Delta, new Hermlet(S2), 1);
+   new Muscle(S2, Beta, new Hermite(S2), 2);
+   new Muscle(S2, Gamma, new Hermite(S2), 1);
+   new Muscle(S2, Delta, new Hermite(S2), 2);
 
    // and the base position is now variable.
-   new Hermlet(S2, X, -1.5, 1.5);
-   new Hermlet(S2, Y, .4, .4);
+   new Hermite(S2, X, -LEAP_LENGTH/2.0, LEAP_LENGTH/2.0);
+   new Hermite(S2, Y, LEAP_LENGTH/4, LEAP_LENGTH/4);
 
-   new Hermlet(S2, Alpha, PI/2, PI/2, PI/3, 2*PI/3);
-   new Hermlet(S2, Beta, PI/11, PI/11, -1*PI/11, 4*PI/11);
-   new Hermlet(S2, Gamma, -3*PI/11, -3*PI/11, -6*PI/11, 0);
-   new Hermlet(S2, Delta, DELTA_REST, DELTA_REST, -2*PI/11, 0);
+   new Hermite(S2, Alpha, PI/2, PI/2, PI/3, 2*PI/3);
+   new Hermite(S2, Beta, PI/11, PI/11, -1*PI/11, 4*PI/11);
+   new Hermite(S2, Gamma, -3*PI/11, -3*PI/11, -6*PI/11, 0);
+   new Hermite(S2, Delta, DELTA_REST, DELTA_REST, -2*PI/11, 0);
 
    // When Luxo lands, apply impact vectors of unknown magnitude!
    new Impulse(S2, BaseRight, 0, 1);
@@ -112,21 +116,21 @@ void Luxo::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec 
    new Impulse(S2, BaseMid, 1, 0);
 
    // In stage three, Luxo has landed, and must now stabilize
-   Stage *S3 = new Stage(W, i, 4, .2);
+   Stage *S3 = new Stage(W, i, STAGE_PIECES, .2);
 
-   new Muscle(S3, Beta, new Hermlet(S3), 1);
-   new Muscle(S3, Gamma, new Hermlet(S3), 1);
-   new Muscle(S3, Delta, new Hermlet(S3), 1);
+   new Muscle(S3, Beta, new Hermite(S3), 2);
+   new Muscle(S3, Gamma, new Hermite(S3), 1);
+   new Muscle(S3, Delta, new Hermite(S3), 2);
 
    // with the nail once again nailed down, elsewhere.
-   new Constant(S3, X, 1.5);
+   new Constant(S3, X, LEAP_LENGTH/2.0);
    new Constant(S3, Y, 0);
 
    new Constant(S3, Alpha, PI/2);
 
-   new Hermlet(S3, Beta, PI/11, BETA_REST, -2*PI/11, 4*PI/11);
-   new Hermlet(S3, Gamma, -3*PI/11, GAMMA_REST, -6*PI/11, 0);
-   new Hermlet(S3, Delta, DELTA_REST, DELTA_REST, -2*PI/11, 0);
+   new Hermite(S3, Beta, PI/11, BETA_REST, -2*PI/11, 4*PI/11);
+   new Hermite(S3, Gamma, -3*PI/11, GAMMA_REST, -6*PI/11, 0);
+   new Hermite(S3, Delta, DELTA_REST, DELTA_REST, -2*PI/11, 0);
 
    int slice = S3->N-1;
 
