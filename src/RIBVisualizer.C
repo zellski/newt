@@ -6,13 +6,15 @@
 # include "BodyPoint.h"
 # include "Primitives.h"
 
+# include <sstream>
+
 using namespace std;
 
 void RIBVisualizer::Generate(World *const W, const adoublev &x) {
    static char buf[256];
    static std::ofstream RIB;
    static std::ofstream TOut;
-   static std::ofstream *qOut, *QOut, *qDot, *qC, *qM;
+   static std::stringstream *qOut, *QOut, *qDot, *qC, *qM;
 
    double T = 0;
 
@@ -26,42 +28,32 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x) {
 
 //   cerr << "Starting rendering...\n";
 
-   qOut = new std::ofstream[W->DOFs.size()];
-   qDot = new std::ofstream[W->DOFs.size()];
-   QOut = new std::ofstream[W->DOFs.size()];
+   qOut = new std::stringstream[W->DOFs.size()];
+   qDot = new std::stringstream[W->DOFs.size()];
+   QOut = new std::stringstream[W->DOFs.size()];
 
-   qC = new std::ofstream[W->DOFs.size()];
-   qM = new std::ofstream[W->DOFs.size()];
+   qC = new std::stringstream[W->DOFs.size()];
+   qM = new std::stringstream[W->DOFs.size()];
 
    TOut.open("../res/TDat.m");
    TOut << "T = [ \n";
+
    for (uint i = 0; i < W->DOFs.size(); i ++) {
       DOF *D = W->DOFs[i];
-      sprintf(buf, "../res/q%sDat.m", D->Name);
-      qOut[i].open(buf);
       qOut[i] << "q" << D->Name << " = [ \n";
-      sprintf(buf, "../res/q%sDotDat.m", D->Name);
-      qDot[i].open(buf);
       qDot[i] << "q" << D->Name << "Dot = [ \n";
-      sprintf(buf, "../res/Q%sDat.m", D->Name);
-      QOut[i].open(buf);
       QOut[i] << "Q" << D->Name << " = [ \n";
 
-      sprintf(buf, "../res/qC%sDat.m", D->Name);
-      qC[i].open(buf);
       qC[i] << "qC" << D->Name << " = [ \n";
-      sprintf(buf, "../res/qM%sDat.m", D->Name);
-      qM[i].open(buf);
       qM[i] << "qM" << D->Name << " = [ \n";
    }
-   rename("../res/snapshot.dat", "../res/snapshot.foo");
+   rename("../res/snapshot.dat", "../res/snapshot.old");
    RIB.open("../res/snapshot.dat");
    RIB << "Projection \"perspective\" \"fov\" 45\n"
        << "PixelSamples 1 1\n"
        << "Translate 0 0 7\n"
        << "LightSource \"ambientlight\" 1 \"intensity\" 0.4\n"
        << "LightSource \"distantlight\" 1 \"from\" [0 1 -4] \"to\" [0 0 0] \"intensity\" 0.8 \n";
-
 
    // sweep through the full time-interval at a constant step
 
@@ -117,6 +109,7 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x) {
    RIB.close();
    TOut << "];\n";
    TOut.close();
+
    for (uint i = 0; i < W->DOFs.size(); i ++) {
       DOF *D = W->DOFs[i];
       qOut[i] << "];\n";
@@ -126,11 +119,17 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x) {
       qC[i] << "];\n";
       qM[i] << "];\n";
 
-      qOut[i].close();
-      qDot[i].close();
-      QOut[i].close();
-      qC[i].close();
-      qM[i].close();
+      qOut[i].flush();
+      qDot[i].flush();
+      QOut[i].flush();
+      qC[i].flush();
+      qM[i].flush();
+
+      std::ofstream DOFOut;
+      sprintf(buf, "../res/%sDat.m", D->Name);
+      DOFOut.open(buf);
+      DOFOut << qOut[i].str() << qDot[i].str() << QOut[i].str() << qC[i].str() << qM[i].str();
+      DOFOut.close();
    }
    delete[] qOut;
    delete[] qDot;
