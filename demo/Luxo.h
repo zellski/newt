@@ -17,7 +17,7 @@ public:
    void update(int kk, 
 	       const adoublev &x, const adoublev &u,
 	       adoublev &f, adouble &f0, adoublev &c);
-   char *name() { return "Luxo"; }
+   const char *name() { return "Luxo"; }
 };
 
 #endif
