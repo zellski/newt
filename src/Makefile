@@ -14,7 +14,7 @@ LD = ${CXX} -shared -o
 
 DEPFLAGS = -MMD -MP
 INCFLAGS = -I../include -I${HQP_INC} -I${ADOLC_INC}
-CFLAGS = -g -O3 -fPIC -DOMU_WITH_ADOLC=1 ${DEPFLAGS} ${INCFLAGS}
+CFLAGS = -g -W\#warnings -O3 -fPIC -DOMU_WITH_ADOLC=1 ${DEPFLAGS} ${INCFLAGS}
 
 LDFLAGS = -L${HQP_LIB} -L${ADOLC_LIB} -ladolc -lhqp -lomu -Wl,-install_name,@rpath/libnewt.so -W,-rpath,../src
 

@@ -20,7 +20,7 @@ CC = gcc
 
 DEPFLAGS = -MMD -MP
 INCFLAGS = -I../include -I${HQP_INC} -I${ADOLC_INC}
-CFLAGS = -g -O3 -fPIC -DOMU_WITH_ADOLC=1 ${DEPFLAGS} ${INCFLAGS}
+CFLAGS = -g -W\#warnings -O3 -fPIC -DOMU_WITH_ADOLC=1 ${DEPFLAGS} ${INCFLAGS}
 
 LDFLAGS = -L../src -Wl,-rpath,../src -Wl,-rpath,${HQP_LIB} -Wl,-rpath,${ADOLC_LIB} -L${HQP_LIB} -L${ADOLC_LIB} -ladolc -lhqp -lomu
 
