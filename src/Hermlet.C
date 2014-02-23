@@ -159,34 +159,34 @@ void Hermlet::SnapShot(const adoublev &x, int slice, double t) {
 
    int six = xIx + i*2;
 
-   fprintf(stderr, "At slice/t (%d, %f) i/tttt = (%d, %f), six = %d", slice, t, i, tttt, six-xIx);
+//   fprintf(stderr, "At slice/t (%d, %f) i/tttt = (%d, %f), six = %d", slice, t, i, tttt, six-xIx);
 
    /* first the right half of the relevant s1 */
    Val += x[six] * s1Val(tttt);
    Dot += x[six] * s1Dot(tttt);
    Bis += x[six] * s1Bis(tttt);
-   fprintf(stderr, "[%d]", six-xIx);
+//   fprintf(stderr, "[%d]", six-xIx);
    six ++;
 
    /* then the right half of the s2 */
    Val += x[six] * s2Val(tttt);
    Dot += x[six] * s2Dot(tttt);
    Bis += x[six] * s2Bis(tttt);
-   fprintf(stderr, "[%d]", six-xIx);
+//   fprintf(stderr, "[%d]", six-xIx);
    six ++;
 
    /* then left half of s1 */
    Val += x[six] * s1Val(tttt-1);
    Dot += x[six] * s1Dot(tttt-1);
    Bis += x[six] * s1Bis(tttt-1);
-   fprintf(stderr, "[%d]", six-xIx);
+//   fprintf(stderr, "[%d]", six-xIx);
    six ++;
 
    /* and finally left half of w2 */
    Val += x[six] * s2Val(tttt-1);
    Dot += x[six] * s2Dot(tttt-1);
    Bis += x[six] * s2Bis(tttt-1);
-   fprintf(stderr, "[%d]\n", six-xIx);
+//   fprintf(stderr, "[%d]\n", six-xIx);
 
    Dot /= S->T/n;
    Bis /= (S->T/n * S->T/n);
@@ -210,7 +210,7 @@ void Hermlet::SnapShot(const adoublev &x, int slice, double t) {
 
 	 int six = lix + i*2 - 1;
 
-	 fprintf(stderr, "At slice/t (%d, %f) depth %d, i/tttt = (%d, %f), six = %d", slice, t, depth, i, tttt, six-xIx);
+//	 fprintf(stderr, "At slice/t (%d, %f) depth %d, i/tttt = (%d, %f), six = %d", slice, t, depth, i, tttt, six-xIx);
 
 	 adouble lVal = 0, lDot = 0, lBis = 0;
 
@@ -220,9 +220,9 @@ void Hermlet::SnapShot(const adoublev &x, int slice, double t) {
 	    lVal += x[six] * w1Val(tttt);
 	    lDot += x[six] * w1Dot(tttt);
 	    lBis += x[six] * w1Bis(tttt);
-	    fprintf(stderr, "[%d]", six-xIx);
+//	    fprintf(stderr, "[%d]", six-xIx);
 	 } else {
-	    fprintf(stderr, "{%d}", six-xIx);
+//	    fprintf(stderr, "{%d}", six-xIx);
 	 }
 	 six ++;
 
@@ -231,7 +231,7 @@ void Hermlet::SnapShot(const adoublev &x, int slice, double t) {
 	 lVal += x[six] * w2Val(tttt);
 	 lDot += x[six] * w2Dot(tttt);
 	 lBis += x[six] * w2Bis(tttt);
-	 fprintf(stderr, "[%d]", six-xIx);
+//	 fprintf(stderr, "[%d]", six-xIx);
 	 six ++;
 
 	 /* then left half of w1 */
@@ -239,10 +239,10 @@ void Hermlet::SnapShot(const adoublev &x, int slice, double t) {
 	    lVal += x[six] * w1Val(tttt-1);
 	    lDot += x[six] * w1Dot(tttt-1);
 	    lBis += x[six] * w1Bis(tttt-1);
-	    fprintf(stderr, "[%d]", six-xIx);
+//	    fprintf(stderr, "[%d]", six-xIx);
 	    six ++;
 	 } else {
-	    fprintf(stderr, "{%d}", six-xIx);
+//	    fprintf(stderr, "{%d}", six-xIx);
 	 }
 
 	 /* and finally left half of w2 */
@@ -250,7 +250,7 @@ void Hermlet::SnapShot(const adoublev &x, int slice, double t) {
 	 lDot += x[six] * w2Dot(tttt-1);
 	 lBis += x[six] * w2Bis(tttt-1);
 
-	 fprintf(stderr, "[%d]\n", six-xIx);
+//	 fprintf(stderr, "[%d]\n", six-xIx);
 
 	 waveScale *= sqrt(2.0);
 
