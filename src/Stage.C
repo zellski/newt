@@ -190,11 +190,13 @@ void Stage::FEMPoint(const int slice, const double t, const double weight,
         }
         adouble qM = (*p)->qMomentum;
 
+# if 0
         adouble qDot = (*p)->qDot;
         adouble qDotContrib = qDot * qDot;
         f0 += 5 * weight * h * qDotContrib; // completely arbitrary; this is highly experimental
 
         speedContribution += 5 * weight * h.value() * qDotContrib.value();
+# endif
 
         (*p)->DOFReps[sIx]->IntegrateFEM(c, qM, qC, slice, t, weight);
     }
