@@ -16,5 +16,5 @@ public:
 
    void SnapShot(const adoublev &x, int slice, double t) {}
    void IntegrateFEM(adoublev &c, adouble lhs, adouble rhs,
-		     int slice, double t, double weight) const {};
+                     int slice, double t, double weight) const {};
 };

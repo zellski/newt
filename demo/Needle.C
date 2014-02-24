@@ -1,5 +1,5 @@
 /*
-**	This is a thin rod falling onto a friction-less surface.
+**        This is a thin rod falling onto a friction-less surface.
 */
 
 # include "Stage.h"
@@ -77,8 +77,8 @@ void Needle::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVe
 }
 
 void Needle::update(int kk, 
-		    const adoublev &x, const adoublev &u,
-		    adoublev &f, adouble &f0, adoublev &c) {
+                    const adoublev &x, const adoublev &u,
+                    adoublev &f, adouble &f0, adoublev &c) {
    W->Update(x, c, f0);
 }
 

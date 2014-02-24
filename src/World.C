@@ -61,7 +61,7 @@ void World::Update(const adoublev &x, adoublev &c, adouble &f0) {
 
 void World::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    cerr << " * Allocating " << xIx << " ix for DOFs, "
-	<< cIx << " for Constraints.\n";
+        << cIx << " for Constraints.\n";
    x.alloc(xIx);
    c.alloc(cIx);
    cerr << " * Zapping constraints.\n";

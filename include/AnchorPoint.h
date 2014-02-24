@@ -4,10 +4,10 @@
 # include "AVec.h"
 
 /*
-**	This class represents a point in the World to which other
-**	objects may attach. For example, the Stationary Creature
-**	-is- an AP, and RigidBody can provide any number of AP's
-**	on request, in the form of BodyPoints.
+**        This class represents a point in the World to which other
+**        objects may attach. For example, the Stationary Creature
+**        -is- an AP, and RigidBody can provide any number of AP's
+**        on request, in the form of BodyPoints.
 */
 
 class adouble;

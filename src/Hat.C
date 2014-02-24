@@ -11,7 +11,7 @@ Hat::Hat(Stage *const s) :
 {}
 
 Hat::Hat(Stage *const s, DOF *const d, double from, double to,
-	 double min, double max) :
+         double min, double max) :
    Fun(s,d,from,to,min,max),
    xIx(S->claimVars(S->N+1)),
    eIx(S->W->ImplicitMuscles ? -1 : S->claimCons(S->N-1))
@@ -54,7 +54,7 @@ void Hat::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
 }
 
 void Hat::IntegrateFEM(adoublev &c, adouble qM, adouble qC,
-		       int slice, double t, double weight) const {
+                       int slice, double t, double weight) const {
    assert(eIx >= 0);
 
    qC *= S->h;

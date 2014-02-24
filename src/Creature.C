@@ -19,7 +19,7 @@ void Creature::CleanSweep() {
    TotJ.zero();
 
    for (vector<BodyPoint *>::const_iterator Q = AttachedPoints.begin();
-	Q != AttachedPoints.end(); Q ++) {
+        Q != AttachedPoints.end(); Q ++) {
       (*Q)->Parent->CleanSweep();
    }
 }
@@ -28,7 +28,7 @@ void Creature::DistImpulse(const adoublev &x) {
    X->JVal = TotJ.x;
    Y->JVal = TotJ.y;
    for (vector<BodyPoint *>::const_iterator Q = AttachedPoints.begin();
-	Q != AttachedPoints.end(); Q ++) {
+        Q != AttachedPoints.end(); Q ++) {
       RigidBody *R = (*Q)->Parent;
 
       R->DistImpulse(x);
@@ -58,7 +58,7 @@ void Creature::BuildSweep(const adoublev &x) {
    Y->QVal = TotF.y;
 
    for (vector<BodyPoint *>::const_iterator Q = AttachedPoints.begin();
-	Q != AttachedPoints.end(); Q ++) {
+        Q != AttachedPoints.end(); Q ++) {
       RigidBody *R = (*Q)->Parent;
 
       (*Q)->Val = Val;
@@ -72,7 +72,7 @@ void Creature::BuildSweep(const adoublev &x) {
       Y->qCurvature += W->G * R->TotM;
 
 //      cerr << "Wrote qCurvature " << Y->qCurvature << " into DOF "
-//	   << Y->Name << "...\n";
+//           << Y->Name << "...\n";
 
       X->qMomentum += R->KDot.x;
       Y->qMomentum += R->KDot.y;

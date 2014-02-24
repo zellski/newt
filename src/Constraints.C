@@ -7,7 +7,7 @@
 # include "Constraints.h"
 
 ValConstraint::ValConstraint(Stage *const s, int n, double loct,
-			     const adouble &watch, double min, double max) :
+                             const adouble &watch, double min, double max) :
    S(s),
    Slice(n),
    t(loct),
@@ -17,12 +17,12 @@ ValConstraint::ValConstraint(Stage *const s, int n, double loct,
    cIx(s->claimCons(1))
 {
    cerr << "Constraint: [" << n << "/" << loct << "] -> ["
-	<< Min << ", " << Max << "]\n";
+        << Min << ", " << Max << "]\n";
    S->Register(this);
 }
 
 ValConstraint::ValConstraint(Stage *const s, int n, double loct,
-			     const adouble &watch, double val) :
+                             const adouble &watch, double val) :
    S(s),
    Slice(n),
    t(loct),
@@ -32,7 +32,7 @@ ValConstraint::ValConstraint(Stage *const s, int n, double loct,
    cIx(s->claimCons(1))
 {
    cerr << "Constraint: [" << n << "/" << loct << "] -> ["
-	<< Min << ", " << Max << "]\n";
+        << Min << ", " << Max << "]\n";
    S->Register(this);
 }
 
@@ -49,8 +49,8 @@ void ValConstraint::Evaluate(const adoublev &x, adoublev &c) {
 }
 
 VecConstraint::VecConstraint(Stage *const s, int n, double loct,
-			     const AVec &watch, double minx, double maxx,
-			     double miny, double maxy) :
+                             const AVec &watch, double minx, double maxx,
+                             double miny, double maxy) :
    S(s),
    Slice(n),
    t(loct),
@@ -61,12 +61,12 @@ VecConstraint::VecConstraint(Stage *const s, int n, double loct,
    cIx(s->claimCons(2))
 {
    cerr << "Constraint: [" << n << "/" << loct << "] -> (["
-	<< MinX << ", " << MaxX << "], [" << MinY << ", " << MaxY << "])\n";
+        << MinX << ", " << MaxX << "], [" << MinY << ", " << MaxY << "])\n";
    S->Register(this);
 }
 
 VecConstraint::VecConstraint(Stage *const s, int n, double loct,
-			     const AVec &watch, double xval, double yval) :
+                             const AVec &watch, double xval, double yval) :
    S(s),
    Slice(n),
    t(loct),
@@ -77,12 +77,12 @@ VecConstraint::VecConstraint(Stage *const s, int n, double loct,
    cIx(s->claimCons(2))
 {
    cerr << "Constraint: [" << n << "/" << loct << "] -> (["
-	<< MinX << ", " << MaxX << "], [" << MinY << ", " << MaxY << "])\n";
+        << MinX << ", " << MaxX << "], [" << MinY << ", " << MaxY << "])\n";
    S->Register(this);
 }
 
 VecConstraint::VecConstraint(Stage *const s, int n, double loct,
-			     const AVec &watch, const AVec &diff) :
+                             const AVec &watch, const AVec &diff) :
    S(s),
    Slice(n),
    t(loct),
@@ -93,7 +93,7 @@ VecConstraint::VecConstraint(Stage *const s, int n, double loct,
    cIx(s->claimCons(2))
 {
    cerr << "Constraint: [" << n << "/" << loct << "] -> (["
-	<< MinX << ", " << MaxX << "], [" << MinY << ", " << MaxY << "])\n";
+        << MinX << ", " << MaxX << "], [" << MinY << ", " << MaxY << "])\n";
    S->Register(this);
 }
 
@@ -105,7 +105,7 @@ void VecConstraint::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
 void VecConstraint::Evaluate(const adoublev &x, adoublev &c) {
    S->SnapShot(x, Slice, t);
    cerr << "Forcing " << Watch << " into ([" << MinX << ", " << MaxX
-	<< "], [" << MinY << ", " << MaxY << "])..";
+        << "], [" << MinY << ", " << MaxY << "])..";
    c[cIx+0] = Watch.x;
    c[cIx+1] = Watch.y;
    if (WatchDiff) {

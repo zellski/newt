@@ -5,7 +5,7 @@
 # include "Fun.h"
 
 /*
-**	Hats! Piecewise linear.
+**        Hats! Piecewise linear.
 */
 
 class Stage;
@@ -28,5 +28,5 @@ public:
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
 
    void IntegrateFEM(adoublev &c, adouble lhs, adouble rhs,
-		     int slice, double t, double weight) const;
+                     int slice, double t, double weight) const;
 };

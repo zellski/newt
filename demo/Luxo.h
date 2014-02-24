@@ -15,8 +15,8 @@ private:
 public:
    void setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec &c);
    void update(int kk, 
-	       const adoublev &x, const adoublev &u,
-	       adoublev &f, adouble &f0, adoublev &c);
+               const adoublev &x, const adoublev &u,
+               adoublev &f, adouble &f0, adoublev &c);
    const char *name() { return "Luxo"; }
 };
 

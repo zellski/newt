@@ -5,7 +5,7 @@
 # include "Fun.h"
 
 /*
-**	PWCs! Piecewise constant.
+**        PWCs! Piecewise constant.
 */
 
 class Stage;

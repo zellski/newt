@@ -6,7 +6,7 @@
 # include "World.h"
 
 BodyPoint *RigidBody::MakePoint(const char *const S,
-				double x, double y, double z) {
+                                double x, double y, double z) {
    assert(!Points[S]);
    return Points[S] = new BodyPoint(S, this, x, y, z);
 }
@@ -17,11 +17,11 @@ BodyPoint *RigidBody::GetPoint(const char *const S) {
 
 void RigidBody::CleanSweep() {
    for (PointMap::const_iterator p = Points.begin();
-	p != Points.end(); p ++) {
+        p != Points.end(); p ++) {
       BodyPoint *P = ((*p).second);
       for (vector<BodyPoint *>::const_iterator Q = P->AttachedPoints.begin();
-	   Q != P->AttachedPoints.end(); Q ++) {
-	 (*Q)->Parent->CleanSweep();
+           Q != P->AttachedPoints.end(); Q ++) {
+         (*Q)->Parent->CleanSweep();
       }
       P->TotF.zero();
       P->TotJ.zero();
@@ -35,16 +35,16 @@ void RigidBody::DistImpulse(const adoublev &x) {
    TotJ.zero();
 
    for (PointMap::const_iterator p = Points.begin();
-	p != Points.end(); p ++) {
+        p != Points.end(); p ++) {
       BodyPoint *P = ((*p).second);
       for (vector<BodyPoint *>::const_iterator Q = P->AttachedPoints.begin();
-	   Q != P->AttachedPoints.end(); Q ++) {
-	 RigidBody *R = (*Q)->Parent;
+           Q != P->AttachedPoints.end(); Q ++) {
+         RigidBody *R = (*Q)->Parent;
 
-	 R->DistImpulse(x);
+         R->DistImpulse(x);
 
-	 TotJ += R->TotJ;
-	 JVal += R->JVal;
+         TotJ += R->TotJ;
+         JVal += R->JVal;
       }
       FlipInto(P->Val, tmp);
       JVal += P->TotJ * tmp;
@@ -107,7 +107,7 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
    }
 
    for (PointMap::const_iterator p = Points.begin();
-	p != Points.end(); p ++) {
+        p != Points.end(); p ++) {
       BodyPoint *P = ((*p).second);
 //      cerr << "Fiddling with point " << P->Name << "...\n";
       RotateInto(P->LocPos, ROB);
@@ -116,38 +116,38 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
       P->Val = rVal + ROB;
       P->Dot = rDot + ADot*FOB;
       if (W->ImplicitMuscles) {
-	 P->Bis = rBis + ABis*FOB - ADot*ADot*ROB;
+         P->Bis = rBis + ABis*FOB - ADot*ADot*ROB;
       }
 
       for (vector<BodyPoint *>::const_iterator Q = P->AttachedPoints.begin();
-	   Q != P->AttachedPoints.end(); Q ++) {
-	 RigidBody *R = (*Q)->Parent;
+           Q != P->AttachedPoints.end(); Q ++) {
+         RigidBody *R = (*Q)->Parent;
 
-	 (*Q)->Val = P->Val;
-	 (*Q)->Dot = P->Dot;
-	 if (W->ImplicitMuscles) {
-	    (*Q)->Bis = P->Bis;
-	 }
+         (*Q)->Val = P->Val;
+         (*Q)->Dot = P->Dot;
+         if (W->ImplicitMuscles) {
+            (*Q)->Bis = P->Bis;
+         }
 
-	 R->AVal = AVal; R->ADot = ADot; R->ABis = ABis;
+         R->AVal = AVal; R->ADot = ADot; R->ABis = ABis;
 
-	 R->BuildSweep(x, *Q);
+         R->BuildSweep(x, *Q);
 
-	 KVal += R->KVal;
-	 KDot += R->KDot;
-	 if (W->ImplicitMuscles) {
-	    KBis += R->KBis;
-	 }
-	 TotM += R->TotM;
-	 TotF += R->TotF;
-	 FVal += R->FVal;
+         KVal += R->KVal;
+         KDot += R->KDot;
+         if (W->ImplicitMuscles) {
+            KBis += R->KBis;
+         }
+         TotM += R->TotM;
+         TotF += R->TotF;
+         FVal += R->FVal;
 
-	 PVal += R->PVal;
-	 UVal += R->UVal;
-	 if (W->ImplicitMuscles) {
-	    PDot += R->PDot;
-	    UDot += R->UDot;
-	 }
+         PVal += R->PVal;
+         UVal += R->UVal;
+         if (W->ImplicitMuscles) {
+            PDot += R->PDot;
+            UDot += R->UDot;
+         }
       }
       FlipInto(P->Val, tmp);
       FVal += P->TotF * tmp;

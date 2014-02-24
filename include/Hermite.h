@@ -5,9 +5,9 @@
 # include "Fun.h"
 
 /*
-**	This is a basis of cubic piecewise polynomials, of width and
-**	depth two; largely uncoupled and with good control over value
-**	and first-derivate interpolation; "Hermite Cubics"
+**        This is a basis of cubic piecewise polynomials, of width and
+**        depth two; largely uncoupled and with good control over value
+**        and first-derivate interpolation; "Hermite Cubics"
 */
 
 class Stage;
@@ -27,7 +27,7 @@ public:
    Hermite(Stage *const s, double from, double to, double min, double max);
    Hermite(Stage *const s, DOF *const D, double from=0, double to=0);
    Hermite(Stage *const s, DOF *const D, double from, double to,
-	   double min, double max);
+           double min, double max);
 
    bool isConstant() { return false; }
 
@@ -36,5 +36,5 @@ public:
    void Evaluate(const adoublev &x, adoublev &c);
 
    void IntegrateFEM(adoublev &c, adouble lhs, adouble rhs,
-		     int slice, double t, double weight) const;
+                     int slice, double t, double weight) const;
 };

@@ -5,7 +5,7 @@
 # include "Fun.h"
 
 /*
-**	PWLs! Piecewise linear.
+**        PWLs! Piecewise linear.
 */
 
 class Stage;

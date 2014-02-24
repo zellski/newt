@@ -101,13 +101,13 @@ void Stage::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
       x.initial[tIx] = Start;
    }
    for (vector<DOF *> :: const_iterator p = W->DOFs.begin();
-	p != W->DOFs.end(); p++) {
+        p != W->DOFs.end(); p++) {
       assert(!!(*p)->DOFReps[sIx]);
       (*p)->DOFReps[sIx]->Initialize(x, c);
    }
    cerr << " * Initializing Constraints\n";
    for (vector<Constraint *> :: const_iterator p = Cons.begin();
-	p != Cons.end(); p++) {
+        p != Cons.end(); p++) {
       (*p)->Initialize(x, c);
    }
    cerr << " * Done!\n";
@@ -119,7 +119,7 @@ void Stage::Update(const adoublev &x, adoublev &c, adouble &f0) {
       h = T/N;
       cerr << "Stage " << sIx << ": T == " << T.value();
       if (T.value() <= Min || T.value() >= Max) {
-	 cerr << " (bumping)";
+         cerr << " (bumping)";
       }
       cerr << "\n";
 
@@ -134,7 +134,7 @@ void Stage::Update(const adoublev &x, adoublev &c, adouble &f0) {
    // then sweep through all constraints slightly redundantly (for now)
 //   cerr << " - Calling Evaluate in all constraints: ";
    for (vector<Constraint *> :: const_iterator p = Cons.begin();
-	p != Cons.end(); p++) {
+        p != Cons.end(); p++) {
       (*p)->Evaluate(x, c);
 //      cerr << ".";
    }
@@ -144,27 +144,27 @@ void Stage::Update(const adoublev &x, adoublev &c, adouble &f0) {
 
 void Stage::SnapShot(const adoublev &x, int slice, double t) {
    for (vector<Creature *>::const_iterator p = W->Creatures.begin();
-	p != W->Creatures.end(); p++) {
+        p != W->Creatures.end(); p++) {
       (*p)->CleanSweep();
    }
    for (vector<DOF *> :: const_iterator p = W->DOFs.begin();
-	p != W->DOFs.end(); p++) {
+        p != W->DOFs.end(); p++) {
       (*p)->SnapShot(x, sIx, slice, t);
    }
    for (vector<Fun *>::const_iterator p = Funs.begin();
-	p != Funs.end(); p++) {
+        p != Funs.end(); p++) {
       (*p)->SnapShot(x, slice, t);
    }
    for (vector<Muscle *>::const_iterator p = Muscles.begin();
-	p != Muscles.end(); p++) {
+        p != Muscles.end(); p++) {
       (*p)->SnapShot(x, slice, t);
    }
    for (vector<Force *>::const_iterator p = Forces.begin();
-	p != Forces.end(); p++) {
+        p != Forces.end(); p++) {
       (*p)->SnapShot(x, slice, t);
    }
    for (vector<Creature *>::const_iterator p = W->Creatures.begin();
-	p != W->Creatures.end(); p++) {
+        p != W->Creatures.end(); p++) {
       (*p)->BuildSweep(x);
    }
 }   

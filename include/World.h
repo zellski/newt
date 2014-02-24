@@ -16,7 +16,7 @@ public:
    vector<DOF *> DOFs;
    vector<Stage *> Stages;
 
-   int xIx, cIx;	// allocation indices into Omu_VariableVec x and c
+   int xIx, cIx;        // allocation indices into Omu_VariableVec x and c
 
    const double G;
 

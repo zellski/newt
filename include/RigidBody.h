@@ -14,7 +14,7 @@ typedef map< string, BodyPoint *, less<string> > PointMap;
 class RigidBody {
 public:
    World *const W;
-   const double	Mass, ROG2;
+   const double        Mass, ROG2;
 
    const char *const Name;
    DOF *const Angle;
@@ -32,7 +32,7 @@ public:
    adouble sinVal, cosVal;
 
    RigidBody(World *const w, const char *const S, DOF *const d,
-	     double M, double rog2) :
+             double M, double rog2) :
       W(w),
       Name(S),
       Points(),

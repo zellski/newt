@@ -29,6 +29,6 @@ void Force::SnapShot(const adoublev &x, int slice, double t) {
       FVec.set(vx*FVal, vy*FVal);
       P->TotF += FVec;
 //      cerr << "Pushing AnchorPoint " << P->Name << " in direction ("
-//	   << vx << ", " << vy << ") magnitude " << v << "..\n";
+//           << vx << ", " << vy << ") magnitude " << v << "..\n";
    }
 }

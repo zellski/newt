@@ -19,9 +19,9 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x) {
    double T = 0;
 
    for (vector<Stage *> :: const_iterator S = W->Stages.begin();
-	S < W->Stages.end(); S ++) {
+        S < W->Stages.end(); S ++) {
       if ((*S)->T.value() <= 0) {
-	 return;
+         return;
       }
       T += (*S)->T.value();
    }
@@ -77,31 +77,31 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x) {
 //      TOut << value(W->T) << "\n";
       TOut << "0\n";
       for (uint i = 0; i < W->DOFs.size(); i ++) {
-	 DOF *D = W->DOFs[i];
-	 qOut[i] << (D->qVal).value() << "\n";
-	 qDot[i] << (D->qDot).value() << "\n";
-	 QOut[i] << (D->QVal).value() << "\n";
+         DOF *D = W->DOFs[i];
+         qOut[i] << (D->qVal).value() << "\n";
+         qDot[i] << (D->qDot).value() << "\n";
+         QOut[i] << (D->QVal).value() << "\n";
 
-	 qC[i] << D->qCurvature.value() << "\n";
-	 qM[i] << D->qMomentum.value()<< "\n";
+         qC[i] << D->qCurvature.value() << "\n";
+         qM[i] << D->qMomentum.value()<< "\n";
       }
 
       RIB << "FrameBegin " << frame << "\n"
-	  << "Display \""
+          << "Display \""
           << (frame < 100 ? (frame < 10 ? "00" : "0") : "") << frame
           << ".tiff\" \"file\" \"rgb\"\n"
-	  << "WorldBegin\n"
-	  << "AttributeBegin\n"
-	  << "Color [1 .45 .06]\n"
-	  << "Surface \"metal\" \"Ka\" 0.5 \"Ks\" 0.8 \"roughness\" 0.5\n";
+          << "WorldBegin\n"
+          << "AttributeBegin\n"
+          << "Color [1 .45 .06]\n"
+          << "Surface \"metal\" \"Ka\" 0.5 \"Ks\" 0.8 \"roughness\" 0.5\n";
 
       for (uint i = 0; i < W->Creatures.size(); i ++) {
-	 Render(W->Creatures[i], RIB);
+         Render(W->Creatures[i], RIB);
       }
 
       RIB << "AttributeEnd\n"
-	  << "WorldEnd\n"
-	  << "FrameEnd\n";
+          << "WorldEnd\n"
+          << "FrameEnd\n";
       frame ++;
    }
 
@@ -153,7 +153,7 @@ void RIBVisualizer::Render(const BodyPoint *P, std::ofstream &RIB) {
    Render(Mom, RIB);
 
    for (PointMap::const_iterator p = Mom->Points.begin();
-	p != Mom->Points.end(); p ++) {
+        p != Mom->Points.end(); p ++) {
       RIB << "TransformBegin\n";
       RIB << "Translate " << (((*p).second)->LocPos.x).value() << " " << (((*p).second)->LocPos.y).value() << " 0\n";      
       Render((const AnchorPoint *) ((*p).second), RIB);
@@ -163,7 +163,7 @@ void RIBVisualizer::Render(const BodyPoint *P, std::ofstream &RIB) {
 
 void RIBVisualizer::Render(const AnchorPoint *P, std::ofstream &RIB) {
    for (vector<BodyPoint *>::const_iterator p = P->AttachedPoints.begin();
-	p != P->AttachedPoints.end(); p ++) {
+        p != P->AttachedPoints.end(); p ++) {
       RIB << "TransformBegin\n";
       Render(*p, RIB);
       RIB << "TransformEnd\n";
@@ -185,23 +185,23 @@ void RIBVisualizer::Render(const RigidBody *B, std::ofstream &RIB) {
       break;
    case BODY_THINROD:
       RIB << "Rotate 90 0 1 0\n"
-	  << "Cylinder " << T->Radius << " " << -.5*T->Length << " " << .5*T->Length << " 360\n"
-	  << "Rotate -90 0 1 0\n";
+          << "Cylinder " << T->Radius << " " << -.5*T->Length << " " << .5*T->Length << " 360\n"
+          << "Rotate -90 0 1 0\n";
       break;
    case BODY_DISK:
       RIB << "Rotate 90 -1 0 0\n"
-	  << "Rotate 90 0 1 0\n"
-	  << "Cylinder " << D->Radius << " " << -.5*D->Height << " " << .5*D->Height << " 360\n"
-	  << "Disk " << .5*D->Height << " " << D->Radius << " 360\n"
-	  << "Rotate -90 0 1 0\n"
-	  << "Rotate -90 -1 0 0\n";
+          << "Rotate 90 0 1 0\n"
+          << "Cylinder " << D->Radius << " " << -.5*D->Height << " " << .5*D->Height << " 360\n"
+          << "Disk " << .5*D->Height << " " << D->Radius << " 360\n"
+          << "Rotate -90 0 1 0\n"
+          << "Rotate -90 -1 0 0\n";
       break;
    case BODY_CYLINDER:
       RIB << "Rotate 90 -1 0 0\n"
-	  << "Rotate 90 0 1 0\n"
-	  << "Cylinder " << C->Radius << " " << -.5*C->Height << " " << .5*C->Height << " 360\n"
-	  << "Rotate -90 0 1 0\n"
-	  << "Rotate -90 -1 0 0\n";
+          << "Rotate 90 0 1 0\n"
+          << "Cylinder " << C->Radius << " " << -.5*C->Height << " " << .5*C->Height << " 360\n"
+          << "Rotate -90 0 1 0\n"
+          << "Rotate -90 -1 0 0\n";
       break;
    default:
       cerr << "I don't know how to render RigidBody " << B->Name << "!\n";

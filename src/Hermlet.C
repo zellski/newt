@@ -14,7 +14,7 @@ Hermlet::Hermlet(Stage *const s, double from, double to) :
 }
 
 Hermlet::Hermlet(Stage *const s, double from, double to,
-		 double min, double max) :
+                 double min, double max) :
    Fun(s,from,to,min,max),
    xIx(S->claimVars(S->N*2+2)),
    cIx(S->claimCons(S->N*2)),
@@ -34,7 +34,7 @@ Hermlet::Hermlet(Stage *const s, DOF *const d, double from, double to) :
 }
 
 Hermlet::Hermlet(Stage *const s, DOF *const d, double from, double to,
-		 double min, double max) :
+                 double min, double max) :
    Fun(s,d,from,to,min,max),
    xIx(S->claimVars(S->N*2+2)),
    cIx(S->claimCons(S->N*2)),
@@ -203,65 +203,65 @@ void Hermlet::SnapShot(const adoublev &x, int slice, double t) {
       double waveScale = 1.0;
 
       while (n != S->N) {
-	 /* derive which local segment we're in */
-	 int i = slice / scale;
-	 /* and finally what local t to use in that segment */
-	 double tttt = ((slice % scale) + t) / scale;
+         /* derive which local segment we're in */
+         int i = slice / scale;
+         /* and finally what local t to use in that segment */
+         double tttt = ((slice % scale) + t) / scale;
 
-	 int six = lix + i*2 - 1;
+         int six = lix + i*2 - 1;
 
-//	 fprintf(stderr, "At slice/t (%d, %f) depth %d, i/tttt = (%d, %f), six = %d", slice, t, depth, i, tttt, six-xIx);
+//         fprintf(stderr, "At slice/t (%d, %f) depth %d, i/tttt = (%d, %f), six = %d", slice, t, depth, i, tttt, six-xIx);
 
-	 adouble lVal = 0, lDot = 0, lBis = 0;
+         adouble lVal = 0, lDot = 0, lBis = 0;
 
-	 /* first the right half of the relevant w1 */
-	 if (i != 0) {
-	    /* unless we're at the extreme left */
-	    lVal += x[six] * w1Val(tttt);
-	    lDot += x[six] * w1Dot(tttt);
-	    lBis += x[six] * w1Bis(tttt);
-//	    fprintf(stderr, "[%d]", six-xIx);
-	 } else {
-//	    fprintf(stderr, "{%d}", six-xIx);
-	 }
-	 six ++;
+         /* first the right half of the relevant w1 */
+         if (i != 0) {
+            /* unless we're at the extreme left */
+            lVal += x[six] * w1Val(tttt);
+            lDot += x[six] * w1Dot(tttt);
+            lBis += x[six] * w1Bis(tttt);
+//            fprintf(stderr, "[%d]", six-xIx);
+         } else {
+//            fprintf(stderr, "{%d}", six-xIx);
+         }
+         six ++;
 
-	 /* then the right half of the w2 */
+         /* then the right half of the w2 */
 
-	 lVal += x[six] * w2Val(tttt);
-	 lDot += x[six] * w2Dot(tttt);
-	 lBis += x[six] * w2Bis(tttt);
-//	 fprintf(stderr, "[%d]", six-xIx);
-	 six ++;
+         lVal += x[six] * w2Val(tttt);
+         lDot += x[six] * w2Dot(tttt);
+         lBis += x[six] * w2Bis(tttt);
+//         fprintf(stderr, "[%d]", six-xIx);
+         six ++;
 
-	 /* then left half of w1 */
-	 if (i != n-1) {
-	    lVal += x[six] * w1Val(tttt-1);
-	    lDot += x[six] * w1Dot(tttt-1);
-	    lBis += x[six] * w1Bis(tttt-1);
-//	    fprintf(stderr, "[%d]", six-xIx);
-	    six ++;
-	 } else {
-//	    fprintf(stderr, "{%d}", six-xIx);
-	 }
+         /* then left half of w1 */
+         if (i != n-1) {
+            lVal += x[six] * w1Val(tttt-1);
+            lDot += x[six] * w1Dot(tttt-1);
+            lBis += x[six] * w1Bis(tttt-1);
+//            fprintf(stderr, "[%d]", six-xIx);
+            six ++;
+         } else {
+//            fprintf(stderr, "{%d}", six-xIx);
+         }
 
-	 /* and finally left half of w2 */
-	 lVal += x[six] * w2Val(tttt-1);
-	 lDot += x[six] * w2Dot(tttt-1);
-	 lBis += x[six] * w2Bis(tttt-1);
+         /* and finally left half of w2 */
+         lVal += x[six] * w2Val(tttt-1);
+         lDot += x[six] * w2Dot(tttt-1);
+         lBis += x[six] * w2Bis(tttt-1);
 
-//	 fprintf(stderr, "[%d]\n", six-xIx);
+//         fprintf(stderr, "[%d]\n", six-xIx);
 
-	 waveScale *= sqrt(2.0);
+         waveScale *= sqrt(2.0);
 
-	 Val += lVal / waveScale;
-	 Dot += lDot / waveScale / (S->T/n);
-	 Bis += lBis / waveScale / (S->T/n * S->T/n);
+         Val += lVal / waveScale;
+         Dot += lDot / waveScale / (S->T/n);
+         Bis += lBis / waveScale / (S->T/n * S->T/n);
 
-	 depth ++;
-	 n <<= 1;
-	 scale >>= 1;
-	 lix += n;
+         depth ++;
+         n <<= 1;
+         scale >>= 1;
+         lix += n;
    }
 }
 
@@ -269,8 +269,8 @@ void Hermlet::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    if (cIx >= 0) {
       cerr << "Constraining Hermlet indices [" << cIx << " - " << cIx+4*S->N << "] to lie between [" << Min << " - " << Max << "]\n";
       for (int i = 0; i < S->N; i ++) {
-	 c.min[cIx+i*2+0] = Min; c.max[cIx+i*2+0] = Max;
-	 c.min[cIx+i*2+1] = Min; c.max[cIx+i*2+1] = Max;
+         c.min[cIx+i*2+0] = Min; c.max[cIx+i*2+0] = Max;
+         c.min[cIx+i*2+1] = Min; c.max[cIx+i*2+1] = Max;
       }
    }
    cerr << "Hermlet Constraints [" << Min << ", " << Max << "] -> [" << -(Max-Min)/S->h.value() << ", " << (Max-Min)/S->h.value() << "]\n";
@@ -288,14 +288,14 @@ void Hermlet::Evaluate(const adoublev &x, adoublev &c) {
    if (cIx >= 0) {
       for (int i = 0; i < S->N; i ++) {
 //      cerr << "Evaluating indices [" << (cIx+i*P+1) << " - " << (cIx+i*P+P) << "] as {";
-	 SnapShot(x, i, 0.2); c[cIx+i*2+0] = Val;
-	 SnapShot(x, i, 0.7); c[cIx+i*2+1] = Val;
+         SnapShot(x, i, 0.2); c[cIx+i*2+0] = Val;
+         SnapShot(x, i, 0.7); c[cIx+i*2+1] = Val;
       }
    }
 }
 
 void Hermlet::IntegrateFEM(adoublev &c, adouble qM, adouble qC,
-			   int slice, double t, double weight) const {
+                           int slice, double t, double weight) const {
    if (eIx < 0) {
       return;
    }

@@ -27,9 +27,9 @@ public:
    Stage *const S;
 
    ValConstraint(Stage *const s, int n, double loct, const adouble &watch,
-		 double min, double max);
+                 double min, double max);
    ValConstraint(Stage *const s, int n, double loct, const adouble &watch,
-		 double val);
+                 double val);
 
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
    void Evaluate(const adoublev &x, adoublev &c);
@@ -47,11 +47,11 @@ public:
    Stage *const S;
 
    VecConstraint(Stage *const s, int n, double loct, const AVec &watch,
-		 double minx, double maxx, double miny, double maxy);
+                 double minx, double maxx, double miny, double maxy);
    VecConstraint(Stage *const s, int n, double loct, const AVec &watch,
-		 double xval, double yval);
+                 double xval, double yval);
    VecConstraint(Stage *const s, int n, double loct, const AVec &watch,
-		 const AVec &diff);
+                 const AVec &diff);
 
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
    void Evaluate(const adoublev &x, adoublev &c);

@@ -1,5 +1,5 @@
 /*
-**	This is an N-limbed pendulum, stretching out.
+**        This is an N-limbed pendulum, stretching out.
 */
 
 # include <math.h>
@@ -23,7 +23,7 @@
 # include "GaussianIntegrator.h"
 
 # define LINKS 8
-# define PI	M_PI
+# define PI        M_PI
 
 void Snake::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec &c) {
    DOF *Angles[LINKS];
@@ -81,8 +81,8 @@ void Snake::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec
 }
 
 void Snake::update(int kk, 
-		    const adoublev &x, const adoublev &u,
-		    adoublev &f, adouble &f0, adoublev &c) {
+                    const adoublev &x, const adoublev &u,
+                    adoublev &f, adouble &f0, adoublev &c) {
    W->Update(x, c, f0);
 }
 

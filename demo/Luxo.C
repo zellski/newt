@@ -1,5 +1,5 @@
 /*
-**	This is a model of Luxo, the hopping desk lamp.
+**        This is a model of Luxo, the hopping desk lamp.
 */
 
 # include <math.h>
@@ -22,11 +22,11 @@
 # include "SimpsonIntegrator.h"
 # include "GaussianIntegrator.h"
 
-# define PI	M_PI
+# define PI        M_PI
 
-# define BETA_REST	 3*PI/11
-# define GAMMA_REST	-6*PI/11
-# define DELTA_REST	-1*PI/11
+# define BETA_REST         3*PI/11
+# define GAMMA_REST        -6*PI/11
+# define DELTA_REST        -1*PI/11
 
 # define STAGE_PIECES 6
 # define LEAP_LENGTH 2.0
@@ -152,8 +152,8 @@ void Luxo::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec 
 
 
 void Luxo::update(int kk, 
-		  const adoublev &x, const adoublev &u,
-		  adoublev &f, adouble &f0, adoublev &c) {
+                  const adoublev &x, const adoublev &u,
+                  adoublev &f, adouble &f0, adoublev &c) {
    W->Update(x, c, f0);
 }
 

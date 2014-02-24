@@ -1,5 +1,5 @@
 /*
-**	This is an N-limbed pendulum, stretching out.
+**        This is an N-limbed pendulum, stretching out.
 */
 
 # include <math.h>
@@ -22,7 +22,7 @@
 # include "PWL.h"
 # include "GaussianIntegrator.h"
 
-# define PI	M_PI
+# define PI        M_PI
 
 void Trivial::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec &c) {
    DOF *alpha;
@@ -61,8 +61,8 @@ void Trivial::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableV
 }
 
 void Trivial::update(int kk, 
-		    const adoublev &x, const adoublev &u,
-		    adoublev &f, adouble &f0, adoublev &c) {
+                    const adoublev &x, const adoublev &u,
+                    adoublev &f, adouble &f0, adoublev &c) {
    W->Update(x, c, f0);
 }
 

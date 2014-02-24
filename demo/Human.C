@@ -1,5 +1,5 @@
 /*
-**	This is a model of Human, the hopping desk lamp.
+**        This is a model of Human, the hopping desk lamp.
 */
 
 # include <math.h>
@@ -22,7 +22,7 @@
 # include "Hermlet.h"
 # include "GaussianIntegrator.h"
 
-# define PI	M_PI
+# define PI        M_PI
 
 void Human::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec &c) {
     W = new World(-9.81);
@@ -218,8 +218,8 @@ void Human::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec
 
 
 void Human::update(int kk, 
-		  const adoublev &x, const adoublev &u,
-		  adoublev &f, adouble &f0, adoublev &c) {
+                  const adoublev &x, const adoublev &u,
+                  adoublev &f, adouble &f0, adoublev &c) {
    W->Update(x, c, f0);
 }
 
