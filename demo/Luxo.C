@@ -15,6 +15,8 @@
 # include "Constant.h"
 # include "Impulse.h"
 # include "Single.h"
+# include "PWL.h"
+# include "Hat.h"
 # include "Hermite.h"
 # include "Hermlet.h"
 # include "SimpsonIntegrator.h"
@@ -26,15 +28,16 @@
 # define GAMMA_REST	-6*PI/11
 # define DELTA_REST	-1*PI/11
 
-# define STAGE_PIECES 8
-# define LEAP_LENGTH 1.0
+# define STAGE_PIECES 6
+# define LEAP_LENGTH 2.0
+# define LEAP_TIME sqrt(1.5 * LEAP_LENGTH / -W->G)
 
 void Luxo::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec &c) {
    W = new World(-9.81);
 
-   // Integrator *i = new SimpsonIntegrator(25);
+    Integrator *i = new SimpsonIntegrator(25);
 //   Integrator *i = new GaussianIntegrator(10);
-   Integrator *i = new GaussianIntegrator(10);
+//   Integrator *i = new GaussianIntegrator(5);
 
    // Luxo has six degrees of freedom
    DOF *X = new DOF(W, "X");
@@ -74,9 +77,9 @@ void Luxo::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec 
 
    Stage *S1 = new Stage(W, i, STAGE_PIECES, .2);
 
-   new Muscle(S1, Beta,  new Hermite(S1), 2);
-   new Muscle(S1, Gamma, new Hermite(S1), 1);
-   new Muscle(S1, Delta, new Hermite(S1), 2);
+   new Muscle(S1, Beta,  new PWL(S1), 2);
+   new Muscle(S1, Gamma, new PWL(S1), 1);
+   new Muscle(S1, Delta, new PWL(S1), 2);
 
    // and Luxo is nailed to the floor so he can gather leap-momentum
    new Constant(S1, X, -LEAP_LENGTH/2.0);
@@ -95,11 +98,11 @@ void Luxo::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec 
    new ValConstraint(S1, 0, 0, Delta->qDot, 0);
 
    // In the second stage, Luxo flies -- this can take longer,
-   Stage *S2 = new Stage(W, i, STAGE_PIECES * 2, .3);
+   Stage *S2 = new Stage(W, i, STAGE_PIECES * 2, LEAP_TIME);
 
-   new Muscle(S2, Beta, new Hermite(S2), 2);
-   new Muscle(S2, Gamma, new Hermite(S2), 1);
-   new Muscle(S2, Delta, new Hermite(S2), 2);
+   new Muscle(S2, Beta, new PWL(S2), 2);
+   new Muscle(S2, Gamma, new PWL(S2), 1);
+   new Muscle(S2, Delta, new PWL(S2), 2);
 
    // and the base position is now variable.
    new Hermite(S2, X, -LEAP_LENGTH/2.0, LEAP_LENGTH/2.0);
@@ -118,9 +121,9 @@ void Luxo::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec 
    // In stage three, Luxo has landed, and must now stabilize
    Stage *S3 = new Stage(W, i, STAGE_PIECES, .2);
 
-   new Muscle(S3, Beta, new Hermite(S3), 2);
-   new Muscle(S3, Gamma, new Hermite(S3), 1);
-   new Muscle(S3, Delta, new Hermite(S3), 2);
+   new Muscle(S3, Beta, new PWL(S3), 2);
+   new Muscle(S3, Gamma, new PWL(S3), 1);
+   new Muscle(S3, Delta, new PWL(S3), 2);
 
    // with the nail once again nailed down, elsewhere.
    new Constant(S3, X, LEAP_LENGTH/2.0);
