@@ -61,9 +61,7 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
       ABis += Angle->qBis;
    }
 
-   sinVal = sin(AVal); cosVal = cos(AVal);
-
-   AVec RIB = rotated(Entry->LocPos);
+   AVec RIB = Entry->LocPos.rotated(AVal);
    AVec FIB = RIB.flipped();
 
    rVal = Entry->Val - RIB;
@@ -104,7 +102,7 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
         p != Points.end(); p ++) {
       BodyPoint *P = ((*p).second);
 //      cerr << "Fiddling with point " << P->Name << "...\n";
-      AVec ROB = rotated(P->LocPos);
+      AVec ROB = P->LocPos.rotated(AVal);
       AVec FOB = ROB.flipped();
 
       P->Val = rVal + ROB;

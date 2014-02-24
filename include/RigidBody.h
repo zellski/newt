@@ -29,8 +29,6 @@ public:
    adouble  FVal, JVal;
    AVec     TotF, TotJ;
 
-   adouble sinVal, cosVal;
-
    RigidBody(World *const w, const char *const S, DOF *const d,
              double M, double rog2) :
       W(w),
@@ -50,8 +48,4 @@ public:
    void BuildSweep(const adoublev &x, const BodyPoint *const Entry);
 
    void DistImpulse(const adoublev &x);
-
-   AVec rotated(const AVec &a) {
-      return AVec(cosVal*a.x - sinVal*a.y, sinVal*a.x + cosVal*a.y);
-   }
 };  
