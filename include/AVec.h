@@ -16,6 +16,10 @@ class AVec {
   void zero();
   void set(const adouble&, const adouble&);
 
+  AVec flipped() const {
+     return AVec(-y, x);
+  }
+
   AVec& operator = (const AVec&);
   AVec& operator += (const AVec&);
   AVec& operator -= (const AVec&);

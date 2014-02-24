@@ -51,12 +51,7 @@ public:
 
    void DistImpulse(const adoublev &x);
 
-   void RotateInto(const AVec &a, AVec &b) {
-      b.x =  cosVal*a.x - sinVal*a.y;
-      b.y =  sinVal*a.x + cosVal*a.y;
-   }
-   void FlipInto(const AVec &a, AVec &b) {
-      b.x = -a.y;
-      b.y =  a.x;
+   AVec rotated(const AVec &a) {
+      return AVec(cosVal*a.x - sinVal*a.y, sinVal*a.x + cosVal*a.y);
    }
 };  

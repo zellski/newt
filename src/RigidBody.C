@@ -29,8 +29,6 @@ void RigidBody::CleanSweep() {
 }
 
 void RigidBody::DistImpulse(const adoublev &x) {
-   AVec tmp;
-
    JVal = 0;
    TotJ.zero();
 
@@ -46,21 +44,17 @@ void RigidBody::DistImpulse(const adoublev &x) {
          TotJ += R->TotJ;
          JVal += R->JVal;
       }
-      FlipInto(P->Val, tmp);
-      JVal += P->TotJ * tmp;
+      JVal += P->TotJ * P->Val.flipped();
       TotJ += P->TotJ;
 //      cerr << "Added JVal " << P->TotJ*tmp << " and TotJ " << P->TotJ << "\n";
    }
-   Angle->JVal += JVal - tmp*TotJ;
+   // FIXME: What the hell is tmp supposed to be here? Entry->Val.flipped() probably?
+   assert(false);
+//   Angle->JVal += JVal - tmp*TotJ;
 //   cerr << "Finally, Angle->Jval: " << JVal - tmp*TotJ << "...\n";
 }
 
-
 void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
-   AVec RIB, FIB, ROB, FOB;
-   AVec dVal, dDot;
-   AVec tmp;
-
    AVal += Angle->qVal;
    ADot += Angle->qDot;
    if (W->ImplicitMuscles) {
@@ -69,8 +63,8 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
 
    sinVal = sin(AVal); cosVal = cos(AVal);
 
-   RotateInto(Entry->LocPos, RIB);
-   FlipInto(RIB, FIB);
+   AVec RIB = rotated(Entry->LocPos);
+   AVec FIB = RIB.flipped();
 
    rVal = Entry->Val - RIB;
    rDot = Entry->Dot - ADot*FIB;
@@ -83,10 +77,10 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
       PDot = ABis * Mass * ROG2;
    }
 
-   FlipInto(rVal, tmp);
-   UVal = Mass * (rDot*tmp);
+   AVec rValFlip = rVal.flipped();
+   UVal = Mass * (rDot*rValFlip);
    if (W->ImplicitMuscles) {
-      UDot = Mass * (rBis*tmp);
+      UDot = Mass * (rBis*rValFlip);
    }
 
    KVal = Mass * rVal;
@@ -110,8 +104,8 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
         p != Points.end(); p ++) {
       BodyPoint *P = ((*p).second);
 //      cerr << "Fiddling with point " << P->Name << "...\n";
-      RotateInto(P->LocPos, ROB);
-      FlipInto(ROB, FOB);
+      AVec ROB = rotated(P->LocPos);
+      AVec FOB = ROB.flipped();
 
       P->Val = rVal + ROB;
       P->Dot = rDot + ADot*FOB;
@@ -149,27 +143,24 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
             UDot += R->UDot;
          }
       }
-      FlipInto(P->Val, tmp);
-      FVal += P->TotF * tmp;
+      FVal += P->TotF * P->Val.flipped();
       TotF += P->TotF;
    }
 
 //   cerr << "Done with recursion for " << Name << " ...";
 
-   tmp = KVal - TotM*Entry->Val;
-   FlipInto(tmp, dVal);
+   AVec dVal = (KVal - TotM*Entry->Val).flipped();
 
-   FlipInto(Entry->Dot, tmp);
-   Angle->qCurvature = W->G*dVal.y - tmp*KDot;
+   Angle->qCurvature = W->G*dVal.y - Entry->Dot.flipped()*KDot;
 
-   FlipInto(Entry->Val, tmp);
-   Angle->qMomentum = UVal + PVal - tmp*KDot;
+   AVec entryValFlip = Entry->Val.flipped();
+   Angle->qMomentum = UVal + PVal - entryValFlip*KDot;
    if (W->ImplicitMuscles) {
-      Angle->QVal += UDot + PDot - tmp*KBis - W->G*dVal.y;
+      Angle->QVal += UDot + PDot - entryValFlip*KBis - W->G*dVal.y;
    }
 //   if (FVal - tmp*TotF != 0) {
 //      cerr << "FORCE: " << FVal - tmp*TotF << "\n";
 //   }
-   Angle->QVal += FVal - tmp*TotF;
+   Angle->QVal += FVal - entryValFlip*TotF;
 //   cerr << "Done!\n";
 }
