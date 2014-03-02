@@ -49,9 +49,8 @@ void Trivial::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableV
    new Constant(S1, X, 0);
    new Constant(S1, Y, 0);
 
-   if (!W->ImplicitMuscles) {
-      new Muscle(S1, alpha, new PWL(S1));
-   }
+   new Muscle(S1, alpha, new PWL(S1));
+
    new Hermlet(S1, alpha, -PI/2, PI/2);
    new ValConstraint(S1, 0, 0, alpha->qVal, -PI/2);
    new ValConstraint(S1, 0, 0, alpha->qDot, 0);

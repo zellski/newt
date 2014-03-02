@@ -24,7 +24,7 @@ public:
    const char *const Name;
    vector<BodyPoint *> AttachedPoints;
    AVec TotF, TotJ;
-   AVec Val, Dot, Bis;
+   AVec Val, Dot;
 
    AnchorPoint(const char *const S);
 

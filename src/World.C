@@ -10,7 +10,6 @@ World::World(double g, bool MuscleFlag) :
    DOFs(),
    Stages(),
    xIx(0), cIx(0),
-   ImplicitMuscles(MuscleFlag),
    G(g)
 {};
 

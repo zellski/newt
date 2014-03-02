@@ -21,11 +21,11 @@ public:
    PointMap Points;
 
    double TotM;
-   adouble  UVal, UDot;
-   adouble  PVal, PDot;
-   AVec     KVal, KDot, KBis;
-   AVec     rVal, rDot, rBis;
-   adouble  AVal, ADot, ABis;
+   adouble  UVal;
+   adouble  PVal;
+   AVec     KVal, KDot;
+   AVec     rVal, rDot;
+   adouble  AVal, ADot;
    adouble  FVal, JVal;
    AVec     TotF, TotJ;
 

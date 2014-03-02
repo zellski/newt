@@ -57,35 +57,20 @@ void RigidBody::DistImpulse(const adoublev &x) {
 void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
    AVal += Angle->qVal;
    ADot += Angle->qDot;
-   if (W->ImplicitMuscles) {
-      ABis += Angle->qBis;
-   }
 
    AVec RIB = Entry->LocPos.rotated(AVal);
    AVec FIB = RIB.flipped();
 
    rVal = Entry->Val - RIB;
    rDot = Entry->Dot - ADot*FIB;
-   if (W->ImplicitMuscles) {
-      rBis = Entry->Bis - ABis*FIB + ADot*ADot*RIB;
-   }
 
    PVal = ADot * Mass * ROG2;
-   if (W->ImplicitMuscles) {
-      PDot = ABis * Mass * ROG2;
-   }
 
    AVec rValFlip = rVal.flipped();
    UVal = Mass * (rDot*rValFlip);
-   if (W->ImplicitMuscles) {
-      UDot = Mass * (rBis*rValFlip);
-   }
 
    KVal = Mass * rVal;
    KDot = Mass * rDot;
-   if (W->ImplicitMuscles) {
-      KBis = Mass * rBis;
-   }
 
    FVal = 0;
    TotF.zero();
@@ -93,10 +78,6 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
    TotM = Mass;
 
 //   cerr << "Body " << Name << ": Pass 1...";
-
-   if (W->ImplicitMuscles) {
-      Angle->QVal = 0;
-   }
 
    for (PointMap::const_iterator p = Points.begin();
         p != Points.end(); p ++) {
@@ -107,9 +88,6 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
 
       P->Val = rVal + ROB;
       P->Dot = rDot + ADot*FOB;
-      if (W->ImplicitMuscles) {
-         P->Bis = rBis + ABis*FOB - ADot*ADot*ROB;
-      }
 
       for (vector<BodyPoint *>::const_iterator Q = P->AttachedPoints.begin();
            Q != P->AttachedPoints.end(); Q ++) {
@@ -117,29 +95,20 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
 
          (*Q)->Val = P->Val;
          (*Q)->Dot = P->Dot;
-         if (W->ImplicitMuscles) {
-            (*Q)->Bis = P->Bis;
-         }
 
-         R->AVal = AVal; R->ADot = ADot; R->ABis = ABis;
+         R->AVal = AVal; R->ADot = ADot;
 
          R->BuildSweep(x, *Q);
 
          KVal += R->KVal;
          KDot += R->KDot;
-         if (W->ImplicitMuscles) {
-            KBis += R->KBis;
-         }
+
          TotM += R->TotM;
          TotF += R->TotF;
          FVal += R->FVal;
 
          PVal += R->PVal;
          UVal += R->UVal;
-         if (W->ImplicitMuscles) {
-            PDot += R->PDot;
-            UDot += R->UDot;
-         }
       }
       FVal += P->TotF * P->Val.flipped();
       TotF += P->TotF;
@@ -153,9 +122,6 @@ void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {
 
    AVec entryValFlip = Entry->Val.flipped();
    Angle->qMomentum = UVal + PVal - entryValFlip*KDot;
-   if (W->ImplicitMuscles) {
-      Angle->QVal += UDot + PDot - entryValFlip*KBis - W->G*dVal.y;
-   }
 //   if (FVal - tmp*TotF != 0) {
 //      cerr << "FORCE: " << FVal - tmp*TotF << "\n";
 //   }

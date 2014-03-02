@@ -16,7 +16,6 @@ void DOF::SnapShot(const adoublev &x, int ival, int slice, double t) {
    DOFReps[ival]->SnapShot(x, slice, t);
    qVal = DOFReps[ival]->Val;
    qDot = DOFReps[ival]->Dot;
-   qBis = DOFReps[ival]->Bis;
 //   cerr << "SnapShot: [ " << qVal << ", " << qDot << ", " << qBis << " ]\n";
    QVal = JVal = 0;
 }

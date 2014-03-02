@@ -20,8 +20,6 @@ public:
 
    const double G;
 
-   const bool ImplicitMuscles;
-
    World(double g, bool implicit = false);
 
    void Update(const adoublev &x, adoublev &c, adouble &f0);

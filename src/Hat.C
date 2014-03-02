@@ -14,7 +14,7 @@ Hat::Hat(Stage *const s, DOF *const d, double from, double to,
          double min, double max) :
    Fun(s,d,from,to,min,max),
    xIx(S->claimVars(S->N+1)),
-   eIx(S->W->ImplicitMuscles ? -1 : S->claimCons(S->N-1))
+   eIx(S->claimCons(S->N-1))
 {}
 
 double Hat::sVal(int width, int depth, double t) const {

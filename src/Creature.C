@@ -48,7 +48,6 @@ void Creature::BuildSweep(const adoublev &x) {
 
    Val.x = X->qVal; Val.y = Y->qVal;
    Dot.x = X->qDot; Dot.y = Y->qDot;
-   Bis.x = X->qBis; Bis.y = Y->qBis;
 
    FlippedVal.x = -Val.y;
    FlippedVal.y =  Val.x;
@@ -63,9 +62,8 @@ void Creature::BuildSweep(const adoublev &x) {
 
       (*Q)->Val = Val;
       (*Q)->Dot = Dot;
-      (*Q)->Bis = Bis;
 
-      R->AVal = 0; R->ADot = 0; R->ABis = 0;
+      R->AVal = 0; R->ADot = 0;
 
       R->BuildSweep(x, *Q);
 

@@ -58,10 +58,8 @@ void Snake::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec
    new Constant(S1, X, 0);
    new Constant(S1, Y, 0);
 
-   if (!W->ImplicitMuscles) {
-      for (int i = 0; i < LINKS; i ++) {
-         new Muscle(S1, Angles[i], new PWL(S1), 1/(i+1));
-      }
+   for (int i = 0; i < LINKS; i ++) {
+       new Muscle(S1, Angles[i], new PWL(S1), 1/(i+1));
    }
    new Hat(S1, Angles[0], -PI/2, PI/2, -PI, PI);
    for (int i = 1; i < LINKS; i ++) {

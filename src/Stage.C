@@ -182,12 +182,7 @@ void Stage::FEMPoint(const int slice, const double t, const double weight,
     for (vector<DOF *> :: const_iterator p = W->DOFs.begin();
          p != W->DOFs.end(); p++) {
         adouble qC = (*p)->qCurvature;
-        if (!W->ImplicitMuscles) {
-            qC += (*p)->QVal;
-        } else {
-            adouble foo = (*p)->QVal;
-            f0 += weight * h * foo * foo;
-        }
+        qC += (*p)->QVal;
         adouble qM = (*p)->qMomentum;
 
 # if 0

@@ -17,9 +17,9 @@ public:
    map<int, Fun *, less<int> > DOFReps;
    const char *const Name;
 
-   adouble qVal, qDot, qBis;                // we fill these in during SnapShot
-   adouble qMomentum, qCurvature;        // this is the SnapShot end product
-   adouble QVal, JVal;                        // force + impulse
+   adouble qVal, qDot;                  // we fill these in during SnapShot
+   adouble qMomentum, qCurvature;       // this is the SnapShot end product
+   adouble QVal, JVal;                  // force + impulse
 
    DOF(World *w, const char *S);
 

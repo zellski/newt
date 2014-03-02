@@ -26,7 +26,7 @@ Hermite::Hermite(Stage *const s, DOF *const d, double from, double to) :
    Fun(s,d,from,to),
    xIx(S->claimVars(S->N*2+2)),
    cIx(-1),
-   eIx(S->W->ImplicitMuscles ? -1 : S->claimCons(S->N*2))
+   eIx(S->claimCons(S->N*2))
 {}
 
 Hermite::Hermite(Stage *const s, DOF *const d, double from, double to,
@@ -34,7 +34,7 @@ Hermite::Hermite(Stage *const s, DOF *const d, double from, double to,
    Fun(s,d,from,to,min,max),
    xIx(S->claimVars(S->N*2+2)),
    cIx(S->claimCons(S->N*2)),
-   eIx(S->W->ImplicitMuscles ? -1 : S->claimCons(S->N*2))
+   eIx(S->claimCons(S->N*2))
 {
    S->Register((Constraint *) this);
 }
