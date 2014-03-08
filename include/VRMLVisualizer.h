@@ -11,8 +11,6 @@ class AnchorPoint;
 class RigidBody;
 
 class VRMLVisualizer {
-public:
-   const World *W;
 private:
    static void Render(const Creature *P, ofstream &VRML);
 

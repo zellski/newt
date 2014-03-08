@@ -12,8 +12,6 @@ class AnchorPoint;
 class RigidBody;
 
 class RIBVisualizer {
-public:
-   const World *W;
 private:
    static void Render(const Creature *P, std::ofstream &RIB);
 
