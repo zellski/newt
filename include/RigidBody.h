@@ -47,5 +47,5 @@ public:
    void CleanSweep();
    void BuildSweep(const adoublev &x, const BodyPoint *const Entry);
 
-   void DistImpulse(const adoublev &x);
+   void DistImpulse(const adoublev &x, const BodyPoint *const Entry);
 };  
