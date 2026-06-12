@@ -137,5 +137,5 @@ consuming it -- with scrubbers for both animation time and optimizer
 iteration -- is planned (see GitHub issue #3). The old RIBVisualizer
 source remains in the tree but is no longer invoked.
 
-P�r Winzell
+Pär Winzell
 zell@alyx.com
