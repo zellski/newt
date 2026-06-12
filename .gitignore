@@ -1,3 +1,7 @@
+/runs/
+/newt.db
+/newt.db-wal
+/newt.db-shm
 demo/*.o
 src/*.o
 src/libnewt.so
@@ -12,3 +16,5 @@ tests/test_quadrature
 tests/test_dynamics
 tests/*.dSYM/
 demo/ADOLC-*.tap
+tests/test_specparser
+tests/test_recorder

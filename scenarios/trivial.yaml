@@ -1,0 +1,22 @@
+# Port of demo/Trivial.C: a muscle-driven pendulum swinging from
+# hanging (-pi/2) to inverted (+pi/2) in two seconds, zero gravity.
+name: Trivial
+creature: creatures/pendulum.creature.yaml
+gravity: 0
+integrator: { type: gauss, n: 5 }
+stages:
+  - name: S1
+    pieces: 32
+    duration: 2
+    muscles:
+      - { dof: LinkAngle, weight: 1 }
+    reps:
+      - { dof: X, type: constant, value: 0 }
+      - { dof: Y, type: constant, value: 0 }
+      - { dof: LinkAngle, type: hermlet,
+          from: -1.5707963267948966, to: 1.5707963267948966 }   # -pi/2 -> pi/2
+    constraints:
+      - { dof: LinkAngle, quantity: q,    at: start, equals: -1.5707963267948966 }
+      - { dof: LinkAngle, quantity: qdot, at: start, equals: 0 }
+      - { dof: LinkAngle, quantity: q,    at: end,   equals: 1.5707963267948966 }
+      - { dof: LinkAngle, quantity: qdot, at: end,   equals: 0 }

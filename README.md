@@ -30,13 +30,7 @@ and is distributed under the Gnu Library General Public License. Compile and ins
 
 Next, type 'make' in the newt/src subdirectory. If all goes well, the code will compile and turn into a library called libnewt.so. If not, you'll have to tinker a bit with src/Makefile.
 
-Finally, 'make' in the newt/demo subdirectory. This will compile a number of example creatures/scenarios into a binary called 'odc' which is then run through a TCL program called 'run'. Yes, a TCL installation is needed, but if you've installed HQP as per above, you already know that.
-
-- - -
-
-The code outputs RenderMan format and you will need a renderer for it. For a summary of such programs, see:
-
-    http://www.faqs.org/faqs/graphics/renderman-faq/
+Finally, 'make' in the newt/demo subdirectory. This builds the solver binary 'odc', which is driven through a Tcl program called 'run'. Yes, a Tcl installation is needed, but if you've installed HQP as per above, you already know that. The system sqlite3 library is also linked (present out of the box on macOS and most Linuxes); the YAML parser (fkYAML) is vendored under include/vendor.
 
 
 ## Tests
@@ -54,39 +48,82 @@ they run anywhere:
 
 In the newt/demo subdirectory, typing e.g.
 
-    ./run Luxo 2>debugout
+    ./run ../scenarios/luxo.yaml
 
-will execute the Luxo module properly, through Tcl.
+solves the Luxo scenario. An optional second argument caps the SQP
+iteration count. Every run gets a private scratch directory under
+newt/runs/ (ADOL-C drops fixed-name tape files into the cwd, so
+concurrent runs need the isolation -- and with it, you can launch
+several runs at once, e.g. for multi-start experiments).
 
-Output ends up in the newt/res subdirectory. Several files are written there each iteration and can be investigated to visualize the optimization process. The RenderMan output ends up in the file
+Results land in a per-project SQLite database, newt.db at the repo
+root (override with the NEWT_DB environment variable). One row per
+run, one row per accepted SQP iterate: objective, infeasibility, the
+raw optimizer vector x, and the DOF trajectories sampled on a
+record_dt grid -- so the whole history of how a motion converged is
+queryable:
 
-	newt/res/snapshot.dat
+    sqlite3 newt.db "SELECT id, scenario_name, status, final_iter FROM runs"
+    sqlite3 newt.db "SELECT k, objective, infeasibility FROM iterations WHERE run_id = 3"
 
-and using e.g. the Blue Moon Rendering Tools (BMRT), you display it with e.g.
+Trajectory frames and x live as little-endian float64 blobs (times,
+frames, x columns); dof_names and stage_bounds are JSON. The scenario
+and creature YAML are snapshotted into the runs row, so a database is
+self-describing. Multiple processes can write concurrently (WAL mode),
+and readers never block -- a viewer can follow a run live.
 
-	rgl snapshot.dat
+## Scenario Files
 
-The other files are on the pattern
+Scenarios live in newt/scenarios as two YAML files: a creature (the
+body plan) and a scenario (everything else), referencing the creature
+by relative path. The five thesis demos there double as schema
+documentation; in brief:
 
-	qAlphaDat.m		    DOF values over the interval
-	qAlphaDotDat.m		DOF rate of change
-	QAlphaDat.m		    Muscle values over the interval
-	qCAlphaDat.m		Inertial terms associated with this DOF
-	qMAlphaDat.m		Generalized momentum relative to this DOF
+A creature file has `name`, `root: {x, y, attach}` (the anchor's two
+positional DOF names and the Body.Point it grabs), `bodies` (a
+sequence -- `type: sphere|rod|disk|cylinder`, a `dof` name, dimensions
+`radius`/`length`/`height` and `density` as the type requires, and
+named `points` in body coordinates), and `attachments` (parent/child
+Body.Point pairs forming the tree).
 
-for a DOF named "Alpha"; other files are written for other DOF.
+A scenario file has `name`, `creature`, `gravity`, `integrator:
+{type: simpson|gauss, n}`, optional `record_dt` (default 0.01), and
+`stages`. Each stage: `pieces`, `duration` (a number, or `{min, max,
+start}` to make the duration an optimizer variable), `muscles`
+(`{dof, weight}`), `reps` (exactly one per DOF: `{dof, type:
+constant|hermite|hermlet|hat, value | from/to [, min/max]}`),
+plus optional nested `impulses` (`{point, direction: [x, y]}`, add
+`magnitude` to fix it instead of letting the optimizer choose) and
+`constraints` (`{dof, quantity: q|qdot, at: start|end|{slice, t},
+equals | min/max}`). Top-level `impulses` and `constraints` (with a
+`stage` key) and `links: [[A, B], ...]` (inter-stage continuity +
+impulse handling) round it off.
 
-The first three can be quite useful for visualisation. The format is constructed to work with Gnu Octave. It is quite possible they also work with Matlab.
+One sharp edge worth knowing: construction order follows document
+order, and optimizer variable indices follow construction order. The
+shipped scenarios reproduce their C++ ancestors' iteration tables
+bit-for-bit because their collections are listed in the original
+construction order. Reordering entries changes nothing mathematically
+but can perturb the optimizer's path.
+
+Validation is strict -- unknown keys, missing DOF representations,
+dangling references and non-power-of-two Hermlet stages are all
+rejected with a path to the offending entry.
 
 ## Roll Your Own
 
-Basically, the examples in the newt/demo subdirectory should explain how togo about configuring your own scenarios. Unfortunately, there are numerous disclaimers and caveats in the current implementation. The whole optimization business is tricky to say the least; sometimes the process feels more like black magic than science. I suggest slowly modifying one of the examples in a direction you wish to go and emailing me if there are difficulties.
+The scenarios in newt/scenarios should explain how to go about
+configuring your own. Unfortunately, there are numerous disclaimers
+and caveats in the current implementation. The whole optimization
+business is tricky to say the least; sometimes the process feels more
+like black magic than science. I suggest slowly modifying one of the
+examples in a direction you wish to go.
 
 A few hints:
 
 * Variable bounds are -essential- for keeping the optimization process on a sane track. Without bounds, the search-space is just too large and too chaotic. At the very least, add bounds that you -know- won't be broken, such as e.g. -10PI < AngularDOF < 10PI.
 
-* The initial values are likewise essential. These are supplied to the constructor of e.g. Hermite() and currently only linear interpolation is supported. The initial values determine where in the search-space the optimization process starts, which in turn entirely determines how it perceives the search space. Different initial values will very often lead to different solutions. Remember that there is no such thing as practical -global- optimization.
+* The initial values are likewise essential. These are the from/to fields of a representation, and currently only linear interpolation between them is supported. The initial values determine where in the search-space the optimization process starts, which in turn entirely determines how it perceives the search space. Different initial values will very often lead to different solutions. Remember that there is no such thing as practical -global- optimization.
 
 * In most cases, keeping stages short helps convergence; alternatively, turn off gravity while experimenting. Long stages and high gravity makes for a chaotic search-space. Short stages removes potential fancy motions from consideration.
 
@@ -94,11 +131,11 @@ A few hints:
 
 ## Rendering
 
-I have included a subdirectory newt/res/RENDER in the distribution, with a makefile in it that assumes the existance of the BMRT renderer as well as the 'transcode' utility:
-
-    http://www.theorie.physik.uni-goettingen.de/~ostreich/transcode/
-
-By default, it generates a MPEG4 stream, which most modern computers can view and which has excellent compression.
+The original RenderMan/Octave file output is retired; everything a
+visualizer needs now lives in the run database. A web-based viewer
+consuming it -- with scrubbers for both animation time and optimizer
+iteration -- is planned (see GitHub issue #3). The old RIBVisualizer
+source remains in the tree but is no longer invoked.
 
 P�r Winzell
 zell@alyx.com

@@ -1,0 +1,79 @@
+# The planar human of demo/Human.C: rod torso, one arm (upper, lower,
+# sphere hand), one leg (upper, lower), rod neck, sphere head. The
+# creature anchor grabs the bottom of the lower leg.
+name: Creature
+root: { x: X, y: Y, attach: LL.LLBot }
+bodies:
+  - name: Torso
+    type: rod
+    dof: TorsoAngle
+    length: 0.60
+    radius: 0.08
+    points:
+      - { name: TorsoMid, at: [0, 0] }
+      - { name: TorsoTop, at: [0.30, 0] }
+      - { name: TorsoBot, at: [-0.30, 0] }
+      - { name: TorsoShoulder, at: [0.25, 0] }
+  - name: UA
+    type: rod
+    dof: UAAngle
+    length: 0.30
+    radius: 0.06
+    points:
+      - { name: UATop, at: [0.15, 0.0] }
+      - { name: UABot, at: [-0.15, 0.0] }
+  - name: LA
+    type: rod
+    dof: LAAngle
+    length: 0.20
+    radius: 0.04
+    points:
+      - { name: LATop, at: [0.10, 0.0] }
+      - { name: LABot, at: [-0.10, 0.0] }
+  - name: RHand
+    type: sphere
+    dof: RHandAngle
+    radius: 0.06
+    density: 0.5
+    points:
+      - { name: RHandTop, at: [0.08, 0.0] }
+  - name: UL
+    type: rod
+    dof: ULAngle
+    length: 0.50
+    radius: 0.06
+    points:
+      - { name: ULTop, at: [0.25, 0.0] }
+      - { name: ULBot, at: [-0.25, 0.0] }
+  - name: LL
+    type: rod
+    dof: LLAngle
+    length: 0.40
+    radius: 0.04
+    points:
+      - { name: LLTop, at: [0.20, 0.0] }
+      - { name: LLBot, at: [-0.20, 0.0] }
+  - name: Neck
+    type: rod
+    dof: NeckAngle
+    length: 0.30
+    radius: 0.04
+    points:
+      - { name: NeckTop, at: [0.15, 0.0] }
+      - { name: NeckBot, at: [-0.15, 0.0] }
+  - name: Head
+    type: sphere
+    dof: HeadAngle
+    radius: 0.10
+    points:
+      - { name: HeadBot, at: [0.05, 0.0] }
+attachments:
+  # note the directions: the upper leg hangs the torso, the lower leg
+  # hangs the upper leg -- the creature is rooted at the foot
+  - { parent: Torso.TorsoShoulder, child: UA.UATop }
+  - { parent: UA.UABot, child: LA.LATop }
+  - { parent: LA.LABot, child: RHand.RHandTop }
+  - { parent: UL.ULTop, child: Torso.TorsoBot }
+  - { parent: LL.LLTop, child: UL.ULBot }
+  - { parent: Torso.TorsoTop, child: Neck.NeckBot }
+  - { parent: Neck.NeckTop, child: Head.HeadBot }
