@@ -1,3 +1,7 @@
+/runs/
+/newt.db
+/newt.db-wal
+/newt.db-shm
 demo/*.o
 src/*.o
 src/libnewt.so

@@ -1,63 +1,65 @@
 #!./odc
 #
-# rf, 2/7/97
+# NewT run driver: per-run scratch isolation + SQLite iterate recording.
 #
+#   ./run <scenario.yaml | ProgramClass> [max_iters]
+#
+# Every run gets its own scratch directory under <repo>/runs/ -- ADOL-C
+# drops its tape files (fixed names!) into the cwd, so concurrent runs
+# corrupt each other without this. Results append to <repo>/newt.db
+# (override with NEWT_DB), one row per accepted SQP iterate.
 
-## say Hello
+puts "Omuses [omu_version]"
 
-set version "Omuses [omu_version]"
-
-if [catch {
-  label .l \
-    -text $version
-  button .b \
-    -text Exit \
-    -command {hqp_exit user}
-  pack .l .b
-  update
-}] {
-  puts $version
+set arg [lindex $argv 0]
+if {$arg == ""} {
+  puts stderr "usage: run <scenario.yaml|ProgramClass> \[max_iters\]"
+  exit 1
 }
 
-## use the first runtime argument as problem name
-## run a problem specific script file if provided
-## else run without configurations
-
-set pname [lindex $argv 0]
-set fname [string tolower $pname].tcl
-if [file exists $fname] {
-  source $fname
+set repo [file normalize ..]
+if {[info exists env(NEWT_DB)]} {
+  set dbPath [file normalize $env(NEWT_DB)]
 } else {
-
-if [catch {prg_name $pname} result] {
-  puts stderr "Usage: run <program>"
-  puts stderr $result
-  exit
+  set dbPath $repo/newt.db
 }
+
+set isYaml [string match -nocase "*.yaml" $arg]
+if {$isYaml} {
+  set yaml [file normalize $arg]
+  set name [file rootname [file tail $yaml]]
+} else {
+  set name $arg
+}
+
+## run isolation: fresh scratch dir becomes the cwd
+set stamp [clock format [clock seconds] -format %Y%m%d-%H%M%S]
+set runDir $repo/runs/$stamp-$name-[pid]
+file mkdir $runDir
+cd $runDir
 
 ## configure the problem and the solver
 
-## use simple RK4 integration for continuous-time equations
-#prg_integrator RK4
-
-## use RKsuite (default)
-#prg_integrator RKsuite
-#prg_int_rtol 1e-6
-#prg_int_atol 1e-12
-
-## optimization stopping limit
-#sqp_eps 1e-6
-
-#sqp_solver Powell
 sqp_solver Schittkowski
-#sqp_qp_solver Mehrotra
 sqp_qp_solver Franke
 
 ## potentially go for a long long time
 qp_max_iters 5000
 sqp_max_iters 5000
+if {[llength $argv] > 1} {
+  sqp_max_iters [lindex $argv 1]
+}
 
-## run the solver
+if {$isYaml} {
+  newt_scenario $yaml
+  prg_name Scenario
+} else {
+  if [catch {prg_name $name} result] {
+    puts stderr "Usage: run <program>"
+    puts stderr $result
+    exit 1
+  }
+}
 
 # setup the problem
 prg_setup
@@ -69,21 +71,149 @@ prg_simulate
 # initialize the SQP solver
 sqp_init
 
-# evaluate the Tcl procedure hqp_solve and catch errors
-catch hqp_solve result
+# open the run record; dt 0 defers to the scenario's record_dt
+newt_open_run $dbPath $name 0
+
+# Our copy of hqp_solve's cold-start path (see HQP's hqp_solve.tcl),
+# console output kept identical, with one addition: newt_record after
+# the initial evaluation and after every accepted step. Each record
+# triggers a values-only re-evaluation at the accepted iterate
+# (prg_update_fbd), so prg_fbd_evals grows by one per recorded iterate.
+proc newt_solve {{stream stdout}} {
+  set qp_iters 0
+  set nullsteps 0
+  set hela_restart 0
+
+  puts $stream [format "%3s %12s %10s %10s \[%3s %3.3s\] %10s %10s %8s"\
+                it obj ||inf|| ||grdL||\
+                qp result ||s|| s'Qs stepsize]
+
+  while 1 {
+
+    if {$qp_iters == 0} {
+      # can't re-use higher order information
+      sqp_qp_update
+      puts -nonewline $stream [format "%3d %12.6g %10.4g %10.4g " \
+         [sqp_iter] [prg_f] [sqp_norm_inf] [sqp_norm_grd_L]]
+      flush $stream
+      # check feasibility of model evaluation
+      if [catch {expr [prg_f]*[sqp_norm_inf]}] {
+        puts $stream ""
+        error evaluation
+      }
+      # the initial point, before any step is taken
+      newt_record [sqp_iter] [prg_f] [sqp_norm_inf] [sqp_norm_grd_L]
+    } else {
+      puts -nonewline $stream [format "%3d %12.6g %10.4g " \
+         [sqp_iter] [prg_f] [sqp_norm_inf]]
+      flush $stream
+      # check feasibility of model evaluation
+      if [catch {expr [prg_f]*[sqp_norm_inf]}] {
+        puts $stream ""
+        error evaluation
+      }
+
+      sqp_qp_update
+
+      puts -nonewline $stream [format "%10.4g " [sqp_norm_grd_L]]
+      flush $stream
+    }
+
+    # test for bad Hessian
+    if {[sqp_xQx] < 0.0} {
+      sqp_hela_restart
+      set hela_restart 1
+    } else {
+      set hela_restart 0
+    }
+
+    if {[sqp_iter] > 0} {
+      if {[sqp_norm_inf] < [sqp_eps]} {
+        if {[sqp_norm_grd_L] < [sqp_eps]} break
+      }
+    }
+
+    sqp_qp_solve
+    incr qp_iters [qp_iter]
+
+    puts -nonewline $stream [format "\[%3d %3.3s\] " \
+        [qp_iter] [qp_result]]
+    flush $stream
+
+    if {[qp_iter] == 0} {
+        puts $stream ""
+        error [qp_result]
+    }
+
+    puts -nonewline $stream [format "%10.4g %10.4g " \
+        [sqp_norm_s] [sqp_sQs]]
+    flush $stream
+
+    if {[sqp_sQs] < 0.0} {
+      sqp_hela_restart
+    }
+
+    if {[sqp_iter] > 0 && [sqp_sQs] >= 0.0 && !$hela_restart} {
+      if {[sqp_norm_inf] < [sqp_eps] && [qp_result] == "optimal"} {
+        if {[sqp_sQs] < [expr [sqp_eps]*[sqp_eps]]} break
+        if {[sqp_iter] > 2} {
+          if {[sqp_norm_s] < [expr [sqp_eps]*[sqp_norm_x]]
+              && [sqp_norm_df] < [expr [sqp_eps]*abs([prg_f])]
+              && [sqp_sQs] < [sqp_eps]} break
+        }
+      }
+    }
+
+    sqp_step
+
+    puts $stream [format "%8.3g" [sqp_alpha]]
+
+    # the freshly accepted iterate (||grdL|| is the pre-step value;
+    # the post-step one only exists after the next sqp_qp_update)
+    newt_record [sqp_iter] [prg_f] [sqp_norm_inf] [sqp_norm_grd_L]
+
+    if {[qp_iter] >= [qp_max_iters] && [qp_result] != "feasible"} {
+        error subiters
+    }
+    if {[sqp_iter] >= [sqp_max_iters]} {
+        error iters
+    }
+    if {[sqp_inf_iters] >= [sqp_max_inf_iters]} {
+        if {[qp_result] == "suboptimal"} {
+            error infeasible
+        } else {
+            error degenerate
+        }
+    }
+
+    if {[sqp_alpha] < 1e-8
+        && [sqp_norm_df] < [expr [sqp_eps]*abs([prg_f])]} {
+        incr nullsteps 1
+    } else {
+        set nullsteps 0
+    }
+    if {$nullsteps > 5} {
+        error stall
+    }
+
+    # update quasi-parallel running Tcl stuff
+    catch {update}
+  }
+
+  puts $stream [format "\n%43d qp-it" $qp_iters]
+  return optimal
+}
+
+if {[catch newt_solve status]} {
+  # status carries the failure reason (iters, stall, evaluation, ...)
+}
+newt_finish $status
 
 ## print the results and exit
 
-puts "Result   : $result"
+puts "Result   : $status"
 puts "Objective: [prg_f]"
 puts "Obj-evals: [prg_fbd_evals]"
-set x [prg_x]
-set n [llength $x]
-if {$n <= 100} {
-  puts "Variables:"
-  for {set i 0} {$i < $n} {incr i} {
-    puts [lrange $x $i [incr i 7]]
-  }
-  exit
-}
-}
+puts "Run dir  : $runDir"
+puts "Database : $dbPath"
+exit
