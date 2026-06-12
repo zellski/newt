@@ -1,0 +1,3 @@
+#!/bin/sh
+# Launch the NewT run viewer: newt-view [path/to/newt.db] [--port N]
+exec bun "$(dirname "$0")/serve.js" "$@"
