@@ -28,7 +28,7 @@ void SimpsonIntegrator::integrate(
    adoublev &c, adouble &f0)
 {
     for (int sample = 0; sample < n; sample ++) {
-        const double weight = weights[sample]/n/3;
+        const double weight = weights[sample]/(n-1)/3;
         const double t = points[sample];
         S->FEMPoint(slice, t, weight, x, c, f0);
     }
