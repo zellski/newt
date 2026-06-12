@@ -2,9 +2,49 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>newt viewer</title>
+<link rel="stylesheet" href="/style.css">
+<script type="importmap">
+{
+   "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+   }
+}
+</script>
 </head>
 <body>
-<p>newt viewer: page lands in the next commit; the API is live under <code>/api/runs</code>.</p>
+<div id="layout">
+   <aside id="sidebar">
+      <h1>newt</h1>
+      <ul id="run-list"></ul>
+   </aside>
+   <main id="stage">
+      <div id="view">
+         <canvas id="gl"></canvas>
+         <div id="hud"></div>
+         <div id="overlay" hidden></div>
+      </div>
+      <div id="controls">
+         <div class="row">
+            <span class="label">iteration</span>
+            <canvas id="iter-canvas" height="64"></canvas>
+            <span id="iter-readout" class="readout"></span>
+         </div>
+         <div class="row">
+            <button id="play" title="play/pause">&#10074;&#10074;</button>
+            <select id="speed">
+               <option value="0.25">&times;&frac14;</option>
+               <option value="1" selected>&times;1</option>
+               <option value="4">&times;4</option>
+            </select>
+            <canvas id="time-canvas" height="36"></canvas>
+            <span id="time-readout" class="readout"></span>
+         </div>
+      </div>
+   </main>
+</div>
+<script type="module" src="/app.js"></script>
 </body>
 </html>
