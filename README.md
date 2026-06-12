@@ -129,13 +129,34 @@ A few hints:
 
 * Experiment using Hat as well as Hermlet representations for Muscles. Using Hat means clumsier control for the Creature, and the motion may look odd. On the other hand, convergence sometimes benefits greatly from this relationship between the DOF and Muscles (Assuming Hermites are still used for the DOF!) and so N can be increased the compensate.
 
-## Rendering
+## The Viewer
 
-The original RenderMan/Octave file output is retired; everything a
-visualizer needs now lives in the run database. A web-based viewer
-consuming it -- with scrubbers for both animation time and optimizer
-iteration -- is planned (see GitHub issue #3). The old RIBVisualizer
-source remains in the tree but is no longer invoked.
+A browser-based viewer lives in newt/viewer. It needs only Bun
+(https://bun.sh -- the SQLite driver and YAML parser are built in,
+there are no packages to install and nothing to build):
+
+    viewer/newt-view newt.db
+
+then open the printed localhost URL. The page shows every run in the
+database with two scrubbers: animation time within an iterate, and
+optimization iteration -- drag the latter across the convergence curve
+to watch the motion evolve from initial guess to converged solution.
+Runs still in progress update live; leave the newest iterate selected
+and the animation refines as the optimizer works. (The 3D scene is
+three.js, loaded from a pinned CDN, so the browser needs network
+access for that one file.)
+
+A run can also be frozen as a single self-contained HTML file, data
+inlined -- handy for sharing a result:
+
+    bun viewer/serve.js newt.db --export 15 -o luxo.html
+
+Under the hood the viewer is a small read-only HTTP server
+(viewer/serve.js) over the run database; its JSON API (/api/runs,
+/api/run/:id, /api/run/:id/iterations, plus a binary frames endpoint)
+is equally usable from your own tooling. The original RenderMan/Octave
+RIBVisualizer is gone; forward kinematics live in viewer/static/fk.js,
+tested by `bun test` in viewer/.
 
 Pär Winzell
 zell@alyx.com
