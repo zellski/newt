@@ -27,8 +27,7 @@ void Force::SnapShot(const adoublev &x, int slice, double t) {
       F->SnapShot(x, slice, t);
       FVal = F->Val;
       FVec.set(vx*FVal, vy*FVal);
-      P->TotF += FVec;
-//      cerr << "Pushing AnchorPoint " << P->Name << " in direction ("
-//           << vx << ", " << vy << ") magnitude " << v << "..\n";
    }
+   // constant-magnitude forces keep the FVec computed at construction
+   P->TotF += FVec;
 }

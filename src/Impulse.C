@@ -26,8 +26,7 @@ Impulse::Impulse(Stage *const s, AnchorPoint *p, double sx, double sy) :
 void Impulse::SnapShot(const adoublev &x) {
    if (xIx >= 0) {
       JVec.set(x[xIx]*vx, x[xIx]*vy);
-      P->TotJ += JVec;
-      cerr << "Impulsing AnchorPoint " << P->Name << " in direction ("
-           << vx << ", " << vy << ") magnitude " << x[xIx] << "..\n";
    }
+   // fixed-magnitude impulses keep the JVec computed at construction
+   P->TotJ += JVec;
 }
