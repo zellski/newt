@@ -1,0 +1,78 @@
+# Eight chained rods hanging from the anchor (demo/Snake.C). The C++
+# reused the names "LinkAngle"/"LinkRod" for all eight; names claim no
+# optimizer state, so unique names here cost nothing.
+name: Anchor
+root: { x: X, y: Y, attach: Rod0.Top }
+bodies:
+  - name: Rod0
+    type: rod
+    dof: Link0
+    length: 0.25       # 2.0 / 8
+    radius: 0.04
+    points:
+      - { name: Top, at: [-0.125, 0.0] }
+      - { name: Bot, at: [0.125, 0.0] }
+  - name: Rod1
+    type: rod
+    dof: Link1
+    length: 0.25
+    radius: 0.04
+    points:
+      - { name: Top, at: [-0.125, 0.0] }
+      - { name: Bot, at: [0.125, 0.0] }
+  - name: Rod2
+    type: rod
+    dof: Link2
+    length: 0.25
+    radius: 0.04
+    points:
+      - { name: Top, at: [-0.125, 0.0] }
+      - { name: Bot, at: [0.125, 0.0] }
+  - name: Rod3
+    type: rod
+    dof: Link3
+    length: 0.25
+    radius: 0.04
+    points:
+      - { name: Top, at: [-0.125, 0.0] }
+      - { name: Bot, at: [0.125, 0.0] }
+  - name: Rod4
+    type: rod
+    dof: Link4
+    length: 0.25
+    radius: 0.04
+    points:
+      - { name: Top, at: [-0.125, 0.0] }
+      - { name: Bot, at: [0.125, 0.0] }
+  - name: Rod5
+    type: rod
+    dof: Link5
+    length: 0.25
+    radius: 0.04
+    points:
+      - { name: Top, at: [-0.125, 0.0] }
+      - { name: Bot, at: [0.125, 0.0] }
+  - name: Rod6
+    type: rod
+    dof: Link6
+    length: 0.25
+    radius: 0.04
+    points:
+      - { name: Top, at: [-0.125, 0.0] }
+      - { name: Bot, at: [0.125, 0.0] }
+  - name: Rod7
+    type: rod
+    dof: Link7
+    length: 0.25
+    radius: 0.04
+    points:
+      - { name: Top, at: [-0.125, 0.0] }
+      - { name: Bot, at: [0.125, 0.0] }
+attachments:
+  - { parent: Rod0.Bot, child: Rod1.Top }
+  - { parent: Rod1.Bot, child: Rod2.Top }
+  - { parent: Rod2.Bot, child: Rod3.Top }
+  - { parent: Rod3.Bot, child: Rod4.Top }
+  - { parent: Rod4.Bot, child: Rod5.Top }
+  - { parent: Rod5.Bot, child: Rod6.Top }
+  - { parent: Rod6.Bot, child: Rod7.Top }

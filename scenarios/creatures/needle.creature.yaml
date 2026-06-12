@@ -1,0 +1,12 @@
+# A single thin needle (demo/Needle.C).
+name: Anchor
+root: { x: X, y: Y, attach: P1.Top }
+bodies:
+  - name: P1
+    type: rod
+    dof: Alpha
+    length: 1
+    radius: 0.01
+    points:
+      - { name: Top, at: [-0.5, 0.0] }
+      - { name: Bot, at: [0.5, 0.0] }

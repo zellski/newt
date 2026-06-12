@@ -1,0 +1,44 @@
+# Luxo the hopping desk lamp (demo/Luxo.C): a disk base, two rod
+# limbs, and a sphere head.
+name: Creature
+root: { x: X, y: Y, attach: Base.BaseBot }
+bodies:
+  - name: Base
+    type: disk
+    dof: Alpha
+    radius: 0.3
+    height: 0.04
+    density: 0.2
+    points:
+      - { name: BaseMid,   at: [0, 0] }
+      - { name: BaseBot,   at: [-0.01, 0] }
+      - { name: BaseTop,   at: [0.15, 0] }     # outside the body
+      - { name: BaseLeft,  at: [0, -0.3] }
+      - { name: BaseRight, at: [0, 0.3] }
+  - name: L1
+    type: rod
+    dof: Beta
+    length: 0.3
+    radius: 0.06
+    points:
+      - { name: L1Bot, at: [-0.15, 0.0] }
+      - { name: L1Top, at: [0.15, 0.0] }
+  - name: L2
+    type: rod
+    dof: Gamma
+    length: 0.3
+    radius: 0.06
+    points:
+      - { name: L2Bot, at: [-0.15, 0.0] }
+      - { name: L2Top, at: [0.15, 0.0] }
+  - name: Head
+    type: sphere
+    dof: Delta
+    radius: 0.1
+    density: 0.1
+    points:
+      - { name: HeadBot, at: [-0.15, 0] }      # outside the body
+attachments:
+  - { parent: Base.BaseTop, child: L1.L1Bot }
+  - { parent: L1.L1Top, child: L2.L2Bot }
+  - { parent: L2.L2Top, child: Head.HeadBot }

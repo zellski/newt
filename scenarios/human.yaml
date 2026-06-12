@@ -1,0 +1,128 @@
+# Port of demo/Human.C: crouch, backflip (the lower-leg angle winds up
+# a full 2*pi), land back at rest. Constants as 17-digit literals:
+#   LL_REST    =   pi/8  =  0.39269908169872414
+#   UL_REST    = 7*pi/8  =  2.748893571891069
+#   TORSO_REST = -5*pi/8 = -1.9634954084936207
+#   UA_REST    = 2*pi/8  =  0.7853981633974483
+#   LA_REST    = 5*pi/8  =  1.9634954084936207
+#   LL_STRETCH    = 7*pi/16 = 1.3744467859455345
+#   UL_STRETCH    = 2*pi/16 = 0.39269908169872414
+#   TORSO_STRETCH =  -pi/16 = -0.19634954084936207
+#   UA_STRETCH = LA_STRETCH = 0
+#   pi/2 = 1.5707963267948966   15*pi/16 = 2.945243112740431
+#   -7*pi/8 = -2.748893571891069   pi = 3.141592653589793
+#   10*pi = 31.41592653589793
+#   LL_STRETCH + 2*pi = 7.6576320931251205
+#   LL_REST + 2*pi    = 6.675884388878311
+name: Human
+creature: creatures/human.creature.yaml
+gravity: -9.81
+integrator: { type: gauss, n: 10 }
+stages:
+  # crouch from rest into the stretch pose
+  - name: S1
+    pieces: 8
+    duration: 0.3
+    muscles:
+      - { dof: TorsoAngle, weight: 1 }
+      - { dof: UAAngle, weight: 1 }
+      - { dof: LAAngle, weight: 1 }
+      - { dof: ULAngle, weight: 1 }
+      - { dof: LLAngle, weight: 1 }
+    reps:
+      - { dof: X, type: constant, value: 0 }
+      - { dof: Y, type: constant, value: 0 }
+      - { dof: LLAngle, type: hermlet, from: 0.39269908169872414, to: 1.3744467859455345,
+          min: 0, max: 1.5707963267948966 }
+      - { dof: ULAngle, type: hermlet, from: 2.748893571891069, to: 0.39269908169872414,
+          min: 0, max: 2.945243112740431 }
+      - { dof: TorsoAngle, type: hermlet, from: -1.9634954084936207, to: -0.19634954084936207,
+          min: -2.748893571891069, max: 0 }
+      - { dof: UAAngle, type: hermlet, from: 0.7853981633974483, to: 0,
+          min: 0, max: 3.141592653589793 }
+      - { dof: LAAngle, type: hermlet, from: 1.9634954084936207, to: 0,
+          min: 0, max: 3.141592653589793 }
+      - { dof: RHandAngle, type: constant, value: 0 }
+      - { dof: NeckAngle, type: constant, value: 0 }
+      - { dof: HeadAngle, type: constant, value: 0 }
+    constraints:
+      - { dof: TorsoAngle, quantity: q,    at: start, equals: -1.9634954084936207 }
+      - { dof: TorsoAngle, quantity: qdot, at: start, equals: 0 }
+      - { dof: UAAngle, quantity: q,    at: start, equals: 0.7853981633974483 }
+      - { dof: UAAngle, quantity: qdot, at: start, equals: 0 }
+      - { dof: LAAngle, quantity: q,    at: start, equals: 1.9634954084936207 }
+      - { dof: LAAngle, quantity: qdot, at: start, equals: 0 }
+      - { dof: ULAngle, quantity: q,    at: start, equals: 2.748893571891069 }
+      - { dof: ULAngle, quantity: qdot, at: start, equals: 0 }
+      - { dof: LLAngle, quantity: q,    at: start, equals: 0.39269908169872414 }
+      - { dof: LLAngle, quantity: qdot, at: start, equals: 0 }
+
+  # airborne: the lower leg sweeps through a full revolution
+  - name: S2
+    pieces: 8
+    duration: 1.0
+    muscles:
+      - { dof: TorsoAngle, weight: 1 }
+      - { dof: UAAngle, weight: 1 }
+      - { dof: LAAngle, weight: 1 }
+      - { dof: ULAngle, weight: 1 }
+      - { dof: LLAngle, weight: 1 }
+    reps:
+      - { dof: X, type: hermlet, from: 0, to: 0 }
+      - { dof: Y, type: hermlet, from: 0, to: 0 }
+      - { dof: LLAngle, type: hermlet, from: 1.3744467859455345, to: 7.6576320931251205,
+          min: 0, max: 31.41592653589793 }
+      - { dof: ULAngle, type: hermlet, from: 0.39269908169872414, to: 0.39269908169872414,
+          min: 0, max: 2.945243112740431 }
+      - { dof: TorsoAngle, type: hermlet, from: -0.19634954084936207, to: -0.19634954084936207,
+          min: -2.748893571891069, max: 31.41592653589793 }
+      - { dof: UAAngle, type: hermlet, from: 0, to: 0,
+          min: 0, max: 3.141592653589793 }
+      - { dof: LAAngle, type: hermlet, from: 0, to: 0,
+          min: 0, max: 3.141592653589793 }
+      - { dof: RHandAngle, type: constant, value: 0 }
+      - { dof: NeckAngle, type: constant, value: 0 }
+      - { dof: HeadAngle, type: constant, value: 0 }
+    impulses:
+      - { point: LL.LLBot, direction: [0, 1] }
+
+  # landed: settle back to the rest pose (one revolution ahead)
+  - name: S3
+    pieces: 8
+    duration: 0.3
+    muscles:
+      - { dof: TorsoAngle, weight: 1 }
+      - { dof: UAAngle, weight: 1 }
+      - { dof: LAAngle, weight: 1 }
+      - { dof: ULAngle, weight: 1 }
+      - { dof: LLAngle, weight: 1 }
+    reps:
+      - { dof: X, type: constant, value: 0 }
+      - { dof: Y, type: constant, value: 0 }
+      - { dof: LLAngle, type: hermlet, from: 7.6576320931251205, to: 6.675884388878311,
+          min: 0, max: 31.41592653589793 }
+      - { dof: ULAngle, type: hermlet, from: 0.39269908169872414, to: 2.748893571891069,
+          min: 0, max: 2.945243112740431 }
+      - { dof: TorsoAngle, type: hermlet, from: -0.19634954084936207, to: -1.9634954084936207,
+          min: -2.748893571891069, max: 0 }
+      - { dof: UAAngle, type: hermlet, from: 0, to: 0.7853981633974483,
+          min: 0, max: 3.141592653589793 }
+      - { dof: LAAngle, type: hermlet, from: 0, to: 1.9634954084936207,
+          min: 0, max: 3.141592653589793 }
+      - { dof: RHandAngle, type: constant, value: 0 }
+      - { dof: NeckAngle, type: constant, value: 0 }
+      - { dof: HeadAngle, type: constant, value: 0 }
+    constraints:
+      - { dof: TorsoAngle, quantity: q,    at: end, equals: -1.9634954084936207 }
+      - { dof: TorsoAngle, quantity: qdot, at: end, equals: 0 }
+      - { dof: UAAngle, quantity: q,    at: end, equals: 0.7853981633974483 }
+      - { dof: UAAngle, quantity: qdot, at: end, equals: 0 }
+      - { dof: LAAngle, quantity: q,    at: end, equals: 1.9634954084936207 }
+      - { dof: LAAngle, quantity: qdot, at: end, equals: 0 }
+      - { dof: ULAngle, quantity: q,    at: end, equals: 2.748893571891069 }
+      - { dof: ULAngle, quantity: qdot, at: end, equals: 0 }
+      - { dof: LLAngle, quantity: q,    at: end, equals: 6.675884388878311 }
+      - { dof: LLAngle, quantity: qdot, at: end, equals: 0 }
+links:
+  - [S1, S2]
+  - [S2, S3]
