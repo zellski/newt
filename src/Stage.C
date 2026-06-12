@@ -13,17 +13,18 @@ Stage::Stage(World *w, Integrator *i, int n, double t) :
    W(w),
    Muscles(),
    Forces(),
+   Funs(),
    Impulses(),
    Cons(),
    integrator(i),
    Min(-1), Max(-1), Start(-1), // not used
-   N(n),
-   T(t),
-   h(t/n),
    speedContribution(0.0),
    torqueContribution(0.0),
+   N(n),
    sIx(w->Register(this)),
-   tIx(-1)
+   tIx(-1),
+   T(t),
+   h(t/n)
 {
    assert(!!W);
    assert(N > 0);
@@ -35,17 +36,18 @@ Stage::Stage(World *w, Integrator *i,
    W(w),
    Muscles(),
    Forces(),
+   Funs(),
    Impulses(),
    Cons(),
-   Min(min), Max(max), Start(start),
    integrator(i),
-   N(n),
-   T(start),
-   h(start/n),
+   Min(min), Max(max), Start(start),
    speedContribution(0.0),
    torqueContribution(0.0),
+   N(n),
    sIx(w->Register(this)),
-   tIx(w->claimVars(1))
+   tIx(w->claimVars(1)),
+   T(start),
+   h(start/n)
 {
    assert(!!W);
    assert(N > 0);
