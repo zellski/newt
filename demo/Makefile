@@ -31,12 +31,7 @@ LDFLAGS = -L../src -Wl,-rpath,../src -Wl,-rpath,${HQP_LIB} -Wl,-rpath,${ADOLC_LI
 
 SRCS = 	Odc_Init.C \
 	Newt_Cmds.C \
-	Scenario.C \
-	Needle.C \
-	Luxo.C \
-	Human.C \
-	Snake.C \
-	Trivial.C
+	Scenario.C
 
 OBJS = $(SRCS:.C=.o) Odc_Main.o
 
