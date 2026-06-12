@@ -1,0 +1,12 @@
+# A single thin rod hanging from the anchor: the Trivial pendulum.
+name: Anchor
+root: { x: X, y: Y, attach: Rod.Top }
+bodies:
+  - name: Rod
+    type: rod
+    dof: LinkAngle
+    length: 1.0
+    radius: 0.04
+    points:
+      - { name: Top, at: [-0.5, 0.0] }
+      - { name: Bottom, at: [0.5, 0.0] }

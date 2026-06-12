@@ -16,6 +16,10 @@ ScenarioSpec ParseScenario(const std::string &yamlText, const std::string &label
 CreatureSpec ParseCreatureFile(const std::string &path);
 ScenarioSpec ParseScenarioFile(const std::string &path);
 
+// whole-file read; throws SpecError on failure (used to snapshot the
+// YAML texts into the run record)
+std::string ReadFile(const std::string &path);
+
 // cross-checks between a scenario and its creature; throws SpecError
 void Validate(const ScenarioSpec &S, const CreatureSpec &C);
 

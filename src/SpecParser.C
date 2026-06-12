@@ -501,16 +501,6 @@ ScenarioSpec parseScenario(const Node &root, const Ctx &ctx) {
    return S;
 }
 
-string slurp(const string &path) {
-   std::ifstream in(path.c_str());
-   if (!in) {
-      throw SpecError(path + ": cannot open file");
-   }
-   std::ostringstream o;
-   o << in.rdbuf();
-   return o.str();
-}
-
 bool powerOfTwo(int n) {
    return n > 0 && (n & (n - 1)) == 0;
 }
@@ -530,11 +520,21 @@ ScenarioSpec newt::ParseScenario(const string &text, const string &label) {
 }
 
 CreatureSpec newt::ParseCreatureFile(const string &path) {
-   return ParseCreature(slurp(path), path);
+   return ParseCreature(ReadFile(path), path);
 }
 
 ScenarioSpec newt::ParseScenarioFile(const string &path) {
-   return ParseScenario(slurp(path), path);
+   return ParseScenario(ReadFile(path), path);
+}
+
+string newt::ReadFile(const string &path) {
+   std::ifstream in(path.c_str());
+   if (!in) {
+      throw SpecError(path + ": cannot open file");
+   }
+   std::ostringstream o;
+   o << in.rdbuf();
+   return o.str();
 }
 
 // --- cross-reference validation ------------------------------------------
