@@ -14,6 +14,7 @@
 # include <cmath>
 # include <limits>
 # include <iostream>
+# include <vector>
 
 class adouble {
    double v;
@@ -52,6 +53,14 @@ inline std::ostream& operator << (std::ostream& out, const adouble& a) {
    return out << a.value();
 }
 
+// just enough vector-of-adouble to satisfy code indexing into the
+// optimizer's variable vector; entries start NaN-poisoned like adouble
 class adoublev {
+   std::vector<adouble> v;
 public:
+   adoublev() {}
+   explicit adoublev(int n) : v(n) {}
+
+   adouble& operator [] (int i) { return v[i]; }
+   const adouble& operator [] (int i) const { return v[i]; }
 };

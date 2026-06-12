@@ -42,8 +42,10 @@ The code outputs RenderMan format and you will need a renderer for it. For a sum
 ## Tests
 
 The newt/tests subdirectory holds standalone unit tests for the math
-underpinnings (the AVec vector algebra and the numerical integration
-rules). They compile against a stub adouble instead of HQP/ADOL-C, so
+underpinnings: the AVec vector algebra, the numerical integration
+rules, and the dynamics distribution machinery (force/impulse
+application and the recursive sweeps onto angular DOFs). They compile
+the real sources against a stub adouble instead of HQP/ADOL-C, so
 they run anywhere:
 
     make -C tests test
