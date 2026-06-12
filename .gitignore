@@ -13,3 +13,4 @@ tests/test_dynamics
 tests/*.dSYM/
 demo/ADOLC-*.tap
 tests/test_specparser
+tests/test_recorder

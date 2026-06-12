@@ -14,10 +14,10 @@ CC = gcc
 LD = ${CXX} -shared -o
 
 DEPFLAGS = -MMD -MP
-INCFLAGS = -I../include -I${HQP_INC} -I${ADOLC_INC}
+INCFLAGS = -I../include -I../include/vendor -I${HQP_INC} -I${ADOLC_INC}
 CFLAGS = -g -W\#warnings -O3 -fPIC -DOMU_WITH_ADOLC=1 ${DEPFLAGS} ${INCFLAGS}
 
-LDFLAGS = -L${HQP_LIB} -L${ADOLC_LIB} -ladolc -lhqp -lomu -Wl,-install_name,@rpath/libnewt.so -W,-rpath,../src
+LDFLAGS = -L${HQP_LIB} -L${ADOLC_LIB} -ladolc -lhqp -lomu -lsqlite3 -Wl,-install_name,@rpath/libnewt.so -W,-rpath,../src
 
 # machine independent part
 
@@ -40,7 +40,9 @@ SRCS = AVec.C \
 	AnchorPoint.C \
 	SimpsonIntegrator.C \
 	GaussianIntegrator.C \
-	RIBVisualizer.C
+	RIBVisualizer.C \
+	SpecParser.C \
+	Recorder.C
 #	VRMLVisualizer.C
 
 OBJS=$(SRCS:.C=.o)

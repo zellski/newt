@@ -6,7 +6,7 @@
 CXX = g++
 CXXFLAGS = -g -O2 -Wall -Istub -I../include
 
-TESTS = test_avec test_quadrature test_dynamics test_specparser
+TESTS = test_avec test_quadrature test_dynamics test_specparser test_recorder
 
 test: $(TESTS)
 	@for t in $(TESTS); do ./$$t || exit 1; done
@@ -31,6 +31,11 @@ test_specparser: test_specparser.C ../src/SpecParser.C \
 		../include/newt/Spec.h ../include/newt/SpecParser.h
 	$(CXX) -g -O2 -Wall -I../include -I../include/vendor -o $@ \
 		test_specparser.C ../src/SpecParser.C
+
+# so is the recorder (system sqlite3)
+test_recorder: test_recorder.C ../src/Recorder.C ../include/newt/Recorder.h
+	$(CXX) -g -O2 -Wall -I../include -o $@ \
+		test_recorder.C ../src/Recorder.C -lsqlite3
 
 clean:
 	rm -f $(TESTS) *.o *~
