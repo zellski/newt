@@ -429,6 +429,44 @@ function tick(now) {
    updateReadouts();
 }
 
+// ------------------------------------------------------------ liveness
+
+const POLL_MS = 1000;
+
+function lastFramedK() {
+   const it = state.iterations.findLast((i) => i.n_frames > 0);
+   return it ? it.k : -1;
+}
+
+// keep the sidebar fresh, and while the selected run is still being
+// optimized, pull new iterates as they land; if the scrubber sits on
+// the newest iterate, follow along
+async function pollLoop() {
+   for (;;) {
+      await new Promise((r) => setTimeout(r, POLL_MS));
+      try {
+         const runs = await getJSON("/api/runs");
+         if (JSON.stringify(runs) !== JSON.stringify(state.runs)) {
+            state.runs = runs;
+            renderRunList();
+         }
+         const r = state.run && runs.find((x) => x.id === state.run.id);
+         if (r && (r.status === "running" ||
+                   r.n_iterations > state.iterations.length)) {
+            const wasAtLatest = state.selectedK === lastFramedK();
+            state.iterations =
+               await getJSON(`/api/run/${state.run.id}/iterations`);
+            state.run.status = r.status;
+            if (wasAtLatest && lastFramedK() !== state.selectedK) {
+               await selectIteration(lastFramedK());
+            }
+         }
+      } catch {
+         // server briefly unreachable; keep polling
+      }
+   }
+}
+
 // ---------------------------------------------------------------- boot
 
 state.runs = await getJSON("/api/runs");
@@ -438,3 +476,4 @@ const initial = hash && state.runs.some((r) => r.id === +hash[1])
    ? +hash[1] : state.runs[0]?.id;
 if (initial !== undefined) await loadRun(initial);
 requestAnimationFrame(tick);
+pollLoop();
