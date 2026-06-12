@@ -29,7 +29,7 @@ void Snake::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec
    DOF *Angles[LINKS];
    ThinRod *Rods[LINKS];
 
-   W = new World(-9.81, false);
+   W = new World(-9.81);
 
    DOF *X = new DOF(W, "X");
    DOF *Y = new DOF(W, "Y");

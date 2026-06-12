@@ -5,7 +5,7 @@
 # include "Creature.h"
 # include "Fun.h"
 
-World::World(double g, bool MuscleFlag) :
+World::World(double g) :
    Creatures(),
    DOFs(),
    Stages(),
