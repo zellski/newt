@@ -12,3 +12,4 @@ tests/test_quadrature
 tests/test_dynamics
 tests/*.dSYM/
 demo/ADOLC-*.tap
+tests/test_specparser
