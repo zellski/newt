@@ -32,11 +32,11 @@ public:
    RigidBody(World *const w, const char *const S, DOF *const d,
              double M, double rog2) :
       W(w),
-      Name(S),
-      Points(),
       Mass(M),
       ROG2(rog2),
-      Angle(d)
+      Name(S),
+      Angle(d),
+      Points()
    {};
 
    virtual int BodyType() const = 0;

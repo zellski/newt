@@ -6,8 +6,8 @@
 Force::Force(Stage *s, AnchorPoint *p, double sx, double sy, double mag) :
    S(s),
    P(p),
-   F(0),
    vx(sx), vy(sy),
+   F(0),
    FVec(sx*mag, sy*mag)
 {
    S->Register(this);
@@ -16,8 +16,8 @@ Force::Force(Stage *s, AnchorPoint *p, double sx, double sy, double mag) :
 Force::Force(Stage *s, AnchorPoint *p, double sx, double sy, Fun *const f) :
    S(s),
    P(p),
-   F(f),
-   vx(sx), vy(sy)
+   vx(sx), vy(sy),
+   F(f)
 {
    S->Register(this);
 }
