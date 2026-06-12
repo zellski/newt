@@ -102,8 +102,7 @@ void Stage::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    }
    for (vector<DOF *> :: const_iterator p = W->DOFs.begin();
         p != W->DOFs.end(); p++) {
-      assert(!!(*p)->DOFReps[sIx]);
-      (*p)->DOFReps[sIx]->Initialize(x, c);
+      (*p)->Rep(sIx)->Initialize(x, c);
    }
    // stage-registered Funs (muscles, forces) are disjoint from the
    // DOFReps above; they need their bounds/initials set up too
@@ -199,7 +198,7 @@ void Stage::FEMPoint(const int slice, const double t, const double weight,
         speedContribution += 5 * weight * h.value() * qDotContrib.value();
 # endif
 
-        (*p)->DOFReps[sIx]->IntegrateFEM(c, qM, qC, slice, t, weight);
+        (*p)->Rep(sIx)->IntegrateFEM(c, qM, qC, slice, t, weight);
     }
     for (vector<Muscle *>::const_iterator m = Muscles.begin();
          m != Muscles.end(); m ++) {

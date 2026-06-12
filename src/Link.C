@@ -10,8 +10,8 @@ Link::Link(Stage *const a, Stage *const b) : A(a), B(b) {
    int cnt = 0;
    for (int i = A->W->DOFs.size()-1; i >= 0; i --) {
       DOF *D = A->W->DOFs[i];
-      if (!D->DOFReps[A->sIx]->isConstant() || 
-          !D->DOFReps[B->sIx]->isConstant()) {
+      if (!D->Rep(A->sIx)->isConstant() ||
+          !D->Rep(B->sIx)->isConstant()) {
          cerr << "Enforcing continuity for " << D->Name << " between "
               << A->sIx << " and " << B->sIx << "\n";
          cnt +=2;
@@ -38,8 +38,8 @@ void Link::Evaluate(const adoublev &x, adoublev &c) {
    int ix = cIx;
    for (int i = A->W->DOFs.size()-1; i >= 0; i --) {
       DOF *D = A->W->DOFs[i];
-      if (!D->DOFReps[A->sIx]->isConstant() ||
-          !D->DOFReps[B->sIx]->isConstant()) {
+      if (!D->Rep(A->sIx)->isConstant() ||
+          !D->Rep(B->sIx)->isConstant()) {
          c[ix ++] = D->qVal;
          c[ix ++] = D->qMomentum + D->JVal;
 //         cerr << "Hi! Here, D->JVal is " << D->JVal << "!\n";
@@ -49,8 +49,8 @@ void Link::Evaluate(const adoublev &x, adoublev &c) {
    ix = cIx;
    for (int i = A->W->DOFs.size()-1; i >= 0; i --) {
       DOF *D = A->W->DOFs[i];
-      if (!D->DOFReps[A->sIx]->isConstant() ||
-          !D->DOFReps[B->sIx]->isConstant()) {
+      if (!D->Rep(A->sIx)->isConstant() ||
+          !D->Rep(B->sIx)->isConstant()) {
          c[ix ++] -= D->qVal;
          c[ix ++] -= D->qMomentum;
       }

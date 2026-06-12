@@ -13,10 +13,10 @@ DOF::DOF(World *const w, const char *const S) :
 }
 
 void DOF::SnapShot(const adoublev &x, int ival, int slice, double t) {
-   DOFReps[ival]->SnapShot(x, slice, t);
-   qVal = DOFReps[ival]->Val;
-   qDot = DOFReps[ival]->Dot;
-//   cerr << "SnapShot: [ " << qVal << ", " << qDot << ", " << qBis << " ]\n";
+   Fun *F = Rep(ival);
+   F->SnapShot(x, slice, t);
+   qVal = F->Val;
+   qDot = F->Dot;
    QVal = JVal = 0;
 }
 

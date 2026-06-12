@@ -1,5 +1,6 @@
 # pragma once
 
+# include <assert.h>
 # include <map>
 
 # include "adolc.h"
@@ -24,6 +25,14 @@ public:
    DOF(World *w, const char *S);
 
    void Register(Fun *const f);
+
+   // checked lookup; a DOF must have a representation on every stage,
+   // and the map's operator[] would silently insert a null instead
+   Fun *Rep(int ival) const {
+      map<int, Fun *, less<int> >::const_iterator p = DOFReps.find(ival);
+      assert(p != DOFReps.end() && !!(*p).second);
+      return (*p).second;
+   }
 
    void SnapShot(const adoublev &x, int ival, int slice, double t);
 };
