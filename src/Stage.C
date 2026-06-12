@@ -105,6 +105,12 @@ void Stage::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
       assert(!!(*p)->DOFReps[sIx]);
       (*p)->DOFReps[sIx]->Initialize(x, c);
    }
+   // stage-registered Funs (muscles, forces) are disjoint from the
+   // DOFReps above; they need their bounds/initials set up too
+   for (vector<Fun *> :: const_iterator p = Funs.begin();
+        p != Funs.end(); p++) {
+      (*p)->Initialize(x, c);
+   }
    cerr << " * Initializing Constraints\n";
    for (vector<Constraint *> :: const_iterator p = Cons.begin();
         p != Cons.end(); p++) {
