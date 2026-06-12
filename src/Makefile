@@ -40,7 +40,6 @@ SRCS = AVec.C \
 	AnchorPoint.C \
 	SimpsonIntegrator.C \
 	GaussianIntegrator.C \
-	RIBVisualizer.C \
 	SpecParser.C \
 	SpecBuilder.C \
 	Recorder.C \
