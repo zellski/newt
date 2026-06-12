@@ -4,14 +4,15 @@
 
 # objects to link with to create an executable
 #MACH_OBJS = -ltcl8.4 -ldl -lm
-MACH_OBJS = -framework Tcl
+MACH_OBJS ?= -framework Tcl
 
-# Change this to point to include directories for HQP, Omuses, AdolC, etc
+# Change these to point to include directories for HQP, Omuses, AdolC
+# etc, or override them on the make command line
 
-ADOLC_INC = /usr/local/include/adolc
-ADOLC_LIB = /usr/local/lib64
-HQP_INC = /usr/local/include/hqp
-HQP_LIB = /usr/local/lib
+ADOLC_INC ?= /usr/local/include/adolc
+ADOLC_LIB ?= /usr/local/lib64
+HQP_INC ?= /usr/local/include/hqp
+HQP_LIB ?= /usr/local/lib
 
 # Change these according to your system!
 
@@ -44,7 +45,7 @@ odc:	always $(OBJS)
 	$(LDFLAGS) -lomu -lhqp -lnewt $(MACH_OBJS)
 
 always:
-	cd ../src; make
+	cd ../src; $(MAKE)
 
 .C.o:
 	$(CXX) -c $(CFLAGS) $<

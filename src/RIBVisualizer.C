@@ -126,7 +126,7 @@ void RIBVisualizer::Generate(World *const W, const adoublev &x) {
       qM[i].flush();
 
       std::ofstream DOFOut;
-      sprintf(buf, "../res/%sDat.m", D->Name);
+      snprintf(buf, sizeof buf, "../res/%sDat.m", D->Name);
       DOFOut.open(buf);
       DOFOut << qOut[i].str() << qDot[i].str() << QOut[i].str() << qC[i].str() << qM[i].str();
       DOFOut.close();
