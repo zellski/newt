@@ -12,6 +12,10 @@ class Creature;
 
 class World {
 public:
+   // the most recently constructed World; lets the recording layer find
+   // the problem without threading it through the Omu_Program plumbing
+   static World *Active;
+
    vector<Creature *> Creatures;
    vector<DOF *> DOFs;
    vector<Stage *> Stages;

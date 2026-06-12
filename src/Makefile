@@ -42,7 +42,8 @@ SRCS = AVec.C \
 	GaussianIntegrator.C \
 	RIBVisualizer.C \
 	SpecParser.C \
-	Recorder.C
+	Recorder.C \
+	Sweep.C
 #	VRMLVisualizer.C
 
 OBJS=$(SRCS:.C=.o)

@@ -1,9 +1,11 @@
-# include "RIBVisualizer.h"
 # include "Stage.h"
 # include "World.h"
 # include "DOF.h"
 # include "Creature.h"
 # include "Fun.h"
+# include "newt/Sweep.h"
+
+World *World::Active = 0;
 
 World::World(double g) :
    Creatures(),
@@ -11,7 +13,9 @@ World::World(double g) :
    Stages(),
    xIx(0), cIx(0),
    G(g)
-{};
+{
+   Active = this;
+};
 
 int World::Register(Creature *C) {
    assert(!!C);
@@ -53,9 +57,9 @@ void World::Update(const adoublev &x, adoublev &c, adouble &f0) {
    for (uint i = 0; i < Stages.size(); i ++) {
       Stages[i]->Update(x, c, f0);
    }
-   RIBVisualizer::Generate(this, x);
-   //   VRMLVisualizer::Generate(this, x, 100);
-
+   if (newt::Sweeper::requested) {
+      newt::Sweeper::Run(this, x);
+   }
 }
 
 void World::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
