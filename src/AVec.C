@@ -6,8 +6,10 @@ AVec::AVec(const adouble x, const adouble y) :
 {
 }
 
-AVec::AVec() {
-   AVec(0, 0);
+AVec::AVec() :
+   x(0),
+   y(0)
+{
 }
 
 void AVec::zero() {
@@ -44,7 +46,7 @@ AVec& AVec::operator *= (const adouble& k) {
 }
 
 adouble operator * (const AVec& a, const AVec& b) {
-   return a.x*b.x + a.y*a.y;
+   return a.x*b.x + a.y*b.y;
 }
 
 AVec operator + (const AVec& a, const AVec& b) {

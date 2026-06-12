@@ -13,17 +13,18 @@ Stage::Stage(World *w, Integrator *i, int n, double t) :
    W(w),
    Muscles(),
    Forces(),
+   Funs(),
    Impulses(),
    Cons(),
    integrator(i),
    Min(-1), Max(-1), Start(-1), // not used
-   N(n),
-   T(t),
-   h(t/n),
    speedContribution(0.0),
    torqueContribution(0.0),
+   N(n),
    sIx(w->Register(this)),
-   tIx(-1)
+   tIx(-1),
+   T(t),
+   h(t/n)
 {
    assert(!!W);
    assert(N > 0);
@@ -35,17 +36,18 @@ Stage::Stage(World *w, Integrator *i,
    W(w),
    Muscles(),
    Forces(),
+   Funs(),
    Impulses(),
    Cons(),
-   Min(min), Max(max), Start(start),
    integrator(i),
-   N(n),
-   T(start),
-   h(start/n),
+   Min(min), Max(max), Start(start),
    speedContribution(0.0),
    torqueContribution(0.0),
+   N(n),
    sIx(w->Register(this)),
-   tIx(w->claimVars(1))
+   tIx(w->claimVars(1)),
+   T(start),
+   h(start/n)
 {
    assert(!!W);
    assert(N > 0);
@@ -102,8 +104,13 @@ void Stage::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    }
    for (vector<DOF *> :: const_iterator p = W->DOFs.begin();
         p != W->DOFs.end(); p++) {
-      assert(!!(*p)->DOFReps[sIx]);
-      (*p)->DOFReps[sIx]->Initialize(x, c);
+      (*p)->Rep(sIx)->Initialize(x, c);
+   }
+   // stage-registered Funs (muscles, forces) are disjoint from the
+   // DOFReps above; they need their bounds/initials set up too
+   for (vector<Fun *> :: const_iterator p = Funs.begin();
+        p != Funs.end(); p++) {
+      (*p)->Initialize(x, c);
    }
    cerr << " * Initializing Constraints\n";
    for (vector<Constraint *> :: const_iterator p = Cons.begin();
@@ -193,7 +200,7 @@ void Stage::FEMPoint(const int slice, const double t, const double weight,
         speedContribution += 5 * weight * h.value() * qDotContrib.value();
 # endif
 
-        (*p)->DOFReps[sIx]->IntegrateFEM(c, qM, qC, slice, t, weight);
+        (*p)->Rep(sIx)->IntegrateFEM(c, qM, qC, slice, t, weight);
     }
     for (vector<Muscle *>::const_iterator m = Muscles.begin();
          m != Muscles.end(); m ++) {

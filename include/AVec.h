@@ -20,7 +20,7 @@ class AVec {
      return AVec(-y, x);
   }
 
-  AVec rotated(adouble& angle) const {
+  AVec rotated(const adouble& angle) const {
       return AVec(cos(angle)*x - sin(angle)*y, sin(angle)*x + cos(angle)*y);
   }
 

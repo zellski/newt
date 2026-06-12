@@ -28,7 +28,7 @@ void Trivial::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableV
    DOF *alpha;
    ThinRod *rod;
 
-   W = new World(0.0, false);
+   W = new World(0.0);
 
    DOF *X = new DOF(W, "X");
    DOF *Y = new DOF(W, "Y");

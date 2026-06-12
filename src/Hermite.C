@@ -100,6 +100,9 @@ void Hermite::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
       x.min[xIx+i*2+0] = Min;
       x.max[xIx+i*2+0] = Max;
       x.initial[xIx+i*2+0] = From + i*(To-From)/S->N;
+      // derivative coefficients are per unit of local slice time, so the
+      // slope of the From->To interpolation is the per-slice rise
+      x.initial[xIx+i*2+1] = (To-From)/S->N;
    }
 }
 
@@ -107,8 +110,8 @@ void Hermite::Evaluate(const adoublev &x, adoublev &c) {
    if (cIx >= 0) {
       for (int i = 0; i < S->N; i ++) {
 //      cerr << "Evaluating indices [" << (cIx+i*P+1) << " - " << (cIx+i*P+P) << "] as {";
-         SnapShot(x, i, 0.3); c[cIx+i*2] = Val;
-         SnapShot(x, i, 0.7); c[cIx+i*2+1] = Val;
+         SnapShot(x, i, 1.0/3); c[cIx+i*2] = Val;
+         SnapShot(x, i, 2.0/3); c[cIx+i*2+1] = Val;
       }
    }
 }

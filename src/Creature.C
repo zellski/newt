@@ -31,7 +31,7 @@ void Creature::DistImpulse(const adoublev &x) {
         Q != AttachedPoints.end(); Q ++) {
       RigidBody *R = (*Q)->Parent;
 
-      R->DistImpulse(x);
+      R->DistImpulse(x, *Q);
 
       X->JVal += R->TotJ.x;
       Y->JVal += R->TotJ.y;

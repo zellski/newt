@@ -28,7 +28,13 @@ void RigidBody::CleanSweep() {
    }
 }
 
-void RigidBody::DistImpulse(const adoublev &x) {
+// Distribute the Cartesian impulses working on points of this body and
+// its outboards onto the angular DOF, exactly as BuildSweep distributes
+// forces (thesis eq. 4.33-4.35, applied to impulses per eq. 3.15). The
+// generalized impulse at the joint comes out as JVal - E[b]*TotJ, with
+// b the entry point through which this body hangs from its parent.
+
+void RigidBody::DistImpulse(const adoublev &x, const BodyPoint *const Entry) {
    JVal = 0;
    TotJ.zero();
 
@@ -39,19 +45,15 @@ void RigidBody::DistImpulse(const adoublev &x) {
            Q != P->AttachedPoints.end(); Q ++) {
          RigidBody *R = (*Q)->Parent;
 
-         R->DistImpulse(x);
+         R->DistImpulse(x, *Q);
 
          TotJ += R->TotJ;
          JVal += R->JVal;
       }
       JVal += P->TotJ * P->Val.flipped();
       TotJ += P->TotJ;
-//      cerr << "Added JVal " << P->TotJ*tmp << " and TotJ " << P->TotJ << "\n";
    }
-   // FIXME: What the hell is tmp supposed to be here? Entry->Val.flipped() probably?
-   assert(false);
-//   Angle->JVal += JVal - tmp*TotJ;
-//   cerr << "Finally, Angle->Jval: " << JVal - tmp*TotJ << "...\n";
+   Angle->JVal += JVal - Entry->Val.flipped()*TotJ;
 }
 
 void RigidBody::BuildSweep(const adoublev &x, const BodyPoint *const Entry) {

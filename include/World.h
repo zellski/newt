@@ -20,7 +20,7 @@ public:
 
    const double G;
 
-   World(double g, bool implicit = false);
+   World(double g);
 
    void Update(const adoublev &x, adoublev &c, adouble &f0);
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);

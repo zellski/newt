@@ -4,20 +4,20 @@
 
 Impulse::Impulse(Stage *const s, AnchorPoint *p,
                  double sx, double sy, double mag) :
+   xIx(-1),
    S(s),
    P(p),
    vx(sx), vy(sy),
-   JVec(sx*mag, sy*mag),
-   xIx(-1)
+   JVec(sx*mag, sy*mag)
 {
    S->Register(this);
 }
 
 Impulse::Impulse(Stage *const s, AnchorPoint *p, double sx, double sy) :
+   xIx(s->claimVars(1)),
    S(s),
    P(p),
-   vx(sx), vy(sy),
-   xIx(s->claimVars(1))
+   vx(sx), vy(sy)
 {
    S->Register(this);
    cerr << "Allocated xIx " << xIx << " for ("        << vx << ", "<< vy << ") impulse\n";
@@ -26,8 +26,7 @@ Impulse::Impulse(Stage *const s, AnchorPoint *p, double sx, double sy) :
 void Impulse::SnapShot(const adoublev &x) {
    if (xIx >= 0) {
       JVec.set(x[xIx]*vx, x[xIx]*vy);
-      P->TotJ += JVec;
-      cerr << "Impulsing AnchorPoint " << P->Name << " in direction ("
-           << vx << ", " << vy << ") magnitude " << x[xIx] << "..\n";
    }
+   // fixed-magnitude impulses keep the JVec computed at construction
+   P->TotJ += JVec;
 }

@@ -20,7 +20,7 @@ This is a 30-line summary of a 50-page thesis. For understanding, go read the fu
 
 ## Installation
 
-The code presented here absolutely relies on the HQP/Omuses optimization package bundle written by Rüdiger Franke. It is available at
+The code presented here absolutely relies on the HQP/Omuses optimization package bundle written by Rï¿½diger Franke. It is available at
 
     http://hqp.sourceforge.net/
 
@@ -38,6 +38,17 @@ The code outputs RenderMan format and you will need a renderer for it. For a sum
 
     http://www.faqs.org/faqs/graphics/renderman-faq/
 
+
+## Tests
+
+The newt/tests subdirectory holds standalone unit tests for the math
+underpinnings: the AVec vector algebra, the numerical integration
+rules, and the dynamics distribution machinery (force/impulse
+application and the recursive sweeps onto angular DOFs). They compile
+the real sources against a stub adouble instead of HQP/ADOL-C, so
+they run anywhere:
+
+    make -C tests test
 
 ## Running It
 
@@ -89,5 +100,5 @@ I have included a subdirectory newt/res/RENDER in the distribution, with a makef
 
 By default, it generates a MPEG4 stream, which most modern computers can view and which has excellent compression.
 
-Pär Winzell
+Pï¿½r Winzell
 zell@alyx.com

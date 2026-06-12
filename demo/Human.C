@@ -17,7 +17,6 @@
 # include "Impulse.h"
 # include "Single.h"
 # include "Hat.h"
-# include "PWC.h"
 # include "PWL.h"
 # include "Hermlet.h"
 # include "GaussianIntegrator.h"

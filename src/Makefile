@@ -1,11 +1,12 @@
 .SUFFIXES: .c .C .o .so
 
-# Change these according to your system!
+# Change these according to your system, or override on the make
+# command line, e.g. make HQP_INC=$HOME/repos/local/include/hqp ...
 
-ADOLC_INC = /usr/local/include/adolc
-ADOLC_LIB = /usr/local/lib64
-HQP_INC = /usr/local/include/hqp
-HQP_LIB = /usr/local/lib
+ADOLC_INC ?= /usr/local/include/adolc
+ADOLC_LIB ?= /usr/local/lib64
+HQP_INC ?= /usr/local/include/hqp
+HQP_LIB ?= /usr/local/lib
 
 CXX = g++
 CC = gcc

@@ -29,7 +29,7 @@ void Snake::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec
    DOF *Angles[LINKS];
    ThinRod *Rods[LINKS];
 
-   W = new World(-9.81, false);
+   W = new World(-9.81);
 
    DOF *X = new DOF(W, "X");
    DOF *Y = new DOF(W, "Y");
@@ -59,7 +59,7 @@ void Snake::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u, Omu_VariableVec
    new Constant(S1, Y, 0);
 
    for (int i = 0; i < LINKS; i ++) {
-       new Muscle(S1, Angles[i], new PWL(S1), 1/(i+1));
+       new Muscle(S1, Angles[i], new PWL(S1), 1.0/(i+1));
    }
    new Hat(S1, Angles[0], -PI/2, PI/2, -PI, PI);
    for (int i = 1; i < LINKS; i ++) {

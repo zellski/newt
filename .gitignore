@@ -7,3 +7,8 @@ src/*.d
 demo/*.d
 /res
 /render-*
+tests/test_avec
+tests/test_quadrature
+tests/test_dynamics
+tests/*.dSYM/
+demo/ADOLC-*.tap
