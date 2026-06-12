@@ -57,6 +57,7 @@ html, body {
 
 #run-list li:hover { background: #252932; }
 #run-list li.selected { background: #2b3038; }
+#run-list li.legacy { opacity: 0.55; }
 
 #run-list .name { font-weight: 600; }
 #run-list .meta { color: var(--dim); font-size: 11px; white-space: nowrap; }

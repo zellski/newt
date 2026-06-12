@@ -20,6 +20,7 @@ const SCHEMA_VERSION = 1;
 
 let dbPath = "newt.db";
 let port = 8717;
+let host = "127.0.0.1";
 let exportId = null;
 let outPath = null;
 
@@ -28,6 +29,8 @@ for (let i = 0; i < argv.length; i++) {
    if (argv[i] === "--port") {
       port = parseInt(argv[++i], 10);
       if (!Number.isFinite(port)) fail("--port needs a number");
+   } else if (argv[i] === "--host") {
+      host = argv[++i] ?? fail("--host needs an address");
    } else if (argv[i] === "--export") {
       exportId = parseInt(argv[++i], 10);
       if (!Number.isFinite(exportId)) fail("--export needs a run id");
@@ -60,6 +63,8 @@ if (version !== SCHEMA_VERSION) {
 const qRuns = db.query(`
    SELECT r.id, r.scenario_name, r.status, r.started_at, r.finished_at,
           r.n_dofs, r.frame_dt, r.final_iter,
+          (r.creature_yaml IS NOT NULL AND r.creature_yaml != '')
+             AS has_creature,
           (SELECT COUNT(*) FROM iterations i WHERE i.run_id = r.id)
              AS n_iterations,
           (SELECT objective FROM iterations i WHERE i.run_id = r.id
@@ -203,6 +208,7 @@ if (exportId !== null) {
 }
 
 const server = Bun.serve({
+   hostname: host,   // loopback-only unless --host says otherwise
    port,
    fetch(req) {
       const { pathname } = new URL(req.url);
@@ -221,4 +227,4 @@ const server = Bun.serve({
    },
 });
 
-console.log(`newt-view: ${dbPath} -> http://localhost:${server.port}/`);
+console.log(`newt-view: ${dbPath} -> http://${host}:${server.port}/`);

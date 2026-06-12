@@ -136,7 +136,7 @@ function rebuildCreature() {
    }
    creatureGroup = new THREE.Group();
    bodyGroups = {};
-   for (const body of state.run.creature.bodies) {
+   for (const body of state.run.creature?.bodies ?? []) {
       const g = new THREE.Group();
       g.add(bodyMesh(body));
       bodyGroups[body.name] = g;
@@ -164,7 +164,7 @@ function creatureExtent() {
 
 function frameCamera() {
    const cur = state.cur;
-   if (!cur || cur.n === 0) return;
+   if (!cur || cur.n === 0 || !state.tree) return;
    const d = cur.d;
    let minX = 1e30, maxX = -1e30, minY = 1e30, maxY = -1e30;
    const step = Math.max(1, Math.floor(cur.n / 60));
@@ -204,6 +204,10 @@ function renderRunList() {
    ul.replaceChildren(...state.runs.map((r) => {
       const li = document.createElement("li");
       if (state.run && r.id === state.run.id) li.classList.add("selected");
+      if (!r.has_creature) {
+         li.classList.add("legacy");
+         li.title = "no creature embedded in this run; metrics only";
+      }
       const left = document.createElement("span");
       const dot = document.createElement("span");
       dot.className = `status ${r.status}`;
@@ -223,7 +227,9 @@ function renderRunList() {
 async function loadRun(id) {
    state.run = await getJSON(`/api/run/${id}`);
    history.replaceState(null, "", `#run=${id}`);
-   state.tree = buildTree(state.run.creature);
+   // legacy rows (pre-YAML C++ demo runs) carry no creature; show their
+   // metrics and curves but leave the 3D view empty
+   state.tree = state.run.creature ? buildTree(state.run.creature) : null;
    state.frameCache = new Map();
    state.iterations = await getJSON(`/api/run/${id}/iterations`);
    rebuildCreature();
@@ -242,9 +248,14 @@ async function selectIteration(k) {
                      : "no iterations recorded");
       return;
    }
-   showOverlay(null);
+   showOverlay(state.tree ? null :
+      "no creature embedded in this run (legacy recording) — metrics only");
    if (!state.frameCache.has(k)) {
-      state.frameCache.set(k, await getFrames(state.run.id, k));
+      const runId = state.run.id;
+      const fetched = await getFrames(runId, k);
+      // a newer selection or run switch won while we fetched; stand down
+      if (state.run.id !== runId || state.selectedK !== k) return;
+      state.frameCache.set(k, fetched);
    }
    state.cur = state.frameCache.get(k);
    // keep t across iterates: scrubbing k then morphs the same moment
@@ -391,17 +402,18 @@ function updateReadouts() {
    $("time-readout").textContent =
       `t ${state.t.toFixed(3)} / ${duration().toFixed(3)} s`;
 
+   // textContent only: scenario_name/status come from the database,
+   // which may be someone else's export
    const r = state.run;
-   $("hud").innerHTML = r
-      ? `<span class="big">${r.scenario_name} #${r.id}</span>\n` +
-        `${r.status} · ${r.n_dofs} dofs · ` +
-        `∇L ${fmt(it?.norm_grd_l)}`
+   $("hud-title").textContent = r ? `${r.scenario_name} #${r.id}` : "";
+   $("hud-info").textContent = r
+      ? `${r.status} · ${r.n_dofs} dofs · ∇L ${fmt(it?.norm_grd_l)}`
       : "";
 }
 
 function displayedPose() {
    const cur = state.cur;
-   if (!cur || cur.n === 0) return null;
+   if (!cur || cur.n === 0 || !state.tree) return null;
    const d = cur.d, dt = state.run.frame_dt;
    const i = Math.min(Math.floor(state.t / dt), cur.n - 1);
    const j = Math.min(i + 1, cur.n - 1);
