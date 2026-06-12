@@ -100,6 +100,9 @@ void Hermite::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
       x.min[xIx+i*2+0] = Min;
       x.max[xIx+i*2+0] = Max;
       x.initial[xIx+i*2+0] = From + i*(To-From)/S->N;
+      // derivative coefficients are per unit of local slice time, so the
+      // slope of the From->To interpolation is the per-slice rise
+      x.initial[xIx+i*2+1] = (To-From)/S->N;
    }
 }
 
