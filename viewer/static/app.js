@@ -64,7 +64,6 @@ const state = {
    frameCache: new Map(),
    t: 0,
    playing: true,
-   speed: 1,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -223,7 +222,7 @@ function renderRunList() {
 
 async function loadRun(id) {
    state.run = await getJSON(`/api/run/${id}`);
-   location.hash = `run=${id}`;
+   history.replaceState(null, "", `#run=${id}`);
    state.tree = buildTree(state.run.creature);
    state.frameCache = new Map();
    state.iterations = await getJSON(`/api/run/${id}/iterations`);
@@ -382,10 +381,6 @@ $("play").addEventListener("click", () => {
    $("play").innerHTML = state.playing ? "&#10074;&#10074;" : "&#9654;";
 });
 
-$("speed").addEventListener("change", (e) => {
-   state.speed = +e.target.value;
-});
-
 // --------------------------------------------------------------- loop
 
 function updateReadouts() {
@@ -437,7 +432,9 @@ function tick(now) {
    }
 
    if (state.playing && duration() > 0) {
-      state.t = (state.t + dt * state.speed) % duration();
+      // read the select live: browsers restore form state on reload
+      // without firing change events, so a cached copy can go stale
+      state.t = (state.t + dt * +$("speed").value) % duration();
    }
    const pose = displayedPose();
    if (pose) applyPose(pose);
