@@ -13,6 +13,7 @@
 */
 
 # include <tcl.h>
+# include <cmath>
 # include <cstdio>
 
 # include "Newt_Glue.h"
@@ -86,18 +87,22 @@ static int CmdOpenRun(ClientData, Tcl_Interp *interp,
 
 static int CmdRecord(ClientData, Tcl_Interp *interp,
                      int objc, Tcl_Obj *const objv[]) {
-   if (objc != 5) {
-      return error(interp, "usage: newt_record <k> <objective> <inf> <grdL>");
+   if (objc != 4 && objc != 5) {
+      return error(interp, "usage: newt_record <k> <objective> <inf> ?<grdL>?");
    }
    if (!Rec) {
       std::fprintf(stderr, "newt_record: no run open, skipping\n");
       return TCL_OK;
    }
    int k;
-   double obj, inf, grdL;
+   double obj, inf;
+   double grdL = NAN;   // omitted => stored as NULL until newt_grdl backfills
    if (Tcl_GetIntFromObj(interp, objv[1], &k) != TCL_OK ||
        Tcl_GetDoubleFromObj(interp, objv[2], &obj) != TCL_OK ||
-       Tcl_GetDoubleFromObj(interp, objv[3], &inf) != TCL_OK ||
+       Tcl_GetDoubleFromObj(interp, objv[3], &inf) != TCL_OK) {
+      return TCL_ERROR;
+   }
+   if (objc == 5 &&
        Tcl_GetDoubleFromObj(interp, objv[4], &grdL) != TCL_OK) {
       return TCL_ERROR;
    }

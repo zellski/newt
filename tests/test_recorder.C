@@ -73,7 +73,8 @@ int main() {
    vector<double> x = ramp(4, 100), times = ramp(3, 0);
    vector<double> frames = ramp(3*3*2, 1000), bounds = ramp(2, 0.5);
    R->RecordIteration(0, 42.5, 1e-3, 2e-2, x, times, frames, bounds);
-   R->RecordIteration(1, 41.0, 1e-4, 1e-2, x, times, frames, bounds);
+   // NaN gradient norm => stored as NULL (pending backfill that never comes)
+   R->RecordIteration(1, 41.0, 1e-4, NAN, x, times, frames, bounds);
 
    // --- second writer on the same database, interleaved ---
    Recorder *R2 = Recorder::Open(dbPath, info("beta"), err);
@@ -130,6 +131,12 @@ int main() {
          memcmp(sqlite3_column_blob(st, 3), &frames[0], frames.size()*8) == 0);
    check("stage bounds json",
          string((const char *) sqlite3_column_text(st, 4)) == "[0.5,1.5]");
+   sqlite3_finalize(st);
+
+   sqlite3_prepare_v2(db,
+      "SELECT norm_grd_l FROM iterations WHERE run_id=1 AND k=1;", -1, &st, 0);
+   check("unbackfilled grdL row", sqlite3_step(st) == SQLITE_ROW);
+   check("grdL stored as NULL", sqlite3_column_type(st, 0) == SQLITE_NULL);
    sqlite3_finalize(st);
 
    sqlite3_prepare_v2(db,

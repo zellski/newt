@@ -40,7 +40,8 @@ public:
                          std::string &err);
 
    // one accepted SQP iterate; frames holds nFrames*nDofs*2 doubles
-   // (q, qdot pairs, frame-major); times holds nFrames global times
+   // (q, qdot pairs, frame-major); times holds nFrames global times.
+   // pass NaN for normGrdL to store NULL (value not yet computed)
    void RecordIteration(int k, double objective, double infeasibility,
                         double normGrdL,
                         const std::vector<double> &x,

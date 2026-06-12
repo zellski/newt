@@ -2,6 +2,7 @@
 
 # include <sqlite3.h>
 # include <unistd.h>
+# include <cmath>
 # include <cstdio>
 # include <sstream>
 
@@ -183,7 +184,12 @@ void Recorder::RecordIteration(int k, double objective, double infeasibility,
    sqlite3_bind_int(st, 2, k);
    sqlite3_bind_double(st, 3, objective);
    sqlite3_bind_double(st, 4, infeasibility);
-   sqlite3_bind_double(st, 5, normGrdL);
+   if (std::isnan(normGrdL)) {
+      // not yet computed for this iterate; UpdateNormGrdL backfills
+      sqlite3_bind_null(st, 5);
+   } else {
+      sqlite3_bind_double(st, 5, normGrdL);
+   }
    sqlite3_bind_int(st, 6, (int) times.size());
    bindBlob(st, 7, x);
    bindBlob(st, 8, times);
