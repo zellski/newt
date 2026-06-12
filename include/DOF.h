@@ -5,8 +5,6 @@
 # include <map>
 
 # include "adolc.h"
-# include "Constraints.h"
-# include "Stage.h"
 
 class World;
 class Fun;

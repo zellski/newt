@@ -3,6 +3,7 @@
 # include <Omu_Variables.h>
 # include "adolc.h"
 # include "Fun.h"
+# include "Constraints.h"
 
 /*
 **        This is a basis of cubic piecewise polynomials, of width and
