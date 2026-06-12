@@ -445,9 +445,18 @@ ScenarioSpec parseScenario(const Node &root, const Ctx &ctx) {
    } else {
       ic.sub("type").fail("unknown integrator '" + itype + "' (simpson|gauss)");
    }
+   // the integrator constructors have hard preconditions: Gauss-Legendre
+   // tables exist for 5/8/10 points only, composite Simpson needs an odd
+   // sample count >= 3 (and caps at 99)
    S.integratorN = (int) integer(req(nf, "n", ic), ic.sub("n"));
-   if (S.integratorN < 1) {
-      ic.sub("n").fail("n must be >= 1");
+   if (S.integrator == ScenarioSpec::Gauss) {
+      if (S.integratorN != 5 && S.integratorN != 8 && S.integratorN != 10) {
+         ic.sub("n").fail("gauss supports n = 5, 8 or 10");
+      }
+   } else {
+      if (S.integratorN < 3 || S.integratorN >= 100 || S.integratorN % 2 == 0) {
+         ic.sub("n").fail("simpson needs an odd n in [3, 99]");
+      }
    }
 
    if (opt(f, "record_dt")) {
@@ -505,6 +514,11 @@ bool powerOfTwo(int n) {
    return n > 0 && (n & (n - 1)) == 0;
 }
 
+// the body part of a "Body.Point" reference
+string bodyOf(const string &ref) {
+   return ref.substr(0, ref.find('.'));
+}
+
 }  // namespace
 
 // --- public entry points ------------------------------------------------
@@ -551,6 +565,9 @@ void newt::Validate(const ScenarioSpec &S, const CreatureSpec &C) {
    }
    for (size_t i = 0; i < C.bodies.size(); i ++) {
       const BodySpec &B = C.bodies[i];
+      if (B.name.find('.') != string::npos) {
+         ctx.fail("body name '" + B.name + "' must not contain '.'");
+      }
       if (!bodies.insert(B.name).second) {
          ctx.fail("duplicate body name '" + B.name + "'");
       }
@@ -558,6 +575,9 @@ void newt::Validate(const ScenarioSpec &S, const CreatureSpec &C) {
          ctx.fail("duplicate DOF name '" + B.dof + "'");
       }
       for (size_t j = 0; j < B.points.size(); j ++) {
+         if (B.points[j].name.find('.') != string::npos) {
+            ctx.fail("point name '" + B.points[j].name + "' must not contain '.'");
+         }
          if (!points.insert(B.name + "." + B.points[j].name).second) {
             ctx.fail("duplicate point '" + B.name + "." + B.points[j].name + "'");
          }
@@ -578,6 +598,49 @@ void newt::Validate(const ScenarioSpec &S, const CreatureSpec &C) {
    for (size_t i = 0; i < C.attachments.size(); i ++) {
       check.point(C.attachments[i].parent, "attachment parent");
       check.point(C.attachments[i].child, "attachment child");
+   }
+
+   // the bodies must form a tree rooted at the anchor's body: every other
+   // body hangs from exactly one parent, no cycles, nothing disconnected.
+   // BuildSweep recurses through attachments without a visited set, so a
+   // malformed graph would recurse forever, not just compute nonsense.
+   {
+      string rootBody = bodyOf(C.rootAttach);
+      map<string, string> parentOf;
+      for (size_t i = 0; i < C.attachments.size(); i ++) {
+         string pb = bodyOf(C.attachments[i].parent);
+         string cb = bodyOf(C.attachments[i].child);
+         if (pb == cb) {
+            ctx.fail("body '" + pb + "' is attached to itself");
+         }
+         if (cb == rootBody) {
+            ctx.fail("root body '" + cb + "' cannot hang from another body");
+         }
+         if (parentOf.count(cb)) {
+            ctx.fail("body '" + cb + "' has more than one parent");
+         }
+         parentOf[cb] = pb;
+      }
+      // one-parent-each plus a parentless root means any cycle or stray
+      // subtree shows up as unreachable from the root
+      set<string> reached;
+      reached.insert(rootBody);
+      for (bool grew = true; grew; ) {
+         grew = false;
+         for (map<string, string>::const_iterator p = parentOf.begin();
+              p != parentOf.end(); p ++) {
+            if (!reached.count(p->first) && reached.count(p->second)) {
+               reached.insert(p->first);
+               grew = true;
+            }
+         }
+      }
+      for (set<string>::const_iterator b = bodies.begin(); b != bodies.end(); b ++) {
+         if (!reached.count(*b)) {
+            ctx.fail("body '" + *b + "' is not connected to the root body '" +
+                     rootBody + "'");
+         }
+      }
    }
 
    // stages

@@ -121,6 +121,24 @@ static int CmdRecord(ClientData, Tcl_Interp *interp,
    return TCL_OK;
 }
 
+static int CmdGrdL(ClientData, Tcl_Interp *interp,
+                   int objc, Tcl_Obj *const objv[]) {
+   if (objc != 3) {
+      return error(interp, "usage: newt_grdl <k> <norm_grd_L>");
+   }
+   if (!Rec) {
+      return TCL_OK;
+   }
+   int k;
+   double grdL;
+   if (Tcl_GetIntFromObj(interp, objv[1], &k) != TCL_OK ||
+       Tcl_GetDoubleFromObj(interp, objv[2], &grdL) != TCL_OK) {
+      return TCL_ERROR;
+   }
+   Rec->UpdateNormGrdL(k, grdL);
+   return TCL_OK;
+}
+
 static int CmdFinish(ClientData, Tcl_Interp *interp,
                      int objc, Tcl_Obj *const objv[]) {
    if (objc != 2) {
@@ -140,6 +158,7 @@ extern "C" int Newt_Init(Tcl_Interp *interp) {
    Tcl_CreateObjCommand(interp, "newt_scenario", CmdScenario, 0, 0);
    Tcl_CreateObjCommand(interp, "newt_open_run", CmdOpenRun, 0, 0);
    Tcl_CreateObjCommand(interp, "newt_record", CmdRecord, 0, 0);
+   Tcl_CreateObjCommand(interp, "newt_grdl", CmdGrdL, 0, 0);
    Tcl_CreateObjCommand(interp, "newt_finish", CmdFinish, 0, 0);
    return TCL_OK;
 }

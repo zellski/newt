@@ -197,6 +197,23 @@ void Recorder::RecordIteration(int k, double objective, double infeasibility,
    sqlite3_finalize(st);
 }
 
+void Recorder::UpdateNormGrdL(int k, double normGrdL) {
+   sqlite3_stmt *st = 0;
+   const char *sql =
+      "UPDATE iterations SET norm_grd_l = ? WHERE run_id = ? AND k = ?;";
+   if (sqlite3_prepare_v2(db, sql, -1, &st, 0) != SQLITE_OK) {
+      std::fprintf(stderr, "Recorder: %s\n", sqlite3_errmsg(db));
+      return;
+   }
+   sqlite3_bind_double(st, 1, normGrdL);
+   sqlite3_bind_int64(st, 2, run);
+   sqlite3_bind_int(st, 3, k);
+   if (sqlite3_step(st) != SQLITE_DONE) {
+      std::fprintf(stderr, "Recorder: %s\n", sqlite3_errmsg(db));
+   }
+   sqlite3_finalize(st);
+}
+
 void Recorder::Finish(const string &status) {
    sqlite3_stmt *st = 0;
    const char *sql =

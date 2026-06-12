@@ -48,6 +48,10 @@ public:
                         const std::vector<double> &frames,
                         const std::vector<double> &stageEnds);
 
+   // the Lagrangian gradient norm for an accepted iterate only becomes
+   // available at the next iteration's QP update; this backfills it
+   void UpdateNormGrdL(int k, double normGrdL);
+
    // stamps status/finished_at/final_iter on the runs row
    void Finish(const std::string &status);
 

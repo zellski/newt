@@ -115,6 +115,10 @@ proc newt_solve {{stream stdout}} {
 
       sqp_qp_update
 
+      # this QP update computed the gradient at the iterate recorded
+      # after the last sqp_step; backfill its norm_grd_l
+      newt_grdl [sqp_iter] [sqp_norm_grd_L]
+
       puts -nonewline $stream [format "%10.4g " [sqp_norm_grd_L]]
       flush $stream
     }
@@ -168,8 +172,10 @@ proc newt_solve {{stream stdout}} {
 
     puts $stream [format "%8.3g" [sqp_alpha]]
 
-    # the freshly accepted iterate (||grdL|| is the pre-step value;
-    # the post-step one only exists after the next sqp_qp_update)
+    # the freshly accepted iterate; ||grdL|| here is still the pre-step
+    # value -- the next pass's sqp_qp_update backfills the real one via
+    # newt_grdl (a run that errors out right after this keeps the stale
+    # value on its last row)
     newt_record [sqp_iter] [prg_f] [sqp_norm_inf] [sqp_norm_grd_L]
 
     if {[qp_iter] >= [qp_max_iters] && [qp_result] != "feasible"} {

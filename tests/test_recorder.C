@@ -85,6 +85,7 @@ int main() {
       R2->Finish("iters");
       delete R2;
    }
+   R->UpdateNormGrdL(2, 0.625);   // gradient-norm backfill
    R->Finish("optimal");
    delete R;
 
@@ -115,10 +116,11 @@ int main() {
    sqlite3_finalize(st);
 
    sqlite3_prepare_v2(db,
-      "SELECT objective, n_frames, x, frames, stage_bounds FROM iterations"
-      " WHERE run_id=1 AND k=2;", -1, &st, 0);
+      "SELECT objective, n_frames, x, frames, stage_bounds, norm_grd_l"
+      " FROM iterations WHERE run_id=1 AND k=2;", -1, &st, 0);
    check("iteration row", sqlite3_step(st) == SQLITE_ROW);
    check("objective", sqlite3_column_double(st, 0) == 40.5);
+   check("grdL backfilled", sqlite3_column_double(st, 5) == 0.625);
    check("n_frames", sqlite3_column_int(st, 1) == 3);
    check("x blob size", sqlite3_column_bytes(st, 2) == 4*8);
    check("x blob bytes",

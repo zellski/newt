@@ -215,15 +215,53 @@ static void testRejections() {
    expectScenarioFail("dangling link stage", "- [S1, S2]", "- [S1, S9]");
    expectScenarioFail("slice out of range", "slice: 3", "slice: 4");
 
-   // creature-side rejections
+   // integrator preconditions (the table-based ctors assert on bad n)
+   expectScenarioFail("gauss 6", "type: gauss, n: 5", "type: gauss, n: 6");
+   expectScenarioFail("simpson even", "type: gauss, n: 5", "type: simpson, n: 4");
+   expectScenarioFail("simpson 1", "type: gauss, n: 5", "type: simpson, n: 1");
+}
+
+// substitute one line of the canonical creature and expect rejection
+static void expectCreatureFail(const char *what, const string &needle,
+                               const string &replacement) {
+   string text = CREATURE;
+   string::size_type p = text.find(needle);
+   if (p == string::npos) {
+      std::fprintf(stderr, "FAIL %s: bad test, needle not found\n", what);
+      failures ++;
+      return;
+   }
+   text.replace(p, needle.size(), replacement);
    try {
-      string text = CREATURE;
-      text.replace(text.find("dof: Beta"), 9, "dof: Alpha");
       CreatureSpec C = ParseCreature(text, "inline");
       Validate(ParseScenario(SCENARIO, "inline"), C);
-      std::fprintf(stderr, "FAIL duplicate dof: expected SpecError\n");
+      std::fprintf(stderr, "FAIL %s: expected SpecError, got none\n", what);
       failures ++;
-   } catch (const SpecError &) {}
+   } catch (const SpecError &) {
+      // expected
+   }
+}
+
+static void testCreatureRejections() {
+   expectCreatureFail("duplicate dof", "dof: Beta", "dof: Alpha");
+
+   // attachment topology: BuildSweep recurses without a visited set, so
+   // anything but a root-anchored tree must be rejected up front
+   expectCreatureFail("self attachment",
+                      "{ parent: Base.Top, child: Arm.Low }",
+                      "{ parent: Base.Top, child: Base.Bot }");
+   expectCreatureFail("double parent",
+                      "{ parent: Base.Top, child: Arm.Low }",
+                      "{ parent: Base.Top, child: Arm.Low }\n"
+                      "  - { parent: Base.Bot, child: Arm.High }");
+   expectCreatureFail("root as child",
+                      "{ parent: Base.Top, child: Arm.Low }",
+                      "{ parent: Base.Top, child: Arm.Low }\n"
+                      "  - { parent: Arm.High, child: Base.Top }");
+   expectCreatureFail("disconnected body",
+                      "attachments:\n"
+                      "  - { parent: Base.Top, child: Arm.Low }\n",
+                      "");
 }
 
 // parse anything shipped under ../scenarios (skip silently if absent)
@@ -255,6 +293,7 @@ int main() {
       testCreature();
       testScenario();
       testRejections();
+      testCreatureRejections();
       testShippedFiles();
    } catch (const SpecError &e) {
       std::fprintf(stderr, "FAIL unexpected SpecError: %s\n", e.msg.c_str());
