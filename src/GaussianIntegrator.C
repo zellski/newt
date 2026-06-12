@@ -47,7 +47,7 @@ GaussianIntegrator::GaussianIntegrator(int nn) : n(nn) {
         points[2] = 0.5 - d3/2.0;   weights[2] = w3;
         points[3] = 0.5 - d2/2.0;   weights[3] = w2;
         points[4] = 0.5 - d1/2.0;   weights[4] = w1;
-        points[5] = 0.5 - d1/2.0;   weights[5] = w1;
+        points[5] = 0.5 + d1/2.0;   weights[5] = w1;
         points[6] = 0.5 + d2/2.0;   weights[6] = w2;
         points[7] = 0.5 + d3/2.0;   weights[7] = w3;
         points[8] = 0.5 + d4/2.0;   weights[8] = w4;
