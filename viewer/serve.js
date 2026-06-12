@@ -7,6 +7,10 @@
 **        appending while we read.
 **
 **        Usage:  bun serve.js [path/to/newt.db] [--port N]
+**                bun serve.js [path/to/newt.db] --export <run-id> [-o out.html]
+**
+**        --export writes one run as a self-contained HTML file (data
+**        inlined; three.js still loaded from its CDN pin).
 */
 
 import { Database } from "bun:sqlite";
@@ -16,12 +20,19 @@ const SCHEMA_VERSION = 1;
 
 let dbPath = "newt.db";
 let port = 8717;
+let exportId = null;
+let outPath = null;
 
 const argv = process.argv.slice(2);
 for (let i = 0; i < argv.length; i++) {
    if (argv[i] === "--port") {
       port = parseInt(argv[++i], 10);
       if (!Number.isFinite(port)) fail("--port needs a number");
+   } else if (argv[i] === "--export") {
+      exportId = parseInt(argv[++i], 10);
+      if (!Number.isFinite(exportId)) fail("--export needs a run id");
+   } else if (argv[i] === "-o") {
+      outPath = argv[++i];
    } else if (argv[i].startsWith("-")) {
       fail(`unknown option ${argv[i]}`);
    } else {
@@ -81,13 +92,18 @@ function apiRuns() {
    return json(qRuns.all());
 }
 
-function apiRun(id) {
+function runDetail(id) {
    const run = qRun.get(id);
-   if (!run) return notFound(`no run ${id}`);
+   if (!run) return null;
    run.dof_names = JSON.parse(run.dof_names);
    run.creature = run.creature_yaml ? Bun.YAML.parse(run.creature_yaml) : null;
    delete run.creature_yaml;
-   return json(run);
+   return run;
+}
+
+function apiRun(id) {
+   const run = runDetail(id);
+   return run ? json(run) : notFound(`no run ${id}`);
 }
 
 function apiIterations(id) {
@@ -134,6 +150,56 @@ async function serveStatic(pathname) {
          "Cache-Control": "no-cache",
       },
    });
+}
+
+// ------------------------------------------------------- static export
+
+async function exportRun(id, out) {
+   const run = runDetail(id);
+   if (!run) fail(`no run ${id}`);
+   const summary = qRuns.all().find((r) => r.id === id);
+   const iterations = qIterations.all(id).map((r) => ({
+      ...r,
+      stage_bounds: r.stage_bounds ? JSON.parse(r.stage_bounds) : [],
+   }));
+
+   const frames = {};
+   for (const it of iterations) {
+      if (it.n_frames === 0) continue;
+      const row = qFrames.get(id, it.k);
+      const buf = new Uint8Array(row.times.length + row.frames.length);
+      buf.set(row.times, 0);
+      buf.set(row.frames, row.times.length);
+      frames[it.k] = { n: it.n_frames, b64: Buffer.from(buf).toString("base64") };
+   }
+
+   const bundle = await Bun.build({
+      entrypoints: [STATIC_DIR + "/app.js"],
+      target: "browser",
+      external: ["three", "three/addons/*"],
+   });
+   if (!bundle.success) fail("bundling app.js failed");
+   const js = await bundle.outputs[0].text();
+   const css = await Bun.file(STATIC_DIR + "/style.css").text();
+
+   const embed = JSON.stringify({ summary, run, iterations, frames })
+      .replace(/</g, "\\u003c");   // keep </script> inert inside the tag
+   const html = (await Bun.file(STATIC_DIR + "/index.html").text())
+      .replace('<link rel="stylesheet" href="/style.css">',
+               `<style>\n${css}</style>`)
+      .replace('<script type="module" src="/app.js"></script>',
+               `<script>window.NEWT_EMBED = ${embed};</script>\n` +
+               `<script type="module">\n${js}</script>`);
+
+   await Bun.write(out, html);
+   console.log(`newt-view: wrote ${out} (${(html.length / 1024).toFixed(0)} KiB,`
+      + ` ${Object.keys(frames).length} iterates; three.js loads from CDN)`);
+}
+
+if (exportId !== null) {
+   await exportRun(exportId,
+      outPath ?? `newt-run-${exportId}.html`);
+   process.exit(0);
 }
 
 const server = Bun.serve({

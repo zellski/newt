@@ -12,13 +12,33 @@ import { buildTree, fkPose } from "./fk.js";
 
 // ------------------------------------------------------------------ api
 
+// a static export (serve.js --export) inlines one run's data as
+// window.NEWT_EMBED; the api layer then never touches the network
+const EMBED = window.NEWT_EMBED;
+
 async function getJSON(url) {
+   if (EMBED) {
+      if (url === "/api/runs") return [EMBED.summary];
+      if (url.endsWith("/iterations")) return EMBED.iterations;
+      return EMBED.run;
+   }
    const r = await fetch(url);
    if (!r.ok) throw new Error(`${url}: ${r.status}`);
    return r.json();
 }
 
 async function getFrames(runId, k) {
+   if (EMBED) {
+      const e = EMBED.frames[k];
+      const bytes = Uint8Array.from(atob(e.b64), (c) => c.charCodeAt(0));
+      const n = e.n, d = EMBED.run.n_dofs;
+      return {
+         n,
+         times: new Float64Array(bytes.buffer, 0, n),
+         frames: new Float64Array(bytes.buffer, n * 8, n * d * 2),
+         d,
+      };
+   }
    const r = await fetch(`/api/run/${runId}/iteration/${k}/frames`);
    if (!r.ok) throw new Error(`frames ${runId}/${k}: ${r.status}`);
    const n = +r.headers.get("X-Newt-Frames");
@@ -404,7 +424,7 @@ let lastTick = performance.now();
 
 function tick(now) {
    requestAnimationFrame(tick);
-   const dt = Math.min((now - lastTick) / 1000, 0.1);
+   const dt = Math.min(Math.max((now - lastTick) / 1000, 0), 0.1);
    lastTick = now;
 
    const view = $("view");
@@ -442,6 +462,7 @@ function lastFramedK() {
 // optimized, pull new iterates as they land; if the scrubber sits on
 // the newest iterate, follow along
 async function pollLoop() {
+   if (EMBED) return;
    for (;;) {
       await new Promise((r) => setTimeout(r, POLL_MS));
       try {
