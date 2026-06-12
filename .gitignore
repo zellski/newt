@@ -10,3 +10,4 @@ demo/*.d
 tests/test_avec
 tests/test_quadrature
 tests/*.dSYM/
+demo/ADOLC-*.tap
