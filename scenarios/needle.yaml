@@ -1,6 +1,6 @@
 # Port of demo/Needle.C: a thin rod falling onto a frictionless
 # surface, tipping over and coming to rest. The first two stage
-# durations are optimizer variables. 8*pi/17 = 1.478396542865785.
+# durations are optimizer variables.
 name: Needle
 creature: creatures/needle.creature.yaml
 gravity: -9.81
@@ -12,14 +12,14 @@ stages:
     reps:
       - { dof: X, type: hermlet, from: 0, to: 0 }
       - { dof: Y, type: hermlet, from: 1, to: 0 }
-      - { dof: Alpha, type: hermlet, from: 1.478396542865785, to: 1.478396542865785 }
+      - { dof: Alpha, type: hermlet, from: 8*pi/17, to: 8*pi/17 }
   - name: I2
     pieces: 16
     duration: { min: 0.1, max: 2, start: 0.3 }
     reps:
       - { dof: X, type: hermlet, from: 0, to: 0 }
       - { dof: Y, type: hermlet, from: 0, to: -1 }
-      - { dof: Alpha, type: hermlet, from: 1.478396542865785, to: 0 }
+      - { dof: Alpha, type: hermlet, from: 8*pi/17, to: 0 }
   - name: I3
     pieces: 8
     duration: 0.1
@@ -34,7 +34,7 @@ links:
   - [I1, I2]
   - [I2, I3]
 constraints:
-  - { stage: I1, dof: Alpha, quantity: q,    at: start, equals: 1.478396542865785 }
+  - { stage: I1, dof: Alpha, quantity: q,    at: start, equals: 8*pi/17 }
   - { stage: I1, dof: Alpha, quantity: qdot, at: start, equals: 0 }
   - { stage: I1, dof: Y,     quantity: q,    at: start, equals: 1 }
   - { stage: I1, dof: Y,     quantity: qdot, at: start, equals: 0 }

@@ -2,6 +2,9 @@
 
 # include <fkYAML/node.hpp>
 
+# include <cctype>
+# include <cmath>
+# include <cstdlib>
 # include <fstream>
 # include <sstream>
 # include <map>
@@ -74,12 +77,130 @@ const Node *opt(const Fields &f, const string &key) {
    return p == f.end() ? 0 : p->second;
 }
 
+// constant-expression evaluator for float-valued fields: number
+// literals, pi/PI, + - * /, unary minus, parens, sqrt(). Deliberately
+// a frozen calculator, not a language: no variables, no references to
+// other fields, no user-defined names.
+struct Expr {
+   const char *p, *end;
+   const string &src;
+   const Ctx &ctx;
+   Expr(const string &s, const Ctx &c)
+      : p(s.c_str()), end(s.c_str() + s.size()), src(s), ctx(c) {}
+   void fail(const string &what) const {
+      ctx.fail("bad expression '" + src + "': " + what);
+   }
+   void ws() {
+      while (p < end && std::isspace((unsigned char) *p)) {
+         p ++;
+      }
+   }
+   bool eat(char c) {
+      ws();
+      if (p < end && *p == c) {
+         p ++;
+         return true;
+      }
+      return false;
+   }
+   double sum() {
+      double v = term();
+      for (;;) {
+         if (eat('+')) {
+            v += term();
+         } else if (eat('-')) {
+            v -= term();
+         } else {
+            return v;
+         }
+      }
+   }
+   double term() {
+      double v = factor();
+      for (;;) {
+         if (eat('*')) {
+            v *= factor();
+         } else if (eat('/')) {
+            double d = factor();
+            if (d == 0) {
+               fail("division by zero");
+            }
+            v /= d;
+         } else {
+            return v;
+         }
+      }
+   }
+   double factor() {
+      ws();
+      if (eat('-')) {
+         return -factor();
+      }
+      if (eat('(')) {
+         double v = sum();
+         if (!eat(')')) {
+            fail("expected ')'");
+         }
+         return v;
+      }
+      if (p < end && (std::isdigit((unsigned char) *p) || *p == '.')) {
+         char *after;
+         double v = std::strtod(p, &after);
+         if (after == p) {
+            fail("malformed number");
+         }
+         p = after;
+         return v;
+      }
+      if (p < end && std::isalpha((unsigned char) *p)) {
+         const char *start = p;
+         while (p < end && std::isalpha((unsigned char) *p)) {
+            p ++;
+         }
+         string name(start, p);
+         if (name == "pi" || name == "PI") {
+            return M_PI;
+         }
+         if (name == "sqrt") {
+            if (!eat('(')) {
+               fail("expected '(' after sqrt");
+            }
+            double v = sum();
+            if (!eat(')')) {
+               fail("expected ')'");
+            }
+            if (v < 0) {
+               fail("sqrt of a negative number");
+            }
+            return std::sqrt(v);
+         }
+         fail("unknown name '" + name + "'");
+      }
+      fail(p < end ? "unexpected '" + string(1, *p) + "'"
+                   : "unexpected end of expression");
+      return 0;   // unreached
+   }
+};
+
+double evalExpr(const string &s, const Ctx &ctx) {
+   Expr e(s, ctx);
+   double v = e.sum();
+   e.ws();
+   if (e.p != e.end) {
+      e.fail("unexpected trailing '" + string(e.p, e.end) + "'");
+   }
+   return v;
+}
+
 double num(const Node &n, const Ctx &ctx) {
    if (n.is_float_number()) {
       return n.get_value<double>();
    }
    if (n.is_integer()) {
       return (double) n.get_value<long long>();
+   }
+   if (n.is_string()) {
+      return evalExpr(n.get_value<string>(), ctx);
    }
    ctx.fail("expected a number");
    return 0;

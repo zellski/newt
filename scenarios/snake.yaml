@@ -1,6 +1,6 @@
 # Port of demo/Snake.C: an eight-link pendulum swinging from hanging
 # to inverted in one second, under gravity. Muscle weights fall off as
-# 1/(i+1) toward the tail. pi/2 = 1.5707963267948966.
+# 1/(i+1) toward the tail.
 name: Snake
 creature: creatures/snake.creature.yaml
 gravity: -9.81
@@ -11,36 +11,36 @@ stages:
     duration: 1
     muscles:
       - { dof: Link0, weight: 1 }
-      - { dof: Link1, weight: 0.5 }
-      - { dof: Link2, weight: 0.3333333333333333 }
-      - { dof: Link3, weight: 0.25 }
-      - { dof: Link4, weight: 0.2 }
-      - { dof: Link5, weight: 0.16666666666666666 }
-      - { dof: Link6, weight: 0.14285714285714285 }
-      - { dof: Link7, weight: 0.125 }
+      - { dof: Link1, weight: 1/2 }
+      - { dof: Link2, weight: 1/3 }
+      - { dof: Link3, weight: 1/4 }
+      - { dof: Link4, weight: 1/5 }
+      - { dof: Link5, weight: 1/6 }
+      - { dof: Link6, weight: 1/7 }
+      - { dof: Link7, weight: 1/8 }
     reps:
       - { dof: X, type: constant, value: 0 }
       - { dof: Y, type: constant, value: 0 }
-      - { dof: Link0, type: hat, from: -1.5707963267948966, to: 1.5707963267948966,
-          min: -3.141592653589793, max: 3.141592653589793 }
+      - { dof: Link0, type: hat, from: -pi/2, to: pi/2,
+          min: -pi, max: pi }
       - { dof: Link1, type: hat, from: 0, to: 0,
-          min: -0.7853981633974483, max: 0.7853981633974483 }
+          min: -pi/4, max: pi/4 }
       - { dof: Link2, type: hat, from: 0, to: 0,
-          min: -0.7853981633974483, max: 0.7853981633974483 }
+          min: -pi/4, max: pi/4 }
       - { dof: Link3, type: hat, from: 0, to: 0,
-          min: -0.7853981633974483, max: 0.7853981633974483 }
+          min: -pi/4, max: pi/4 }
       - { dof: Link4, type: hat, from: 0, to: 0,
-          min: -0.7853981633974483, max: 0.7853981633974483 }
+          min: -pi/4, max: pi/4 }
       - { dof: Link5, type: hat, from: 0, to: 0,
-          min: -0.7853981633974483, max: 0.7853981633974483 }
+          min: -pi/4, max: pi/4 }
       - { dof: Link6, type: hat, from: 0, to: 0,
-          min: -0.7853981633974483, max: 0.7853981633974483 }
+          min: -pi/4, max: pi/4 }
       - { dof: Link7, type: hat, from: 0, to: 0,
-          min: -0.7853981633974483, max: 0.7853981633974483 }
+          min: -pi/4, max: pi/4 }
     constraints:
-      - { dof: Link0, quantity: q,    at: start, equals: -1.5707963267948966 }
+      - { dof: Link0, quantity: q,    at: start, equals: -pi/2 }
       - { dof: Link0, quantity: qdot, at: start, equals: 0 }
-      - { dof: Link0, quantity: q,    at: end,   equals: 1.5707963267948966 }
+      - { dof: Link0, quantity: q,    at: end,   equals: pi/2 }
       - { dof: Link0, quantity: qdot, at: end,   equals: 0 }
       - { dof: Link1, quantity: q,    at: start, equals: 0 }
       - { dof: Link1, quantity: qdot, at: start, equals: 0 }

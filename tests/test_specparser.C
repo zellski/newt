@@ -184,6 +184,47 @@ static void expectScenarioFail(const char *what, const string &needle,
    }
 }
 
+// route an expression through a numeric field and return its value
+static double evalViaGravity(const string &expr) {
+   string text = SCENARIO;
+   const string needle = "gravity: -9.81";
+   text.replace(text.find(needle), needle.size(), "gravity: " + expr);
+   return ParseScenario(text, "inline").gravity;
+}
+
+static void testExpressions() {
+   // the exact 17-digit literals the shipped scenarios used to carry
+   checkNum("pi", evalViaGravity("pi"), 3.141592653589793);
+   checkNum("PI/2", evalViaGravity("PI/2"), 1.5707963267948966);
+   checkNum("3*pi/11", evalViaGravity("3*pi/11"), 0.8567979964335799);
+   checkNum("-5*pi/8", evalViaGravity("-5*pi/8"), -1.9634954084936207);
+   checkNum("15*pi/16", evalViaGravity("15*pi/16"), 2.945243112740431);
+   checkNum("-7*pi/11", evalViaGravity("-7*pi/11"), -1.9991953250116865);
+   checkNum("8*pi/17", evalViaGravity("8*pi/17"), 1.478396542865785);
+   checkNum("7*pi/16 + 2*pi", evalViaGravity("7*pi/16 + 2*pi"), 7.6576320931251205);
+   checkNum("pi/8 + 2*pi", evalViaGravity("pi/8 + 2*pi"), 6.675884388878311);
+   checkNum("sqrt(1.5*2.0/9.81)", evalViaGravity("sqrt(1.5*2.0/9.81)"),
+            0.553001263609331);
+   checkNum("1/3", evalViaGravity("1/3"), 0.3333333333333333);
+   checkNum("1/7", evalViaGravity("1/7"), 0.14285714285714285);
+
+   // grammar mechanics
+   checkNum("parens", evalViaGravity("(1 + 2) * (3 - 4)"), -3.0);
+   checkNum("nested negation", evalViaGravity("--2"), 2.0);
+   checkNum("left assoc", evalViaGravity("8/4/2"), 1.0);
+   checkNum("quoted", evalViaGravity("\"-(1 + 2) * 3\""), -9.0);
+   checkNum("whitespace", evalViaGravity("\"  2 * pi  \""), 6.283185307179586);
+
+   expectScenarioFail("unknown name", "gravity: -9.81", "gravity: tau", false);
+   expectScenarioFail("trailing junk", "gravity: -9.81", "gravity: pi pi", false);
+   expectScenarioFail("unbalanced parens", "gravity: -9.81", "gravity: (1+2", false);
+   expectScenarioFail("division by zero", "gravity: -9.81", "gravity: 1/0", false);
+   expectScenarioFail("sqrt of negative", "gravity: -9.81", "gravity: sqrt(0-1)", false);
+   expectScenarioFail("empty expression", "gravity: -9.81", "gravity: \"\"", false);
+   expectScenarioFail("dangling operator", "gravity: -9.81", "gravity: 1+", false);
+   expectScenarioFail("bare operator", "gravity: -9.81", "gravity: \"*\"", false);
+}
+
 static void testRejections() {
    // parse-time
    expectScenarioFail("unknown key", "gravity:", "gravties:");
@@ -292,6 +333,7 @@ int main() {
    try {
       testCreature();
       testScenario();
+      testExpressions();
       testRejections();
       testCreatureRejections();
       testShippedFiles();
