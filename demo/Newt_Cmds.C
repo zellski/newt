@@ -25,6 +25,7 @@
 std::string Newt_ScenarioPath;
 std::string Newt_ScenarioYaml;
 std::string Newt_CreatureYaml;
+std::string Newt_CensusText;
 double Newt_RecordDt = 0;
 
 static newt::Recorder *Rec = 0;
@@ -144,6 +145,19 @@ static int CmdGrdL(ClientData, Tcl_Interp *interp,
    return TCL_OK;
 }
 
+static int CmdCensus(ClientData, Tcl_Interp *interp,
+                     int objc, Tcl_Obj *const objv[]) {
+   if (objc != 1) {
+      return error(interp, "usage: newt_census");
+   }
+   if (Newt_CensusText.empty()) {
+      return error(interp, "newt_census: no scenario set up");
+   }
+   Tcl_SetObjResult(interp,
+                    Tcl_NewStringObj(Newt_CensusText.c_str(), -1));
+   return TCL_OK;
+}
+
 static int CmdFinish(ClientData, Tcl_Interp *interp,
                      int objc, Tcl_Obj *const objv[]) {
    if (objc != 2) {
@@ -164,6 +178,7 @@ extern "C" int Newt_Init(Tcl_Interp *interp) {
    Tcl_CreateObjCommand(interp, "newt_open_run", CmdOpenRun, 0, 0);
    Tcl_CreateObjCommand(interp, "newt_record", CmdRecord, 0, 0);
    Tcl_CreateObjCommand(interp, "newt_grdl", CmdGrdL, 0, 0);
+   Tcl_CreateObjCommand(interp, "newt_census", CmdCensus, 0, 0);
    Tcl_CreateObjCommand(interp, "newt_finish", CmdFinish, 0, 0);
    return TCL_OK;
 }

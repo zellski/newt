@@ -26,11 +26,12 @@ test_dynamics: test_dynamics.C $(DYN_SRCS) stub/adoublev.h stub/Stage.h \
 		stub/World.h stub/Omu_Variables.h
 	$(CXX) $(CXXFLAGS) -o $@ test_dynamics.C $(DYN_SRCS)
 
-# the spec parser is solver-free std C++; no stubs involved
-test_specparser: test_specparser.C ../src/SpecParser.C \
-		../include/newt/Spec.h ../include/newt/SpecParser.h
+# the spec parser and census are solver-free std C++; no stubs involved
+test_specparser: test_specparser.C ../src/SpecParser.C ../src/Census.C \
+		../include/newt/Spec.h ../include/newt/SpecParser.h \
+		../include/newt/Census.h
 	$(CXX) -g -O2 -Wall -I../include -I../include/vendor -o $@ \
-		test_specparser.C ../src/SpecParser.C
+		test_specparser.C ../src/SpecParser.C ../src/Census.C
 
 # so is the recorder (system sqlite3)
 test_recorder: test_recorder.C ../src/Recorder.C ../include/newt/Recorder.h

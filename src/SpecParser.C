@@ -766,7 +766,58 @@ string newt::ReadFile(const string &path) {
 
 // --- cross-reference validation ------------------------------------------
 
-void newt::Validate(const ScenarioSpec &S, const CreatureSpec &C) {
+namespace {
+
+// "q at start", "qdot at slice 3 t=0.5" -- for structural diagnostics
+string conWhere(const ConstraintSpec &K) {
+   std::ostringstream o;
+   o << (K.quantity == ConstraintSpec::Val ? "q" : "qdot") << " at ";
+   switch (K.at) {
+   case ConstraintSpec::Start:
+      o << "start";
+      break;
+   case ConstraintSpec::End:
+      o << "end";
+      break;
+   case ConstraintSpec::Explicit:
+      o << "slice " << K.slice << " t=" << K.t;
+      break;
+   }
+   return o.str();
+}
+
+bool sameLocation(const ConstraintSpec &a, const ConstraintSpec &b) {
+   return a.dof == b.dof && a.quantity == b.quantity && a.at == b.at &&
+      (a.at != ConstraintSpec::Explicit ||
+       (a.slice == b.slice && a.t == b.t));
+}
+
+// the boundary value a stage commits to for (dof, quantity), if any:
+// a constant rep, or an equality constraint at that boundary
+bool boundaryValue(const StageSpec &st,
+                   const vector<const ConstraintSpec *> &cons,
+                   const string &dof, ConstraintSpec::Quantity q,
+                   ConstraintSpec::At at, double &val) {
+   for (size_t i = 0; i < st.reps.size(); i ++) {
+      if (st.reps[i].dof == dof && st.reps[i].type == RepSpec::Constant) {
+         val = q == ConstraintSpec::Val ? st.reps[i].value : 0;
+         return true;
+      }
+   }
+   for (size_t i = 0; i < cons.size(); i ++) {
+      const ConstraintSpec &K = *cons[i];
+      if (K.dof == dof && K.quantity == q && K.at == at && !K.isRange) {
+         val = K.equals;
+         return true;
+      }
+   }
+   return false;
+}
+
+}  // namespace
+
+void newt::Validate(const ScenarioSpec &S, const CreatureSpec &C,
+                    std::vector<std::string> *warnings) {
    Ctx ctx(S.name);
 
    // creature-internal name tables
@@ -936,6 +987,137 @@ void newt::Validate(const ScenarioSpec &S, const CreatureSpec &C) {
                 (K.slice < 0 || K.slice >= S.stages[j].pieces)) {
                ctx.fail("constraint slice out of range for stage '" + K.stage + "'");
             }
+         }
+      }
+   }
+
+   // --- structural soundness ------------------------------------------
+
+   // the effective constraint list per stage: nested entries (pins are
+   // already lowered into those) plus top-level entries targeting it
+   vector<vector<const ConstraintSpec *> > cons(S.stages.size());
+   map<string, size_t> stageIx;
+   for (size_t i = 0; i < S.stages.size(); i ++) {
+      stageIx[S.stages[i].name] = i;
+      for (size_t j = 0; j < S.stages[i].constraints.size(); j ++) {
+         cons[i].push_back(&S.stages[i].constraints[j]);
+      }
+   }
+   for (size_t i = 0; i < S.constraints.size(); i ++) {
+      cons[stageIx[S.constraints[i].stage]].push_back(&S.constraints[i]);
+   }
+
+   for (size_t i = 0; i < S.stages.size(); i ++) {
+      const StageSpec &st = S.stages[i];
+      Ctx sc = ctx.sub("stage " + st.name);
+
+      // a constraint must not contradict a constant rep (q: the value,
+      // qdot: zero)
+      for (size_t j = 0; j < cons[i].size(); j ++) {
+         const ConstraintSpec &K = *cons[i][j];
+         const RepSpec *R = 0;
+         for (size_t r = 0; r < st.reps.size(); r ++) {
+            if (st.reps[r].dof == K.dof) {
+               R = &st.reps[r];
+            }
+         }
+         if (!R || R->type != RepSpec::Constant) {
+            continue;
+         }
+         double want = K.quantity == ConstraintSpec::Val ? R->value : 0;
+         bool clash = K.isRange ? (want < K.min || want > K.max)
+                                : K.equals != want;
+         if (clash) {
+            sc.fail("constraint '" + K.dof + " " + conWhere(K) +
+                    "' contradicts the constant rep");
+         }
+      }
+
+      // same-location constraints must agree (identical redundancy is
+      // fine -- a pin plus the matching explicit row, say)
+      for (size_t j = 0; j < cons[i].size(); j ++) {
+         for (size_t k = j + 1; k < cons[i].size(); k ++) {
+            const ConstraintSpec &a = *cons[i][j], &b = *cons[i][k];
+            if (!sameLocation(a, b)) {
+               continue;
+            }
+            bool clash;
+            if (!a.isRange && !b.isRange) {
+               clash = a.equals != b.equals;
+            } else if (a.isRange && b.isRange) {
+               clash = a.min > b.max || b.min > a.max;     // disjoint
+            } else {
+               const ConstraintSpec &eq = a.isRange ? b : a;
+               const ConstraintSpec &rg = a.isRange ? a : b;
+               clash = eq.equals < rg.min || eq.equals > rg.max;
+            }
+            if (clash) {
+               sc.fail("conflicting constraints on '" + a.dof + " " +
+                       conWhere(a) + "'");
+            }
+         }
+      }
+   }
+
+   // facing boundaries across a link must agree: what stage A commits
+   // to at its end (constant rep or equality constraint) must equal
+   // what stage B commits to at its start
+   vector<std::pair<string, string> > links = S.links;
+   if (S.chainLinks) {
+      for (size_t i = 0; i + 1 < S.stages.size(); i ++) {
+         links.push_back(std::make_pair(S.stages[i].name,
+                                        S.stages[i + 1].name));
+      }
+   }
+   for (size_t l = 0; l < links.size(); l ++) {
+      size_t a = stageIx[links[l].first], b = stageIx[links[l].second];
+      for (set<string>::const_iterator d = dofs.begin();
+           d != dofs.end(); d ++) {
+         for (int q = 0; q < 2; q ++) {
+            ConstraintSpec::Quantity quantity = q == 0
+               ? ConstraintSpec::Val : ConstraintSpec::Dot;
+            double endV, startV;
+            if (boundaryValue(S.stages[a], cons[a], *d, quantity,
+                              ConstraintSpec::End, endV) &&
+                boundaryValue(S.stages[b], cons[b], *d, quantity,
+                              ConstraintSpec::Start, startV) &&
+                endV != startV) {
+               std::ostringstream o;
+               o << "link " << links[l].first << "->" << links[l].second
+                 << ": DOF '" << *d << "' "
+                 << (q == 0 ? "q" : "qdot") << " ends at " << endV
+                 << " but starts at " << startV;
+               ctx.fail(o.str());
+            }
+         }
+      }
+   }
+
+   // a DOF that is never a constant and never gets a position
+   // constraint has no absolute anchor anywhere -- almost certainly an
+   // authoring slip, but conceivably intended, hence a warning
+   if (warnings) {
+      for (set<string>::const_iterator d = dofs.begin();
+           d != dofs.end(); d ++) {
+         bool anchored = false;
+         for (size_t i = 0; i < S.stages.size() && !anchored; i ++) {
+            for (size_t r = 0; r < S.stages[i].reps.size(); r ++) {
+               if (S.stages[i].reps[r].dof == *d &&
+                   S.stages[i].reps[r].type == RepSpec::Constant) {
+                  anchored = true;
+               }
+            }
+            for (size_t j = 0; j < cons[i].size() && !anchored; j ++) {
+               if (cons[i][j]->dof == *d &&
+                   cons[i][j]->quantity == ConstraintSpec::Val) {
+                  anchored = true;
+               }
+            }
+         }
+         if (!anchored) {
+            warnings->push_back("DOF '" + *d + "' has no position "
+                                "constraint or constant rep on any stage; "
+                                "its absolute position is unanchored");
          }
       }
    }

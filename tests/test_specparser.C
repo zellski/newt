@@ -11,6 +11,7 @@
 # include <dirent.h>
 
 # include "newt/SpecParser.h"
+# include "newt/Census.h"
 
 using namespace newt;
 using std::string;
@@ -310,6 +311,108 @@ static void testPins() {
       "      - { dof: Alpha", false);
 }
 
+static void testStructuralValidation() {
+   // a constraint that contradicts a constant rep
+   expectScenarioFail("contradicts constant",
+      "constraints:\n      - { dof: Beta, quantity: q, at: start, equals: 0.5 }",
+      "constraints:\n"
+      "      - { dof: Y, quantity: q, at: start, equals: 1 }\n"
+      "      - { dof: Beta, quantity: q, at: start, equals: 0.5 }");
+   // two equalities at the same location with different values
+   expectScenarioFail("conflicting duplicates",
+      "- { dof: Beta, quantity: q, at: start, equals: 0.5 }",
+      "- { dof: Beta, quantity: q, at: start, equals: 0.5 }\n"
+      "      - { dof: Beta, quantity: q, at: start, equals: 0.6 }");
+   // an equality outside a range at the same location
+   expectScenarioFail("equality outside range",
+      "- { dof: Beta, quantity: qdot, at: end, min: -2, max: 2 }",
+      "- { dof: Beta, quantity: qdot, at: end, min: -2, max: 2 }\n"
+      "      - { dof: Beta, quantity: qdot, at: end, equals: 3 }");
+   // an identical redundant duplicate stays legal
+   {
+      ScenarioSpec S = parseWith("redundant duplicate",
+         "- { dof: Beta, quantity: q, at: start, equals: 0.5 }",
+         "- { dof: Beta, quantity: q, at: start, equals: 0.5 }\n"
+         "      - { dof: Beta, quantity: q, at: start, equals: 0.5 }");
+      CreatureSpec C = ParseCreature(CREATURE, "inline");
+      Validate(S, C);
+   }
+   // facing boundaries across the S1->S2 link must agree: S1 ends Beta
+   // at 0.25, S2 claims it starts at 0.3
+   {
+      string text = SCENARIO;
+      const string n1 = "- { dof: Beta, quantity: qdot, at: end, min: -2, max: 2 }";
+      text.replace(text.find(n1), n1.size(),
+         "- { dof: Beta, quantity: q, at: end, equals: 0.25 }");
+      const string n2 = "  - { stage: S2, dof: Beta, quantity: q, at: { slice: 3, t: 0.5 }, equals: 0.5 }";
+      text.replace(text.find(n2), n2.size(),
+         "  - { stage: S2, dof: Beta, quantity: q, at: start, equals: 0.3 }");
+      try {
+         ScenarioSpec S = ParseScenario(text, "inline");
+         CreatureSpec C = ParseCreature(CREATURE, "inline");
+         Validate(S, C);
+         std::fprintf(stderr, "FAIL facing boundaries: expected SpecError\n");
+         failures ++;
+      } catch (const SpecError &) {
+         // expected
+      }
+   }
+   // unanchored DOFs warn: take away Alpha's constant rep and it has
+   // no q constraint or constant anywhere
+   {
+      ScenarioSpec S = parseWith("unanchored dof",
+         "- { dof: Alpha, type: constant, value: 1.5 }",
+         "- { dof: Alpha, type: hermlet, from: 1.5, to: 1.5 }");
+      CreatureSpec C = ParseCreature(CREATURE, "inline");
+      std::vector<string> warnings;
+      Validate(S, C, &warnings);
+      check("unanchored dof warns", warnings.size() == 1 &&
+            warnings[0].find("Alpha") != string::npos);
+   }
+   // the canonical pair is warning-free
+   {
+      ScenarioSpec S = ParseScenario(SCENARIO, "inline");
+      CreatureSpec C = ParseCreature(CREATURE, "inline");
+      std::vector<string> warnings;
+      Validate(S, C, &warnings);
+      check("canonical scenario warning-free", warnings.empty());
+   }
+}
+
+static void testCensus() {
+   ScenarioSpec S = ParseScenario(SCENARIO, "inline");
+   CreatureSpec C = ParseCreature(CREATURE, "inline");
+
+   // hand-derived totals for the canonical scenario:
+   // vars: S2 duration 1; reps: Alpha hermlet 18 + Beta hermite 18 (S1)
+   //       + X hat 5 + Beta hermite 10 (S2) = 51; S1 muscle PWL 16;
+   //       S1 free impulse 1  => 69
+   // cons: Beta S1 bounds 16; FEM: Alpha 16 + Beta 16 (S1), X 3 +
+   //       Beta 8 (S2) = 43; link S1->S2: X, Alpha, Beta -> 6;
+   //       explicit constraints 3  => 68
+   int nVars, nCons;
+   CensusTotals(S, C, nVars, nCons);
+   check("census vars", nVars == 69);
+   check("census cons", nCons == 68);
+
+   string text = Census(S, C);
+   check("census table cells",
+         text.find("hermite s[q] e[qd]") != string::npos &&   // S1 Beta
+         text.find("hermlet") != string::npos &&              // S1 Alpha
+         text.find("hermite m[1]") != string::npos);          // S2 Beta
+   check("census links line", text.find("links: S1->S2") != string::npos);
+   check("census breakdown",
+         text.find("variables: 69") != string::npos &&
+         text.find("constraints: 68") != string::npos);
+
+   // pins count separately from explicit constraints
+   ScenarioSpec SP = parseWith("census pins", BETA_REP,
+      "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+      "          pin: both }");
+   string ptext = Census(SP, C);
+   check("census pin count", ptext.find("pins                  4") != string::npos);
+}
+
 static void testChainDefault() {
    {
       ScenarioSpec S = parseWith("chain default", "links:\n  - [S1, S2]\n", "");
@@ -455,6 +558,8 @@ int main() {
       testScenario();
       testExpressions();
       testPins();
+      testStructuralValidation();
+      testCensus();
       testChainDefault();
       testRejections();
       testCreatureRejections();

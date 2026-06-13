@@ -5,10 +5,14 @@
 
 # include "Scenario.h"
 
+# include <sstream>
+# include <vector>
+
 # include "World.h"
 # include "Newt_Glue.h"
 # include "newt/SpecParser.h"
 # include "newt/SpecBuilder.h"
+# include "newt/Census.h"
 
 using std::string;
 
@@ -35,7 +39,11 @@ void Scenario::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u,
       newt::ScenarioSpec S = newt::ParseScenarioFile(Newt_ScenarioPath);
       string creaturePath = resolve(Newt_ScenarioPath, S.creaturePath);
       newt::CreatureSpec C = newt::ParseCreatureFile(creaturePath);
-      newt::Validate(S, C);
+      std::vector<string> warnings;
+      newt::Validate(S, C, &warnings);
+      for (size_t i = 0; i < warnings.size(); i ++) {
+         cerr << "Warning: " << warnings[i] << "\n";
+      }
 
       // snapshots for the run record
       Newt_ScenarioYaml = newt::ReadFile(Newt_ScenarioPath);
@@ -43,6 +51,24 @@ void Scenario::setup(int k, Omu_VariableVec &x, Omu_VariableVec &u,
       Newt_RecordDt = S.recordDt;
 
       W = newt::BuildWorld(S, C, x, c);
+
+      // the census for newt_census, cross-checked against the claims
+      // the build just made
+      {
+         std::ostringstream o;
+         o << newt::Census(S, C);
+         int nVars, nCons;
+         newt::CensusTotals(S, C, nVars, nCons);
+         if (nVars == W->xIx && nCons == W->cIx) {
+            o << "cross-check: census totals match the built World ("
+              << nVars << " vars, " << nCons << " cons)\n";
+         } else {
+            o << "cross-check: MISMATCH -- census says " << nVars
+              << " vars / " << nCons << " cons, the World claimed "
+              << W->xIx << " / " << W->cIx << "\n";
+         }
+         Newt_CensusText = o.str();
+      }
    } catch (const newt::SpecError &e) {
       cerr << "Scenario: " << e.msg << "\n";
       m_error(E_INPUT, "Scenario: bad scenario/creature file");
