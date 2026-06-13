@@ -30,6 +30,3 @@ stages:
 impulses:
   - { stage: I1, point: P1.Top, direction: [0, 1] }
   - { stage: I2, point: P1.Bot, direction: [0, 1] }
-links:
-  - [I1, I2]
-  - [I2, I3]

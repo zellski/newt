@@ -690,6 +690,11 @@ ScenarioSpec parseScenario(const Node &root, const Ctx &ctx) {
    if (links && chain) {
       ctx.fail("give either links or chain, not both");
    }
+   if (!links && !chain && S.stages.size() > 1) {
+      // consecutive stages link by default; opt out with chain: false
+      // or an explicit links: list
+      S.chainLinks = true;
+   }
    if (chain) {
       Ctx cc = ctx.sub("chain");
       if (!chain->is_boolean()) {

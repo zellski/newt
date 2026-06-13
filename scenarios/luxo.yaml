@@ -67,6 +67,3 @@ stages:
           min: -6*pi/11, max: 0, pin: end }
       - { dof: Delta, type: hermite, from: -pi/11, to: -pi/11,
           min: -2*pi/11, max: 0, pin: end }
-links:
-  - [S1, S2]
-  - [S2, S3]

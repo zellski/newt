@@ -310,6 +310,41 @@ static void testPins() {
       "      - { dof: Alpha", false);
 }
 
+static void testChainDefault() {
+   {
+      ScenarioSpec S = parseWith("chain default", "links:\n  - [S1, S2]\n", "");
+      check("multi-stage chains by default", S.chainLinks && S.links.empty());
+   }
+   {
+      ScenarioSpec S = parseWith("chain opt-out", "links:\n  - [S1, S2]\n",
+                                 "chain: false\n");
+      check("chain: false opts out", !S.chainLinks && S.links.empty());
+   }
+   {
+      // an explicit links: list suppresses the default
+      ScenarioSpec S = ParseScenario(SCENARIO, "inline");
+      check("explicit links honored", !S.chainLinks && S.links.size() == 1);
+   }
+   {
+      static const char *MONO =
+         "name: Mono\n"
+         "creature: beast.creature.yaml\n"
+         "gravity: 0\n"
+         "integrator: { type: gauss, n: 5 }\n"
+         "stages:\n"
+         "  - name: S1\n"
+         "    pieces: 4\n"
+         "    duration: 1\n"
+         "    reps:\n"
+         "      - { dof: X, type: constant, value: 0 }\n"
+         "      - { dof: Y, type: constant, value: 0 }\n"
+         "      - { dof: Alpha, type: hermite, from: 0, to: 1 }\n"
+         "      - { dof: Beta, type: hermite, from: 0, to: 1 }\n";
+      ScenarioSpec S = ParseScenario(MONO, "inline");
+      check("single stage stays unchained", !S.chainLinks && S.links.empty());
+   }
+}
+
 static void testRejections() {
    // parse-time
    expectScenarioFail("unknown key", "gravity:", "gravties:");
@@ -420,6 +455,7 @@ int main() {
       testScenario();
       testExpressions();
       testPins();
+      testChainDefault();
       testRejections();
       testCreatureRejections();
       testShippedFiles();

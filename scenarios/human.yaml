@@ -89,6 +89,3 @@ stages:
       - { dof: RHandAngle, type: constant, value: 0 }
       - { dof: NeckAngle, type: constant, value: 0 }
       - { dof: HeadAngle, type: constant, value: 0 }
-links:
-  - [S1, S2]
-  - [S2, S3]
