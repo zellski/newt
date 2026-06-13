@@ -1,5 +1,7 @@
 # pragma once
 
+# include <string>
+
 # include <Omu_Variables.h>
 # include "AVec.h"
 
@@ -27,9 +29,9 @@ public:
    Stage *const S;
 
    ValConstraint(Stage *const s, int n, double loct, const adouble &watch,
-                 double min, double max);
+                 double min, double max, const std::string &label = "?");
    ValConstraint(Stage *const s, int n, double loct, const adouble &watch,
-                 double val);
+                 double val, const std::string &label = "?");
 
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
    void Evaluate(const adoublev &x, adoublev &c);

@@ -22,6 +22,17 @@ Link::Link(Stage *const a, Stage *const b) : A(a), B(b) {
    }
    cerr << "Claiming a total of " << cnt << " constraints.\n";
    cIx = A->claimCons(cnt);
+   int ix = cIx;
+   for (int i = A->W->DOFs.size()-1; i >= 0; i --) {
+      DOF *D = A->W->DOFs[i];
+      if (!D->Rep(A->sIx)->isConstant() ||
+          !D->Rep(B->sIx)->isConstant()) {
+         string prefix = string("link ") + A->Name + "->" + B->Name +
+            ": " + D->Name;
+         A->W->LabelCon(ix ++, prefix + " continuity");
+         A->W->LabelCon(ix ++, prefix + " momentum");
+      }
+   }
    A->Register((Constraint * const) this);
 }
 

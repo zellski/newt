@@ -1,3 +1,5 @@
+# include <sstream>
+
 # include "Stage.h"
 # include "World.h"
 # include "DOF.h"
@@ -35,18 +37,44 @@ int World::Register(Stage *S) {
    return Stages.size() - 1;
 }
 
-int World::claimVars(int n) {
+// blocks of more than one row get "label[i]" so every row stays unique
+static void appendLabels(std::vector<std::string> &labels, int n,
+                         const std::string &label) {
+   if (n == 1) {
+      labels.push_back(label);
+      return;
+   }
+   for (int i = 0; i < n; i ++) {
+      std::ostringstream o;
+      o << label << "[" << i << "]";
+      labels.push_back(o.str());
+   }
+}
+
+int World::claimVars(int n, const std::string &label) {
    assert(n > 0);
    int tmp = xIx;
    xIx += n;
+   appendLabels(xLabels, n, label);
    return tmp;
 }
 
-int World::claimCons(int n) {
+int World::claimCons(int n, const std::string &label) {
    assert(n > 0);
    int tmp = cIx;
    cIx += n;
+   appendLabels(cLabels, n, label);
    return tmp;
+}
+
+void World::LabelVar(int ix, const std::string &label) {
+   assert(ix >= 0 && ix < (int) xLabels.size());
+   xLabels[ix] = label;
+}
+
+void World::LabelCon(int ix, const std::string &label) {
+   assert(ix >= 0 && ix < (int) cLabels.size());
+   cLabels[ix] = label;
 }
 
 void World::Update(const adoublev &x, adoublev &c, adouble &f0) {
@@ -63,6 +91,8 @@ void World::Update(const adoublev &x, adoublev &c, adouble &f0) {
 }
 
 void World::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
+   assert((int) xLabels.size() == xIx);
+   assert((int) cLabels.size() == cIx);
    cerr << " * Allocating " << xIx << " ix for DOFs, "
         << cIx << " for Constraints.\n";
    x.alloc(xIx);

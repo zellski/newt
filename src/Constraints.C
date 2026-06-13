@@ -7,14 +7,15 @@
 # include "Constraints.h"
 
 ValConstraint::ValConstraint(Stage *const s, int n, double loct,
-                             const adouble &watch, double min, double max) :
+                             const adouble &watch, double min, double max,
+                             const std::string &label) :
    S(s),
    Slice(n),
    t(loct),
    Watch(watch),
    WatchDiff(0),
    Min(min), Max(max),
-   cIx(s->claimCons(1))
+   cIx(s->claimCons(1, label))
 {
    cerr << "Constraint: [" << n << "/" << loct << "] -> ["
         << Min << ", " << Max << "]\n";
@@ -22,14 +23,15 @@ ValConstraint::ValConstraint(Stage *const s, int n, double loct,
 }
 
 ValConstraint::ValConstraint(Stage *const s, int n, double loct,
-                             const adouble &watch, double val) :
+                             const adouble &watch, double val,
+                             const std::string &label) :
    S(s),
    Slice(n),
    t(loct),
    Watch(watch),
    WatchDiff(0),
    Min(val), Max(val),
-   cIx(s->claimCons(1))
+   cIx(s->claimCons(1, label))
 {
    cerr << "Constraint: [" << n << "/" << loct << "] -> ["
         << Min << ", " << Max << "]\n";

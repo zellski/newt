@@ -13,8 +13,9 @@ Impulse::Impulse(Stage *const s, AnchorPoint *p,
    S->Register(this);
 }
 
-Impulse::Impulse(Stage *const s, AnchorPoint *p, double sx, double sy) :
-   xIx(s->claimVars(1)),
+Impulse::Impulse(Stage *const s, AnchorPoint *p, double sx, double sy,
+                 const std::string &label) :
+   xIx(s->claimVars(1, label)),
    S(s),
    P(p),
    vx(sx), vy(sy)

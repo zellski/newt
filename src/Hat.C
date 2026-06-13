@@ -13,8 +13,8 @@ Hat::Hat(Stage *const s) :
 Hat::Hat(Stage *const s, DOF *const d, double from, double to,
          double min, double max) :
    Fun(s,d,from,to,min,max),
-   xIx(S->claimVars(S->N+1)),
-   eIx(S->claimCons(S->N-1))
+   xIx(S->claimVars(S->N+1, ClaimLabel(s, d, "hat coeffs"))),
+   eIx(S->claimCons(S->N-1, ClaimLabel(s, d, "FEM equation")))
 {}
 
 double Hat::sVal(int width, int depth, double t) const {

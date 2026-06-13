@@ -7,6 +7,7 @@
 
 # pragma once
 
+# include <string>
 # include <vector>
 # include "adolc.h"
 # include "Omu_Variables.h"
@@ -23,7 +24,7 @@ public:
 
    template <class T> int Register(T *) { return 0; }
 
-   int claimVars(int n) {
+   int claimVars(int n, const std::string & = "?") {
       int ix = nVars;
       nVars += n;
       return ix;
