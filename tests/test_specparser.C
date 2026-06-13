@@ -413,6 +413,44 @@ static void testCensus() {
    check("census pin count", ptext.find("pins                  4") != string::npos);
 }
 
+// a two-stage scenario with every DOF constant on both stages: the
+// default chain link spans zero non-constant DOFs and must claim no
+// rows (Link.C used to abort in World::claimCons(0))
+static void testZeroRowLink() {
+   static const char *ALLCONST =
+      "name: AllConst\n"
+      "creature: beast.creature.yaml\n"
+      "gravity: 0\n"
+      "integrator: { type: gauss, n: 5 }\n"
+      "stages:\n"
+      "  - name: S1\n"
+      "    pieces: 4\n"
+      "    duration: 1\n"
+      "    reps:\n"
+      "      - { dof: X, type: constant, value: 0 }\n"
+      "      - { dof: Y, type: constant, value: 0 }\n"
+      "      - { dof: Alpha, type: constant, value: 0 }\n"
+      "      - { dof: Beta, type: constant, value: 0 }\n"
+      "  - name: S2\n"
+      "    pieces: 4\n"
+      "    duration: 1\n"
+      "    reps:\n"
+      "      - { dof: X, type: constant, value: 0 }\n"
+      "      - { dof: Y, type: constant, value: 0 }\n"
+      "      - { dof: Alpha, type: constant, value: 0 }\n"
+      "      - { dof: Beta, type: constant, value: 0 }\n";
+   ScenarioSpec S = ParseScenario(ALLCONST, "inline");
+   CreatureSpec C = ParseCreature(CREATURE, "inline");
+   check("all-constant chains by default", S.chainLinks);
+   Validate(S, C);
+   int nVars, nCons;
+   CensusTotals(S, C, nVars, nCons);
+   check("all-constant claims no vars", nVars == 0);
+   check("all-constant claims no cons", nCons == 0);
+   check("zero-row link contributes nothing",
+         Census(S, C).find("link continuity       0") != string::npos);
+}
+
 static void testChainDefault() {
    {
       ScenarioSpec S = parseWith("chain default", "links:\n  - [S1, S2]\n", "");
@@ -560,6 +598,7 @@ int main() {
       testPins();
       testStructuralValidation();
       testCensus();
+      testZeroRowLink();
       testChainDefault();
       testRejections();
       testCreatureRejections();

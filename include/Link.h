@@ -13,7 +13,7 @@ class Link: public Constraint {
 private:
    Stage *const A;
    Stage *const B;
-   int cIx;
+   int cIx = -1;
 public:
    Link(Stage *const a, Stage *const b);
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {}
