@@ -22,51 +22,18 @@ stages:
       - { dof: X, type: constant, value: 0 }
       - { dof: Y, type: constant, value: 0 }
       - { dof: Link0, type: hat, from: -pi/2, to: pi/2,
-          min: -pi, max: pi }
+          min: -pi, max: pi, pin: both }
       - { dof: Link1, type: hat, from: 0, to: 0,
-          min: -pi/4, max: pi/4 }
+          min: -pi/4, max: pi/4, pin: both }
       - { dof: Link2, type: hat, from: 0, to: 0,
-          min: -pi/4, max: pi/4 }
+          min: -pi/4, max: pi/4, pin: both }
       - { dof: Link3, type: hat, from: 0, to: 0,
-          min: -pi/4, max: pi/4 }
+          min: -pi/4, max: pi/4, pin: both }
       - { dof: Link4, type: hat, from: 0, to: 0,
-          min: -pi/4, max: pi/4 }
+          min: -pi/4, max: pi/4, pin: both }
       - { dof: Link5, type: hat, from: 0, to: 0,
-          min: -pi/4, max: pi/4 }
+          min: -pi/4, max: pi/4, pin: both }
       - { dof: Link6, type: hat, from: 0, to: 0,
-          min: -pi/4, max: pi/4 }
+          min: -pi/4, max: pi/4, pin: both }
       - { dof: Link7, type: hat, from: 0, to: 0,
-          min: -pi/4, max: pi/4 }
-    constraints:
-      - { dof: Link0, quantity: q,    at: start, equals: -pi/2 }
-      - { dof: Link0, quantity: qdot, at: start, equals: 0 }
-      - { dof: Link0, quantity: q,    at: end,   equals: pi/2 }
-      - { dof: Link0, quantity: qdot, at: end,   equals: 0 }
-      - { dof: Link1, quantity: q,    at: start, equals: 0 }
-      - { dof: Link1, quantity: qdot, at: start, equals: 0 }
-      - { dof: Link1, quantity: q,    at: end,   equals: 0 }
-      - { dof: Link1, quantity: qdot, at: end,   equals: 0 }
-      - { dof: Link2, quantity: q,    at: start, equals: 0 }
-      - { dof: Link2, quantity: qdot, at: start, equals: 0 }
-      - { dof: Link2, quantity: q,    at: end,   equals: 0 }
-      - { dof: Link2, quantity: qdot, at: end,   equals: 0 }
-      - { dof: Link3, quantity: q,    at: start, equals: 0 }
-      - { dof: Link3, quantity: qdot, at: start, equals: 0 }
-      - { dof: Link3, quantity: q,    at: end,   equals: 0 }
-      - { dof: Link3, quantity: qdot, at: end,   equals: 0 }
-      - { dof: Link4, quantity: q,    at: start, equals: 0 }
-      - { dof: Link4, quantity: qdot, at: start, equals: 0 }
-      - { dof: Link4, quantity: q,    at: end,   equals: 0 }
-      - { dof: Link4, quantity: qdot, at: end,   equals: 0 }
-      - { dof: Link5, quantity: q,    at: start, equals: 0 }
-      - { dof: Link5, quantity: qdot, at: start, equals: 0 }
-      - { dof: Link5, quantity: q,    at: end,   equals: 0 }
-      - { dof: Link5, quantity: qdot, at: end,   equals: 0 }
-      - { dof: Link6, quantity: q,    at: start, equals: 0 }
-      - { dof: Link6, quantity: qdot, at: start, equals: 0 }
-      - { dof: Link6, quantity: q,    at: end,   equals: 0 }
-      - { dof: Link6, quantity: qdot, at: end,   equals: 0 }
-      - { dof: Link7, quantity: q,    at: start, equals: 0 }
-      - { dof: Link7, quantity: qdot, at: start, equals: 0 }
-      - { dof: Link7, quantity: q,    at: end,   equals: 0 }
-      - { dof: Link7, quantity: qdot, at: end,   equals: 0 }
+          min: -pi/4, max: pi/4, pin: both }

@@ -21,29 +21,18 @@ stages:
       - { dof: X, type: constant, value: 0 }
       - { dof: Y, type: constant, value: 0 }
       - { dof: LLAngle, type: hermlet, from: pi/8, to: 7*pi/16,
-          min: 0, max: pi/2 }
+          min: 0, max: pi/2, pin: start }
       - { dof: ULAngle, type: hermlet, from: 7*pi/8, to: pi/8,
-          min: 0, max: 15*pi/16 }
+          min: 0, max: 15*pi/16, pin: start }
       - { dof: TorsoAngle, type: hermlet, from: -5*pi/8, to: -pi/16,
-          min: -7*pi/8, max: 0 }
+          min: -7*pi/8, max: 0, pin: start }
       - { dof: UAAngle, type: hermlet, from: pi/4, to: 0,
-          min: 0, max: pi }
+          min: 0, max: pi, pin: start }
       - { dof: LAAngle, type: hermlet, from: 5*pi/8, to: 0,
-          min: 0, max: pi }
+          min: 0, max: pi, pin: start }
       - { dof: RHandAngle, type: constant, value: 0 }
       - { dof: NeckAngle, type: constant, value: 0 }
       - { dof: HeadAngle, type: constant, value: 0 }
-    constraints:
-      - { dof: TorsoAngle, quantity: q,    at: start, equals: -5*pi/8 }
-      - { dof: TorsoAngle, quantity: qdot, at: start, equals: 0 }
-      - { dof: UAAngle, quantity: q,    at: start, equals: pi/4 }
-      - { dof: UAAngle, quantity: qdot, at: start, equals: 0 }
-      - { dof: LAAngle, quantity: q,    at: start, equals: 5*pi/8 }
-      - { dof: LAAngle, quantity: qdot, at: start, equals: 0 }
-      - { dof: ULAngle, quantity: q,    at: start, equals: 7*pi/8 }
-      - { dof: ULAngle, quantity: qdot, at: start, equals: 0 }
-      - { dof: LLAngle, quantity: q,    at: start, equals: pi/8 }
-      - { dof: LLAngle, quantity: qdot, at: start, equals: 0 }
 
   # airborne: the lower leg sweeps through a full revolution
   - name: S2
@@ -88,29 +77,18 @@ stages:
       - { dof: X, type: constant, value: 0 }
       - { dof: Y, type: constant, value: 0 }
       - { dof: LLAngle, type: hermlet, from: 7*pi/16 + 2*pi, to: pi/8 + 2*pi,
-          min: 0, max: 10*pi }
+          min: 0, max: 10*pi, pin: end }
       - { dof: ULAngle, type: hermlet, from: pi/8, to: 7*pi/8,
-          min: 0, max: 15*pi/16 }
+          min: 0, max: 15*pi/16, pin: end }
       - { dof: TorsoAngle, type: hermlet, from: -pi/16, to: -5*pi/8,
-          min: -7*pi/8, max: 0 }
+          min: -7*pi/8, max: 0, pin: end }
       - { dof: UAAngle, type: hermlet, from: 0, to: pi/4,
-          min: 0, max: pi }
+          min: 0, max: pi, pin: end }
       - { dof: LAAngle, type: hermlet, from: 0, to: 5*pi/8,
-          min: 0, max: pi }
+          min: 0, max: pi, pin: end }
       - { dof: RHandAngle, type: constant, value: 0 }
       - { dof: NeckAngle, type: constant, value: 0 }
       - { dof: HeadAngle, type: constant, value: 0 }
-    constraints:
-      - { dof: TorsoAngle, quantity: q,    at: end, equals: -5*pi/8 }
-      - { dof: TorsoAngle, quantity: qdot, at: end, equals: 0 }
-      - { dof: UAAngle, quantity: q,    at: end, equals: pi/4 }
-      - { dof: UAAngle, quantity: qdot, at: end, equals: 0 }
-      - { dof: LAAngle, quantity: q,    at: end, equals: 5*pi/8 }
-      - { dof: LAAngle, quantity: qdot, at: end, equals: 0 }
-      - { dof: ULAngle, quantity: q,    at: end, equals: 7*pi/8 }
-      - { dof: ULAngle, quantity: qdot, at: end, equals: 0 }
-      - { dof: LLAngle, quantity: q,    at: end, equals: pi/8 + 2*pi }
-      - { dof: LLAngle, quantity: qdot, at: end, equals: 0 }
 links:
   - [S1, S2]
   - [S2, S3]

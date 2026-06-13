@@ -38,6 +38,13 @@ typedef map<string, Stage *> StMap;
 // "<stage>: <dof> q at start = -1.963" -- the row's provenance in full
 static string conLabel(const ConstraintSpec &K, Stage *S) {
    std::ostringstream o;
+   if (K.fromPin) {
+      o << S->Name << ": " << K.dof << " pin "
+        << (K.at == ConstraintSpec::Start ? "start" : "end") << " ("
+        << (K.quantity == ConstraintSpec::Val ? "q" : "qdot") << ") = "
+        << K.equals;
+      return o.str();
+   }
    o << S->Name << ": " << K.dof << " "
      << (K.quantity == ConstraintSpec::Val ? "q" : "qdot") << " at ";
    switch (K.at) {

@@ -19,18 +19,11 @@ stages:
       - { dof: Y, type: constant, value: 0 }
       - { dof: Alpha, type: constant, value: pi/2 }
       - { dof: Beta, type: hermite, from: 3*pi/11, to: pi/11,
-          min: -2*pi/11, max: 4*pi/11 }
+          min: -2*pi/11, max: 4*pi/11, pin: start }
       - { dof: Gamma, type: hermite, from: -6*pi/11, to: -3*pi/11,
-          min: -7*pi/11, max: 0 }
+          min: -7*pi/11, max: 0, pin: start }
       - { dof: Delta, type: hermite, from: -pi/11, to: -pi/11,
-          min: -2*pi/11, max: 0 }
-    constraints:
-      - { dof: Beta,  quantity: q,    at: start, equals: 3*pi/11 }
-      - { dof: Beta,  quantity: qdot, at: start, equals: 0 }
-      - { dof: Gamma, quantity: q,    at: start, equals: -6*pi/11 }
-      - { dof: Gamma, quantity: qdot, at: start, equals: 0 }
-      - { dof: Delta, quantity: q,    at: start, equals: -pi/11 }
-      - { dof: Delta, quantity: qdot, at: start, equals: 0 }
+          min: -2*pi/11, max: 0, pin: start }
 
   # flight; landing impact vectors of unknown magnitude
   - name: S2
@@ -69,18 +62,11 @@ stages:
       - { dof: Y, type: constant, value: 0 }
       - { dof: Alpha, type: constant, value: pi/2 }
       - { dof: Beta, type: hermite, from: pi/11, to: 3*pi/11,
-          min: -2*pi/11, max: 4*pi/11 }
+          min: -2*pi/11, max: 4*pi/11, pin: end }
       - { dof: Gamma, type: hermite, from: -3*pi/11, to: -6*pi/11,
-          min: -6*pi/11, max: 0 }
+          min: -6*pi/11, max: 0, pin: end }
       - { dof: Delta, type: hermite, from: -pi/11, to: -pi/11,
-          min: -2*pi/11, max: 0 }
-    constraints:
-      - { dof: Beta,  quantity: q,    at: end, equals: 3*pi/11 }
-      - { dof: Beta,  quantity: qdot, at: end, equals: 0 }
-      - { dof: Gamma, quantity: q,    at: end, equals: -6*pi/11 }
-      - { dof: Gamma, quantity: qdot, at: end, equals: 0 }
-      - { dof: Delta, quantity: q,    at: end, equals: -pi/11 }
-      - { dof: Delta, quantity: qdot, at: end, equals: 0 }
+          min: -2*pi/11, max: 0, pin: end }
 links:
   - [S1, S2]
   - [S2, S3]

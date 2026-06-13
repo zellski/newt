@@ -184,6 +184,20 @@ static void expectScenarioFail(const char *what, const string &needle,
    }
 }
 
+// substitute one line of the canonical scenario and parse
+static ScenarioSpec parseWith(const char *what, const string &needle,
+                              const string &replacement) {
+   string text = SCENARIO;
+   string::size_type p = text.find(needle);
+   if (p == string::npos) {
+      std::fprintf(stderr, "FAIL %s: bad test, needle not found\n", what);
+      failures ++;
+      throw SpecError("bad test");
+   }
+   text.replace(p, needle.size(), replacement);
+   return ParseScenario(text, "inline");
+}
+
 // route an expression through a numeric field and return its value
 static double evalViaGravity(const string &expr) {
    string text = SCENARIO;
@@ -223,6 +237,77 @@ static void testExpressions() {
    expectScenarioFail("empty expression", "gravity: -9.81", "gravity: \"\"", false);
    expectScenarioFail("dangling operator", "gravity: -9.81", "gravity: 1+", false);
    expectScenarioFail("bare operator", "gravity: -9.81", "gravity: \"*\"", false);
+}
+
+static const char *BETA_REP =
+   "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1 }";
+
+static void testPins() {
+   {
+      ScenarioSpec S = parseWith("pin both", BETA_REP,
+         "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+         "          pin: both }");
+      const StageSpec &S1 = S.stages[0];
+      check("pins prepended", S1.constraints.size() == 6);
+      const ConstraintSpec &q0 = S1.constraints[0];
+      check("pin q start", q0.fromPin && q0.dof == "Beta" &&
+            q0.quantity == ConstraintSpec::Val &&
+            q0.at == ConstraintSpec::Start && !q0.isRange);
+      checkNum("pin q start defaults to from", q0.equals, 0.5);
+      const ConstraintSpec &d0 = S1.constraints[1];
+      check("pin qdot start", d0.fromPin &&
+            d0.quantity == ConstraintSpec::Dot &&
+            d0.at == ConstraintSpec::Start);
+      checkNum("pin qdot defaults to 0", d0.equals, 0);
+      const ConstraintSpec &q1 = S1.constraints[2];
+      check("pin q end", q1.fromPin && q1.quantity == ConstraintSpec::Val &&
+            q1.at == ConstraintSpec::End);
+      checkNum("pin q end defaults to to", q1.equals, 0.25);
+      check("pin qdot end", S1.constraints[3].at == ConstraintSpec::End &&
+            S1.constraints[3].quantity == ConstraintSpec::Dot);
+      check("explicit constraints follow",
+            !S1.constraints[4].fromPin && !S1.constraints[5].fromPin &&
+            S1.constraints[4].at == ConstraintSpec::Start);
+      CreatureSpec C = ParseCreature(CREATURE, "inline");
+      Validate(S, C);
+   }
+   {
+      ScenarioSpec S = parseWith("pin overrides", BETA_REP,
+         "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+         "          pin: { start: { q: -1/2, qdot: 0.1 } } }");
+      const StageSpec &S1 = S.stages[0];
+      check("start-only pin", S1.constraints.size() == 4 &&
+            S1.constraints[0].fromPin && !S1.constraints[2].fromPin);
+      checkNum("pin q override", S1.constraints[0].equals, -0.5);
+      checkNum("pin qdot override", S1.constraints[1].equals, 0.1);
+   }
+   {
+      ScenarioSpec S = parseWith("pin on constant",
+         "- { dof: Y, type: constant, value: 0 }\n      - { dof: Alpha",
+         "- { dof: Y, type: constant, value: 0, pin: start }\n"
+         "      - { dof: Alpha");
+      const StageSpec &S1 = S.stages[0];
+      check("constant pin defaults to value",
+            S1.constraints.size() == 4 && S1.constraints[0].dof == "Y" &&
+            S1.constraints[0].equals == 0 && S1.constraints[1].equals == 0);
+   }
+
+   expectScenarioFail("bad pin token", BETA_REP,
+      "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+      "          pin: middle }", false);
+   expectScenarioFail("bad pin key", BETA_REP,
+      "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+      "          pin: { middle: { q: 0 } } }", false);
+   expectScenarioFail("empty pin mapping", BETA_REP,
+      "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+      "          pin: {} }", false);
+   expectScenarioFail("pin outside rep bounds", BETA_REP,
+      "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+      "          pin: { start: { q: 5 } } }", false);
+   expectScenarioFail("pin contradicts constant",
+      "- { dof: Y, type: constant, value: 0 }\n      - { dof: Alpha",
+      "- { dof: Y, type: constant, value: 0, pin: { start: { q: 1 } } }\n"
+      "      - { dof: Alpha", false);
 }
 
 static void testRejections() {
@@ -334,6 +419,7 @@ int main() {
       testCreature();
       testScenario();
       testExpressions();
+      testPins();
       testRejections();
       testCreatureRejections();
       testShippedFiles();

@@ -346,6 +346,51 @@ CreatureSpec parseCreature(const Node &root, const Ctx &ctx) {
 
 // --- scenario ----------------------------------------------------------
 
+// one boundary of a pin: mapping with optional q/qdot overrides
+RepSpec::Pin parsePinSide(const Node &n, const Ctx &ctx) {
+   RepSpec::Pin P;
+   P.on = true;
+   Fields f = fields(n, ctx);
+   checkKeys(f, keys("q", "qdot"), ctx);
+   if (opt(f, "q")) {
+      P.hasQ = true;
+      P.q = num(*opt(f, "q"), ctx.sub("q"));
+   }
+   if (opt(f, "qdot")) {
+      P.hasQdot = true;
+      P.qdot = num(*opt(f, "qdot"), ctx.sub("qdot"));
+   }
+   return P;
+}
+
+// pin: start | end | both, or { start: {q, qdot}, end: {q, qdot} }
+void parsePin(const Node &n, RepSpec &R, const Ctx &ctx) {
+   if (n.is_string()) {
+      string s = n.get_value<string>();
+      if (s == "start") {
+         R.pinStart.on = true;
+      } else if (s == "end") {
+         R.pinEnd.on = true;
+      } else if (s == "both") {
+         R.pinStart.on = R.pinEnd.on = true;
+      } else {
+         ctx.fail("expected start, end, both or {start, end}");
+      }
+      return;
+   }
+   Fields f = fields(n, ctx);
+   checkKeys(f, keys("start", "end"), ctx);
+   if (!opt(f, "start") && !opt(f, "end")) {
+      ctx.fail("pin mapping needs start and/or end");
+   }
+   if (opt(f, "start")) {
+      R.pinStart = parsePinSide(*opt(f, "start"), ctx.sub("start"));
+   }
+   if (opt(f, "end")) {
+      R.pinEnd = parsePinSide(*opt(f, "end"), ctx.sub("end"));
+   }
+}
+
 RepSpec parseRep(const Node &n, const Ctx &ctx) {
    Fields f = fields(n, ctx);
    RepSpec R;
@@ -354,7 +399,7 @@ RepSpec parseRep(const Node &n, const Ctx &ctx) {
    string type = str(req(f, "type", ctx), ctx.sub("type"));
    if (type == "constant") {
       R.type = RepSpec::Constant;
-      checkKeys(f, keys("dof", "type", "value"), ctx);
+      checkKeys(f, keys("dof", "type", "value", "pin"), ctx);
       R.value = num(req(f, "value", ctx), ctx.sub("value"));
    } else {
       if (type == "hermite") {
@@ -367,7 +412,7 @@ RepSpec parseRep(const Node &n, const Ctx &ctx) {
          ctx.sub("type").fail("unknown rep type '" + type +
                               "' (constant|hermite|hermlet|hat)");
       }
-      checkKeys(f, keys("dof", "type", "from", "to", "min", "max"), ctx);
+      checkKeys(f, keys("dof", "type", "from", "to", "min", "max", "pin"), ctx);
       R.from = num(req(f, "from", ctx), ctx.sub("from"));
       R.to = num(req(f, "to", ctx), ctx.sub("to"));
       const Node *mn = opt(f, "min"), *mx = opt(f, "max");
@@ -383,7 +428,38 @@ RepSpec parseRep(const Node &n, const Ctx &ctx) {
          }
       }
    }
+   if (opt(f, "pin")) {
+      parsePin(*opt(f, "pin"), R, ctx.sub("pin"));
+   }
    return R;
+}
+
+// lower one boundary pin to its (q, qdot) constraint pair
+void desugarPin(const RepSpec &R, const RepSpec::Pin &P,
+                ConstraintSpec::At at, vector<ConstraintSpec> &out,
+                const Ctx &ctx) {
+   if (!P.on) {
+      return;
+   }
+   double q = P.hasQ ? P.q
+      : R.type == RepSpec::Constant ? R.value
+      : at == ConstraintSpec::Start ? R.from : R.to;
+   if (R.type == RepSpec::Constant && q != R.value) {
+      ctx.fail("pin contradicts the constant rep's value");
+   }
+   if (R.hasBounds && (q < R.min || q > R.max)) {
+      ctx.fail("pin lies outside the rep's [min, max]");
+   }
+   ConstraintSpec K;
+   K.dof = R.dof;
+   K.at = at;
+   K.fromPin = true;
+   K.quantity = ConstraintSpec::Val;
+   K.equals = q;
+   out.push_back(K);
+   K.quantity = ConstraintSpec::Dot;
+   K.equals = P.hasQdot ? P.qdot : 0;
+   out.push_back(K);
 }
 
 ImpulseSpec parseImpulse(const Node &n, const Ctx &ctx, bool topLevel) {
@@ -537,6 +613,17 @@ StageSpec parseStage(const Node &n, const Ctx &ctx) {
          S.constraints.push_back(parseConstraint(cs[i], ctx.item("constraints", i), false));
       }
    }
+
+   // pins lower to ordinary constraints, placed ahead of any explicit
+   // ones: rep document order, start before end, q before qdot
+   vector<ConstraintSpec> pins;
+   for (size_t i = 0; i < S.reps.size(); i ++) {
+      const RepSpec &R = S.reps[i];
+      Ctx rc = ctx.item("reps", i).sub("pin");
+      desugarPin(R, R.pinStart, ConstraintSpec::Start, pins, rc);
+      desugarPin(R, R.pinEnd, ConstraintSpec::End, pins, rc);
+   }
+   S.constraints.insert(S.constraints.begin(), pins.begin(), pins.end());
    return S;
 }
 
