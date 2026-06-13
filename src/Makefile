@@ -43,6 +43,7 @@ SRCS = AVec.C \
 	SpecParser.C \
 	SpecBuilder.C \
 	Census.C \
+	Residuals.C \
 	Recorder.C \
 	Sweep.C
 #	VRMLVisualizer.C

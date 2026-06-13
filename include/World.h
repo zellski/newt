@@ -27,6 +27,10 @@ public:
    // legacy unlabeled claims read "?"
    std::vector<std::string> xLabels, cLabels;
 
+   // the constraint bounds as set by Initialize, snapshotted for
+   // residual reporting (Omu owns the live vectors)
+   std::vector<double> cMins, cMaxs;
+
    const double G;
 
    World(double g);

@@ -227,6 +227,17 @@ proc newt_solve {{stream stdout}} {
 if {[catch newt_solve status]} {
   # status carries the failure reason (iters, stall, evaluation, ...)
 }
+
+# a failed solve ends with its largest violations, by name
+if {$status != "optimal"} {
+  if {[catch {newt_residuals} residuals]} {
+    puts stderr "newt_residuals: $residuals"
+  } else {
+    puts ""
+    puts $residuals
+  }
+}
+
 newt_finish $status
 
 ## print the results and exit

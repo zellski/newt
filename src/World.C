@@ -6,6 +6,7 @@
 # include "Creature.h"
 # include "Fun.h"
 # include "newt/Sweep.h"
+# include "newt/Residuals.h"
 
 World *World::Active = 0;
 
@@ -88,6 +89,9 @@ void World::Update(const adoublev &x, adoublev &c, adouble &f0) {
    if (newt::Sweeper::requested) {
       newt::Sweeper::Run(this, x);
    }
+   if (newt::Residuals::requested) {
+      newt::Residuals::Capture(this, c);
+   }
 }
 
 void World::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
@@ -104,4 +108,11 @@ void World::Initialize(Omu_VariableVec &x, Omu_VariableVec &c) {
    for (uint i = 0; i < Stages.size(); i ++) {
       Stages[i]->Initialize(x, c);
    }
-}   
+   // bounds are final now; snapshot them for residual reporting
+   cMins.clear();
+   cMaxs.clear();
+   for (int i = 0; i < cIx; i ++) {
+      cMins.push_back(c.min[i]);
+      cMaxs.push_back(c.max[i]);
+   }
+}
