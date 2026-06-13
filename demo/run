@@ -2,7 +2,10 @@
 #
 # NewT run driver: per-run scratch isolation + SQLite iterate recording.
 #
-#   ./run <scenario.yaml | ProgramClass> [max_iters]
+#   ./run <scenario.yaml | ProgramClass> [max_iters | check]
+#
+# `check` sets up the problem, prints the constraint census and exits
+# without solving.
 #
 # Every run gets its own scratch directory under <repo>/runs/ -- ADOL-C
 # drops its tape files (fixed names!) into the cwd, so concurrent runs
@@ -46,8 +49,14 @@ sqp_qp_solver Franke
 ## potentially go for a long long time
 qp_max_iters 5000
 sqp_max_iters 5000
+set checkOnly 0
 if {[llength $argv] > 1} {
-  sqp_max_iters [lindex $argv 1]
+  set arg2 [lindex $argv 1]
+  if {$arg2 == "check"} {
+    set checkOnly 1
+  } else {
+    sqp_max_iters $arg2
+  }
 }
 
 if {$isYaml} {
@@ -63,6 +72,12 @@ if {$isYaml} {
 
 # setup the problem
 prg_setup
+
+# check mode: print the census and stop before any solving
+if {$checkOnly} {
+  puts [newt_census]
+  exit
+}
 
 # perform an initial-value simulation
 # (this is only needed to initialize additional states variables)
@@ -212,6 +227,17 @@ proc newt_solve {{stream stdout}} {
 if {[catch newt_solve status]} {
   # status carries the failure reason (iters, stall, evaluation, ...)
 }
+
+# a failed solve ends with its largest violations, by name
+if {$status != "optimal"} {
+  if {[catch {newt_residuals} residuals]} {
+    puts stderr "newt_residuals: $residuals"
+  } else {
+    puts ""
+    puts $residuals
+  }
+}
+
 newt_finish $status
 
 ## print the results and exit

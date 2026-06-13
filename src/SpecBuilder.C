@@ -2,6 +2,7 @@
 
 # include <cstring>
 # include <map>
+# include <sstream>
 
 # include "World.h"
 # include "DOF.h"
@@ -34,6 +35,37 @@ typedef map<string, DOF *> DofMap;
 typedef map<string, BodyPoint *> PtMap;
 typedef map<string, Stage *> StMap;
 
+// "<stage>: <dof> q at start = -1.963" -- the row's provenance in full
+static string conLabel(const ConstraintSpec &K, Stage *S) {
+   std::ostringstream o;
+   if (K.fromPin) {
+      o << S->Name << ": " << K.dof << " pin "
+        << (K.at == ConstraintSpec::Start ? "start" : "end") << " ("
+        << (K.quantity == ConstraintSpec::Val ? "q" : "qdot") << ") = "
+        << K.equals;
+      return o.str();
+   }
+   o << S->Name << ": " << K.dof << " "
+     << (K.quantity == ConstraintSpec::Val ? "q" : "qdot") << " at ";
+   switch (K.at) {
+   case ConstraintSpec::Start:
+      o << "start";
+      break;
+   case ConstraintSpec::End:
+      o << "end";
+      break;
+   case ConstraintSpec::Explicit:
+      o << "slice " << K.slice << " t=" << K.t;
+      break;
+   }
+   if (K.isRange) {
+      o << " in [" << K.min << ", " << K.max << "]";
+   } else {
+      o << " = " << K.equals;
+   }
+   return o.str();
+}
+
 static void buildConstraint(const ConstraintSpec &K, Stage *S, DOF *D) {
    int slice = 0;
    double t = 0;
@@ -50,9 +82,9 @@ static void buildConstraint(const ConstraintSpec &K, Stage *S, DOF *D) {
    }
    const adouble &watch = K.quantity == ConstraintSpec::Val ? D->qVal : D->qDot;
    if (K.isRange) {
-      new ValConstraint(S, slice, t, watch, K.min, K.max);
+      new ValConstraint(S, slice, t, watch, K.min, K.max, conLabel(K, S));
    } else {
-      new ValConstraint(S, slice, t, watch, K.equals);
+      new ValConstraint(S, slice, t, watch, K.equals, conLabel(K, S));
    }
 }
 
@@ -60,7 +92,8 @@ static void buildImpulse(const ImpulseSpec &I, Stage *S, AnchorPoint *P) {
    if (I.hasMagnitude) {
       new Impulse(S, P, I.sx, I.sy, I.magnitude);
    } else {
-      new Impulse(S, P, I.sx, I.sy);
+      new Impulse(S, P, I.sx, I.sy,
+                  string(S->Name) + ": impulse @" + I.point + " magnitude");
    }
 }
 
@@ -118,12 +151,15 @@ World *newt::BuildWorld(const ScenarioSpec &S, const CreatureSpec &C,
    for (size_t i = 0; i < S.stages.size(); i ++) {
       const StageSpec &st = S.stages[i];
       Stage *Sg = st.variableDuration
-         ? new Stage(W, I, st.pieces, st.min, st.max, st.start)
-         : new Stage(W, I, st.pieces, st.T);
+         ? new Stage(W, dup(st.name), I, st.pieces, st.min, st.max, st.start)
+         : new Stage(W, dup(st.name), I, st.pieces, st.T);
       stages[st.name] = Sg;
 
       for (size_t j = 0; j < st.muscles.size(); j ++) {
-         new Muscle(Sg, dofs[st.muscles[j].dof], new PWL(Sg), st.muscles[j].weight);
+         const string &dof = st.muscles[j].dof;
+         new Muscle(Sg, dofs[dof],
+                    new PWL(Sg, st.name + ": " + dof + " torque coeffs"),
+                    st.muscles[j].weight);
       }
       for (size_t j = 0; j < st.reps.size(); j ++) {
          const RepSpec &R = st.reps[j];

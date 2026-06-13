@@ -1,5 +1,7 @@
 # pragma once
 
+# include <string>
+
 # include "AVec.h"
 
 class Stage;
@@ -14,7 +16,8 @@ public:
    AVec JVec;
 
    Impulse(Stage *const s, AnchorPoint *p, double sx, double sy, double mag);
-   Impulse(Stage *const s, AnchorPoint *p, double sx, double sy);
+   Impulse(Stage *const s, AnchorPoint *p, double sx, double sy,
+           const std::string &label = "?");
 
    void SnapShot(const adoublev &x);
 };

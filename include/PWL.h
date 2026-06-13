@@ -1,5 +1,7 @@
 # pragma once
 
+# include <string>
+
 # include <Omu_Variables.h>
 # include "adolc.h"
 # include "Fun.h"
@@ -14,7 +16,7 @@ class PWL: public Fun {
 protected:
    const int xIx;
 public:
-   PWL(Stage *const s);
+   PWL(Stage *const s, const std::string &label = "?");
 
    void SnapShot(const adoublev &x, int slice, double t);
    bool isConstant() { return false; }

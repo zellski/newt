@@ -11,6 +11,7 @@
 # include <dirent.h>
 
 # include "newt/SpecParser.h"
+# include "newt/Census.h"
 
 using namespace newt;
 using std::string;
@@ -184,6 +185,307 @@ static void expectScenarioFail(const char *what, const string &needle,
    }
 }
 
+// substitute one line of the canonical scenario and parse
+static ScenarioSpec parseWith(const char *what, const string &needle,
+                              const string &replacement) {
+   string text = SCENARIO;
+   string::size_type p = text.find(needle);
+   if (p == string::npos) {
+      std::fprintf(stderr, "FAIL %s: bad test, needle not found\n", what);
+      failures ++;
+      throw SpecError("bad test");
+   }
+   text.replace(p, needle.size(), replacement);
+   return ParseScenario(text, "inline");
+}
+
+// route an expression through a numeric field and return its value
+static double evalViaGravity(const string &expr) {
+   string text = SCENARIO;
+   const string needle = "gravity: -9.81";
+   text.replace(text.find(needle), needle.size(), "gravity: " + expr);
+   return ParseScenario(text, "inline").gravity;
+}
+
+static void testExpressions() {
+   // the exact 17-digit literals the shipped scenarios used to carry
+   checkNum("pi", evalViaGravity("pi"), 3.141592653589793);
+   checkNum("PI/2", evalViaGravity("PI/2"), 1.5707963267948966);
+   checkNum("3*pi/11", evalViaGravity("3*pi/11"), 0.8567979964335799);
+   checkNum("-5*pi/8", evalViaGravity("-5*pi/8"), -1.9634954084936207);
+   checkNum("15*pi/16", evalViaGravity("15*pi/16"), 2.945243112740431);
+   checkNum("-7*pi/11", evalViaGravity("-7*pi/11"), -1.9991953250116865);
+   checkNum("8*pi/17", evalViaGravity("8*pi/17"), 1.478396542865785);
+   checkNum("7*pi/16 + 2*pi", evalViaGravity("7*pi/16 + 2*pi"), 7.6576320931251205);
+   checkNum("pi/8 + 2*pi", evalViaGravity("pi/8 + 2*pi"), 6.675884388878311);
+   checkNum("sqrt(1.5*2.0/9.81)", evalViaGravity("sqrt(1.5*2.0/9.81)"),
+            0.553001263609331);
+   checkNum("1/3", evalViaGravity("1/3"), 0.3333333333333333);
+   checkNum("1/7", evalViaGravity("1/7"), 0.14285714285714285);
+
+   // grammar mechanics
+   checkNum("parens", evalViaGravity("(1 + 2) * (3 - 4)"), -3.0);
+   checkNum("nested negation", evalViaGravity("--2"), 2.0);
+   checkNum("left assoc", evalViaGravity("8/4/2"), 1.0);
+   checkNum("quoted", evalViaGravity("\"-(1 + 2) * 3\""), -9.0);
+   checkNum("whitespace", evalViaGravity("\"  2 * pi  \""), 6.283185307179586);
+
+   expectScenarioFail("unknown name", "gravity: -9.81", "gravity: tau", false);
+   expectScenarioFail("trailing junk", "gravity: -9.81", "gravity: pi pi", false);
+   expectScenarioFail("unbalanced parens", "gravity: -9.81", "gravity: (1+2", false);
+   expectScenarioFail("division by zero", "gravity: -9.81", "gravity: 1/0", false);
+   expectScenarioFail("sqrt of negative", "gravity: -9.81", "gravity: sqrt(0-1)", false);
+   expectScenarioFail("empty expression", "gravity: -9.81", "gravity: \"\"", false);
+   expectScenarioFail("dangling operator", "gravity: -9.81", "gravity: 1+", false);
+   expectScenarioFail("bare operator", "gravity: -9.81", "gravity: \"*\"", false);
+}
+
+static const char *BETA_REP =
+   "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1 }";
+
+static void testPins() {
+   {
+      ScenarioSpec S = parseWith("pin both", BETA_REP,
+         "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+         "          pin: both }");
+      const StageSpec &S1 = S.stages[0];
+      check("pins prepended", S1.constraints.size() == 6);
+      const ConstraintSpec &q0 = S1.constraints[0];
+      check("pin q start", q0.fromPin && q0.dof == "Beta" &&
+            q0.quantity == ConstraintSpec::Val &&
+            q0.at == ConstraintSpec::Start && !q0.isRange);
+      checkNum("pin q start defaults to from", q0.equals, 0.5);
+      const ConstraintSpec &d0 = S1.constraints[1];
+      check("pin qdot start", d0.fromPin &&
+            d0.quantity == ConstraintSpec::Dot &&
+            d0.at == ConstraintSpec::Start);
+      checkNum("pin qdot defaults to 0", d0.equals, 0);
+      const ConstraintSpec &q1 = S1.constraints[2];
+      check("pin q end", q1.fromPin && q1.quantity == ConstraintSpec::Val &&
+            q1.at == ConstraintSpec::End);
+      checkNum("pin q end defaults to to", q1.equals, 0.25);
+      check("pin qdot end", S1.constraints[3].at == ConstraintSpec::End &&
+            S1.constraints[3].quantity == ConstraintSpec::Dot);
+      check("explicit constraints follow",
+            !S1.constraints[4].fromPin && !S1.constraints[5].fromPin &&
+            S1.constraints[4].at == ConstraintSpec::Start);
+      CreatureSpec C = ParseCreature(CREATURE, "inline");
+      Validate(S, C);
+   }
+   {
+      ScenarioSpec S = parseWith("pin overrides", BETA_REP,
+         "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+         "          pin: { start: { q: -1/2, qdot: 0.1 } } }");
+      const StageSpec &S1 = S.stages[0];
+      check("start-only pin", S1.constraints.size() == 4 &&
+            S1.constraints[0].fromPin && !S1.constraints[2].fromPin);
+      checkNum("pin q override", S1.constraints[0].equals, -0.5);
+      checkNum("pin qdot override", S1.constraints[1].equals, 0.1);
+   }
+   {
+      ScenarioSpec S = parseWith("pin on constant",
+         "- { dof: Y, type: constant, value: 0 }\n      - { dof: Alpha",
+         "- { dof: Y, type: constant, value: 0, pin: start }\n"
+         "      - { dof: Alpha");
+      const StageSpec &S1 = S.stages[0];
+      check("constant pin defaults to value",
+            S1.constraints.size() == 4 && S1.constraints[0].dof == "Y" &&
+            S1.constraints[0].equals == 0 && S1.constraints[1].equals == 0);
+   }
+
+   expectScenarioFail("bad pin token", BETA_REP,
+      "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+      "          pin: middle }", false);
+   expectScenarioFail("bad pin key", BETA_REP,
+      "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+      "          pin: { middle: { q: 0 } } }", false);
+   expectScenarioFail("empty pin mapping", BETA_REP,
+      "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+      "          pin: {} }", false);
+   expectScenarioFail("pin outside rep bounds", BETA_REP,
+      "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+      "          pin: { start: { q: 5 } } }", false);
+   expectScenarioFail("pin contradicts constant",
+      "- { dof: Y, type: constant, value: 0 }\n      - { dof: Alpha",
+      "- { dof: Y, type: constant, value: 0, pin: { start: { q: 1 } } }\n"
+      "      - { dof: Alpha", false);
+}
+
+static void testStructuralValidation() {
+   // a constraint that contradicts a constant rep
+   expectScenarioFail("contradicts constant",
+      "constraints:\n      - { dof: Beta, quantity: q, at: start, equals: 0.5 }",
+      "constraints:\n"
+      "      - { dof: Y, quantity: q, at: start, equals: 1 }\n"
+      "      - { dof: Beta, quantity: q, at: start, equals: 0.5 }");
+   // two equalities at the same location with different values
+   expectScenarioFail("conflicting duplicates",
+      "- { dof: Beta, quantity: q, at: start, equals: 0.5 }",
+      "- { dof: Beta, quantity: q, at: start, equals: 0.5 }\n"
+      "      - { dof: Beta, quantity: q, at: start, equals: 0.6 }");
+   // an equality outside a range at the same location
+   expectScenarioFail("equality outside range",
+      "- { dof: Beta, quantity: qdot, at: end, min: -2, max: 2 }",
+      "- { dof: Beta, quantity: qdot, at: end, min: -2, max: 2 }\n"
+      "      - { dof: Beta, quantity: qdot, at: end, equals: 3 }");
+   // an identical redundant duplicate stays legal
+   {
+      ScenarioSpec S = parseWith("redundant duplicate",
+         "- { dof: Beta, quantity: q, at: start, equals: 0.5 }",
+         "- { dof: Beta, quantity: q, at: start, equals: 0.5 }\n"
+         "      - { dof: Beta, quantity: q, at: start, equals: 0.5 }");
+      CreatureSpec C = ParseCreature(CREATURE, "inline");
+      Validate(S, C);
+   }
+   // facing boundaries across the S1->S2 link must agree: S1 ends Beta
+   // at 0.25, S2 claims it starts at 0.3
+   {
+      string text = SCENARIO;
+      const string n1 = "- { dof: Beta, quantity: qdot, at: end, min: -2, max: 2 }";
+      text.replace(text.find(n1), n1.size(),
+         "- { dof: Beta, quantity: q, at: end, equals: 0.25 }");
+      const string n2 = "  - { stage: S2, dof: Beta, quantity: q, at: { slice: 3, t: 0.5 }, equals: 0.5 }";
+      text.replace(text.find(n2), n2.size(),
+         "  - { stage: S2, dof: Beta, quantity: q, at: start, equals: 0.3 }");
+      try {
+         ScenarioSpec S = ParseScenario(text, "inline");
+         CreatureSpec C = ParseCreature(CREATURE, "inline");
+         Validate(S, C);
+         std::fprintf(stderr, "FAIL facing boundaries: expected SpecError\n");
+         failures ++;
+      } catch (const SpecError &) {
+         // expected
+      }
+   }
+   // unanchored DOFs warn: take away Alpha's constant rep and it has
+   // no q constraint or constant anywhere
+   {
+      ScenarioSpec S = parseWith("unanchored dof",
+         "- { dof: Alpha, type: constant, value: 1.5 }",
+         "- { dof: Alpha, type: hermlet, from: 1.5, to: 1.5 }");
+      CreatureSpec C = ParseCreature(CREATURE, "inline");
+      std::vector<string> warnings;
+      Validate(S, C, &warnings);
+      check("unanchored dof warns", warnings.size() == 1 &&
+            warnings[0].find("Alpha") != string::npos);
+   }
+   // the canonical pair is warning-free
+   {
+      ScenarioSpec S = ParseScenario(SCENARIO, "inline");
+      CreatureSpec C = ParseCreature(CREATURE, "inline");
+      std::vector<string> warnings;
+      Validate(S, C, &warnings);
+      check("canonical scenario warning-free", warnings.empty());
+   }
+}
+
+static void testCensus() {
+   ScenarioSpec S = ParseScenario(SCENARIO, "inline");
+   CreatureSpec C = ParseCreature(CREATURE, "inline");
+
+   // hand-derived totals for the canonical scenario:
+   // vars: S2 duration 1; reps: Alpha hermlet 18 + Beta hermite 18 (S1)
+   //       + X hat 5 + Beta hermite 10 (S2) = 51; S1 muscle PWL 16;
+   //       S1 free impulse 1  => 69
+   // cons: Beta S1 bounds 16; FEM: Alpha 16 + Beta 16 (S1), X 3 +
+   //       Beta 8 (S2) = 43; link S1->S2: X, Alpha, Beta -> 6;
+   //       explicit constraints 3  => 68
+   int nVars, nCons;
+   CensusTotals(S, C, nVars, nCons);
+   check("census vars", nVars == 69);
+   check("census cons", nCons == 68);
+
+   string text = Census(S, C);
+   check("census table cells",
+         text.find("hermite s[q] e[qd]") != string::npos &&   // S1 Beta
+         text.find("hermlet") != string::npos &&              // S1 Alpha
+         text.find("hermite m[1]") != string::npos);          // S2 Beta
+   check("census links line", text.find("links: S1->S2") != string::npos);
+   check("census breakdown",
+         text.find("variables: 69") != string::npos &&
+         text.find("constraints: 68") != string::npos);
+
+   // pins count separately from explicit constraints
+   ScenarioSpec SP = parseWith("census pins", BETA_REP,
+      "- { dof: Beta, type: hermite, from: 0.5, to: 0.25, min: -1, max: 1,\n"
+      "          pin: both }");
+   string ptext = Census(SP, C);
+   check("census pin count", ptext.find("pins                  4") != string::npos);
+}
+
+// a two-stage scenario with every DOF constant on both stages: the
+// default chain link spans zero non-constant DOFs and must claim no
+// rows (Link.C used to abort in World::claimCons(0))
+static void testZeroRowLink() {
+   static const char *ALLCONST =
+      "name: AllConst\n"
+      "creature: beast.creature.yaml\n"
+      "gravity: 0\n"
+      "integrator: { type: gauss, n: 5 }\n"
+      "stages:\n"
+      "  - name: S1\n"
+      "    pieces: 4\n"
+      "    duration: 1\n"
+      "    reps:\n"
+      "      - { dof: X, type: constant, value: 0 }\n"
+      "      - { dof: Y, type: constant, value: 0 }\n"
+      "      - { dof: Alpha, type: constant, value: 0 }\n"
+      "      - { dof: Beta, type: constant, value: 0 }\n"
+      "  - name: S2\n"
+      "    pieces: 4\n"
+      "    duration: 1\n"
+      "    reps:\n"
+      "      - { dof: X, type: constant, value: 0 }\n"
+      "      - { dof: Y, type: constant, value: 0 }\n"
+      "      - { dof: Alpha, type: constant, value: 0 }\n"
+      "      - { dof: Beta, type: constant, value: 0 }\n";
+   ScenarioSpec S = ParseScenario(ALLCONST, "inline");
+   CreatureSpec C = ParseCreature(CREATURE, "inline");
+   check("all-constant chains by default", S.chainLinks);
+   Validate(S, C);
+   int nVars, nCons;
+   CensusTotals(S, C, nVars, nCons);
+   check("all-constant claims no vars", nVars == 0);
+   check("all-constant claims no cons", nCons == 0);
+   check("zero-row link contributes nothing",
+         Census(S, C).find("link continuity       0") != string::npos);
+}
+
+static void testChainDefault() {
+   {
+      ScenarioSpec S = parseWith("chain default", "links:\n  - [S1, S2]\n", "");
+      check("multi-stage chains by default", S.chainLinks && S.links.empty());
+   }
+   {
+      ScenarioSpec S = parseWith("chain opt-out", "links:\n  - [S1, S2]\n",
+                                 "chain: false\n");
+      check("chain: false opts out", !S.chainLinks && S.links.empty());
+   }
+   {
+      // an explicit links: list suppresses the default
+      ScenarioSpec S = ParseScenario(SCENARIO, "inline");
+      check("explicit links honored", !S.chainLinks && S.links.size() == 1);
+   }
+   {
+      static const char *MONO =
+         "name: Mono\n"
+         "creature: beast.creature.yaml\n"
+         "gravity: 0\n"
+         "integrator: { type: gauss, n: 5 }\n"
+         "stages:\n"
+         "  - name: S1\n"
+         "    pieces: 4\n"
+         "    duration: 1\n"
+         "    reps:\n"
+         "      - { dof: X, type: constant, value: 0 }\n"
+         "      - { dof: Y, type: constant, value: 0 }\n"
+         "      - { dof: Alpha, type: hermite, from: 0, to: 1 }\n"
+         "      - { dof: Beta, type: hermite, from: 0, to: 1 }\n";
+      ScenarioSpec S = ParseScenario(MONO, "inline");
+      check("single stage stays unchained", !S.chainLinks && S.links.empty());
+   }
+}
+
 static void testRejections() {
    // parse-time
    expectScenarioFail("unknown key", "gravity:", "gravties:");
@@ -292,6 +594,12 @@ int main() {
    try {
       testCreature();
       testScenario();
+      testExpressions();
+      testPins();
+      testStructuralValidation();
+      testCensus();
+      testZeroRowLink();
+      testChainDefault();
       testRejections();
       testCreatureRejections();
       testShippedFiles();

@@ -13,10 +13,4 @@ stages:
     reps:
       - { dof: X, type: constant, value: 0 }
       - { dof: Y, type: constant, value: 0 }
-      - { dof: LinkAngle, type: hermlet,
-          from: -1.5707963267948966, to: 1.5707963267948966 }   # -pi/2 -> pi/2
-    constraints:
-      - { dof: LinkAngle, quantity: q,    at: start, equals: -1.5707963267948966 }
-      - { dof: LinkAngle, quantity: qdot, at: start, equals: 0 }
-      - { dof: LinkAngle, quantity: q,    at: end,   equals: 1.5707963267948966 }
-      - { dof: LinkAngle, quantity: qdot, at: end,   equals: 0 }
+      - { dof: LinkAngle, type: hermlet, from: -pi/2, to: pi/2, pin: both }

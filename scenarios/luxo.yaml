@@ -1,15 +1,6 @@
 # Port of demo/Luxo.C: crouch, leap two meters, land and stabilize.
-# All derived constants are 17-significant-digit literals of the C++
-# expressions:
-#   BETA_REST  =  3*pi/11 =  0.8567979964335799
-#   GAMMA_REST = -6*pi/11 = -1.7135959928671598
-#   DELTA_REST =  -pi/11  = -0.28559933214452665
-#   pi/11 = 0.28559933214452665    -2*pi/11 = -0.5711986642890533
-#   4*pi/11 = 1.1423973285781066   -3*pi/11 = -0.8567979964335799
-#   -7*pi/11 = -1.9991953250116865  pi/2 = 1.5707963267948966
-#   pi/3 = 1.0471975511965976      2*pi/3 = 2.0943951023931953
-#   LEAP_LENGTH = 2.0
-#   LEAP_TIME = sqrt(1.5*2.0/9.81) = 0.553001263609331
+# Rest pose: Beta = 3*pi/11, Gamma = -6*pi/11, Delta = -pi/11.
+# Flight time is the ballistic sqrt(1.5 * LEAP_LENGTH / g).
 name: Luxo
 creature: creatures/luxo.creature.yaml
 gravity: -9.81
@@ -26,25 +17,18 @@ stages:
     reps:
       - { dof: X, type: constant, value: -1.0 }
       - { dof: Y, type: constant, value: 0 }
-      - { dof: Alpha, type: constant, value: 1.5707963267948966 }
-      - { dof: Beta, type: hermite, from: 0.8567979964335799, to: 0.28559933214452665,
-          min: -0.5711986642890533, max: 1.1423973285781066 }
-      - { dof: Gamma, type: hermite, from: -1.7135959928671598, to: -0.8567979964335799,
-          min: -1.9991953250116865, max: 0 }
-      - { dof: Delta, type: hermite, from: -0.28559933214452665, to: -0.28559933214452665,
-          min: -0.5711986642890533, max: 0 }
-    constraints:
-      - { dof: Beta,  quantity: q,    at: start, equals: 0.8567979964335799 }
-      - { dof: Beta,  quantity: qdot, at: start, equals: 0 }
-      - { dof: Gamma, quantity: q,    at: start, equals: -1.7135959928671598 }
-      - { dof: Gamma, quantity: qdot, at: start, equals: 0 }
-      - { dof: Delta, quantity: q,    at: start, equals: -0.28559933214452665 }
-      - { dof: Delta, quantity: qdot, at: start, equals: 0 }
+      - { dof: Alpha, type: constant, value: pi/2 }
+      - { dof: Beta, type: hermite, from: 3*pi/11, to: pi/11,
+          min: -2*pi/11, max: 4*pi/11, pin: start }
+      - { dof: Gamma, type: hermite, from: -6*pi/11, to: -3*pi/11,
+          min: -7*pi/11, max: 0, pin: start }
+      - { dof: Delta, type: hermite, from: -pi/11, to: -pi/11,
+          min: -2*pi/11, max: 0, pin: start }
 
   # flight; landing impact vectors of unknown magnitude
   - name: S2
     pieces: 12
-    duration: 0.553001263609331
+    duration: sqrt(1.5*2.0/9.81)
     muscles:
       - { dof: Beta,  weight: 2 }
       - { dof: Gamma, weight: 1 }
@@ -52,14 +36,14 @@ stages:
     reps:
       - { dof: X, type: hermite, from: -1.0, to: 1.0 }
       - { dof: Y, type: hermite, from: 0.5, to: 0.5 }
-      - { dof: Alpha, type: hermite, from: 1.5707963267948966, to: 1.5707963267948966,
-          min: 1.0471975511965976, max: 2.0943951023931953 }
-      - { dof: Beta, type: hermite, from: 0.28559933214452665, to: 0.28559933214452665,
-          min: -0.28559933214452665, max: 1.1423973285781066 }
-      - { dof: Gamma, type: hermite, from: -0.8567979964335799, to: -0.8567979964335799,
-          min: -1.7135959928671598, max: 0 }
-      - { dof: Delta, type: hermite, from: -0.28559933214452665, to: -0.28559933214452665,
-          min: -0.5711986642890533, max: 0 }
+      - { dof: Alpha, type: hermite, from: pi/2, to: pi/2,
+          min: pi/3, max: 2*pi/3 }
+      - { dof: Beta, type: hermite, from: pi/11, to: pi/11,
+          min: -pi/11, max: 4*pi/11 }
+      - { dof: Gamma, type: hermite, from: -3*pi/11, to: -3*pi/11,
+          min: -6*pi/11, max: 0 }
+      - { dof: Delta, type: hermite, from: -pi/11, to: -pi/11,
+          min: -2*pi/11, max: 0 }
     impulses:
       - { point: Base.BaseRight, direction: [0, 1] }
       - { point: Base.BaseLeft,  direction: [0, 1] }
@@ -76,20 +60,10 @@ stages:
     reps:
       - { dof: X, type: constant, value: 1.0 }
       - { dof: Y, type: constant, value: 0 }
-      - { dof: Alpha, type: constant, value: 1.5707963267948966 }
-      - { dof: Beta, type: hermite, from: 0.28559933214452665, to: 0.8567979964335799,
-          min: -0.5711986642890533, max: 1.1423973285781066 }
-      - { dof: Gamma, type: hermite, from: -0.8567979964335799, to: -1.7135959928671598,
-          min: -1.7135959928671598, max: 0 }
-      - { dof: Delta, type: hermite, from: -0.28559933214452665, to: -0.28559933214452665,
-          min: -0.5711986642890533, max: 0 }
-    constraints:
-      - { dof: Beta,  quantity: q,    at: end, equals: 0.8567979964335799 }
-      - { dof: Beta,  quantity: qdot, at: end, equals: 0 }
-      - { dof: Gamma, quantity: q,    at: end, equals: -1.7135959928671598 }
-      - { dof: Gamma, quantity: qdot, at: end, equals: 0 }
-      - { dof: Delta, quantity: q,    at: end, equals: -0.28559933214452665 }
-      - { dof: Delta, quantity: qdot, at: end, equals: 0 }
-links:
-  - [S1, S2]
-  - [S2, S3]
+      - { dof: Alpha, type: constant, value: pi/2 }
+      - { dof: Beta, type: hermite, from: pi/11, to: 3*pi/11,
+          min: -2*pi/11, max: 4*pi/11, pin: end }
+      - { dof: Gamma, type: hermite, from: -3*pi/11, to: -6*pi/11,
+          min: -6*pi/11, max: 0, pin: end }
+      - { dof: Delta, type: hermite, from: -pi/11, to: -pi/11,
+          min: -2*pi/11, max: 0, pin: end }

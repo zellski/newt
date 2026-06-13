@@ -2,6 +2,9 @@
 
 # include <fkYAML/node.hpp>
 
+# include <cctype>
+# include <cmath>
+# include <cstdlib>
 # include <fstream>
 # include <sstream>
 # include <map>
@@ -74,12 +77,130 @@ const Node *opt(const Fields &f, const string &key) {
    return p == f.end() ? 0 : p->second;
 }
 
+// constant-expression evaluator for float-valued fields: number
+// literals, pi/PI, + - * /, unary minus, parens, sqrt(). Deliberately
+// a frozen calculator, not a language: no variables, no references to
+// other fields, no user-defined names.
+struct Expr {
+   const char *p, *end;
+   const string &src;
+   const Ctx &ctx;
+   Expr(const string &s, const Ctx &c)
+      : p(s.c_str()), end(s.c_str() + s.size()), src(s), ctx(c) {}
+   void fail(const string &what) const {
+      ctx.fail("bad expression '" + src + "': " + what);
+   }
+   void ws() {
+      while (p < end && std::isspace((unsigned char) *p)) {
+         p ++;
+      }
+   }
+   bool eat(char c) {
+      ws();
+      if (p < end && *p == c) {
+         p ++;
+         return true;
+      }
+      return false;
+   }
+   double sum() {
+      double v = term();
+      for (;;) {
+         if (eat('+')) {
+            v += term();
+         } else if (eat('-')) {
+            v -= term();
+         } else {
+            return v;
+         }
+      }
+   }
+   double term() {
+      double v = factor();
+      for (;;) {
+         if (eat('*')) {
+            v *= factor();
+         } else if (eat('/')) {
+            double d = factor();
+            if (d == 0) {
+               fail("division by zero");
+            }
+            v /= d;
+         } else {
+            return v;
+         }
+      }
+   }
+   double factor() {
+      ws();
+      if (eat('-')) {
+         return -factor();
+      }
+      if (eat('(')) {
+         double v = sum();
+         if (!eat(')')) {
+            fail("expected ')'");
+         }
+         return v;
+      }
+      if (p < end && (std::isdigit((unsigned char) *p) || *p == '.')) {
+         char *after;
+         double v = std::strtod(p, &after);
+         if (after == p) {
+            fail("malformed number");
+         }
+         p = after;
+         return v;
+      }
+      if (p < end && std::isalpha((unsigned char) *p)) {
+         const char *start = p;
+         while (p < end && std::isalpha((unsigned char) *p)) {
+            p ++;
+         }
+         string name(start, p);
+         if (name == "pi" || name == "PI") {
+            return M_PI;
+         }
+         if (name == "sqrt") {
+            if (!eat('(')) {
+               fail("expected '(' after sqrt");
+            }
+            double v = sum();
+            if (!eat(')')) {
+               fail("expected ')'");
+            }
+            if (v < 0) {
+               fail("sqrt of a negative number");
+            }
+            return std::sqrt(v);
+         }
+         fail("unknown name '" + name + "'");
+      }
+      fail(p < end ? "unexpected '" + string(1, *p) + "'"
+                   : "unexpected end of expression");
+      return 0;   // unreached
+   }
+};
+
+double evalExpr(const string &s, const Ctx &ctx) {
+   Expr e(s, ctx);
+   double v = e.sum();
+   e.ws();
+   if (e.p != e.end) {
+      e.fail("unexpected trailing '" + string(e.p, e.end) + "'");
+   }
+   return v;
+}
+
 double num(const Node &n, const Ctx &ctx) {
    if (n.is_float_number()) {
       return n.get_value<double>();
    }
    if (n.is_integer()) {
       return (double) n.get_value<long long>();
+   }
+   if (n.is_string()) {
+      return evalExpr(n.get_value<string>(), ctx);
    }
    ctx.fail("expected a number");
    return 0;
@@ -225,6 +346,51 @@ CreatureSpec parseCreature(const Node &root, const Ctx &ctx) {
 
 // --- scenario ----------------------------------------------------------
 
+// one boundary of a pin: mapping with optional q/qdot overrides
+RepSpec::Pin parsePinSide(const Node &n, const Ctx &ctx) {
+   RepSpec::Pin P;
+   P.on = true;
+   Fields f = fields(n, ctx);
+   checkKeys(f, keys("q", "qdot"), ctx);
+   if (opt(f, "q")) {
+      P.hasQ = true;
+      P.q = num(*opt(f, "q"), ctx.sub("q"));
+   }
+   if (opt(f, "qdot")) {
+      P.hasQdot = true;
+      P.qdot = num(*opt(f, "qdot"), ctx.sub("qdot"));
+   }
+   return P;
+}
+
+// pin: start | end | both, or { start: {q, qdot}, end: {q, qdot} }
+void parsePin(const Node &n, RepSpec &R, const Ctx &ctx) {
+   if (n.is_string()) {
+      string s = n.get_value<string>();
+      if (s == "start") {
+         R.pinStart.on = true;
+      } else if (s == "end") {
+         R.pinEnd.on = true;
+      } else if (s == "both") {
+         R.pinStart.on = R.pinEnd.on = true;
+      } else {
+         ctx.fail("expected start, end, both or {start, end}");
+      }
+      return;
+   }
+   Fields f = fields(n, ctx);
+   checkKeys(f, keys("start", "end"), ctx);
+   if (!opt(f, "start") && !opt(f, "end")) {
+      ctx.fail("pin mapping needs start and/or end");
+   }
+   if (opt(f, "start")) {
+      R.pinStart = parsePinSide(*opt(f, "start"), ctx.sub("start"));
+   }
+   if (opt(f, "end")) {
+      R.pinEnd = parsePinSide(*opt(f, "end"), ctx.sub("end"));
+   }
+}
+
 RepSpec parseRep(const Node &n, const Ctx &ctx) {
    Fields f = fields(n, ctx);
    RepSpec R;
@@ -233,7 +399,7 @@ RepSpec parseRep(const Node &n, const Ctx &ctx) {
    string type = str(req(f, "type", ctx), ctx.sub("type"));
    if (type == "constant") {
       R.type = RepSpec::Constant;
-      checkKeys(f, keys("dof", "type", "value"), ctx);
+      checkKeys(f, keys("dof", "type", "value", "pin"), ctx);
       R.value = num(req(f, "value", ctx), ctx.sub("value"));
    } else {
       if (type == "hermite") {
@@ -246,7 +412,7 @@ RepSpec parseRep(const Node &n, const Ctx &ctx) {
          ctx.sub("type").fail("unknown rep type '" + type +
                               "' (constant|hermite|hermlet|hat)");
       }
-      checkKeys(f, keys("dof", "type", "from", "to", "min", "max"), ctx);
+      checkKeys(f, keys("dof", "type", "from", "to", "min", "max", "pin"), ctx);
       R.from = num(req(f, "from", ctx), ctx.sub("from"));
       R.to = num(req(f, "to", ctx), ctx.sub("to"));
       const Node *mn = opt(f, "min"), *mx = opt(f, "max");
@@ -262,7 +428,38 @@ RepSpec parseRep(const Node &n, const Ctx &ctx) {
          }
       }
    }
+   if (opt(f, "pin")) {
+      parsePin(*opt(f, "pin"), R, ctx.sub("pin"));
+   }
    return R;
+}
+
+// lower one boundary pin to its (q, qdot) constraint pair
+void desugarPin(const RepSpec &R, const RepSpec::Pin &P,
+                ConstraintSpec::At at, vector<ConstraintSpec> &out,
+                const Ctx &ctx) {
+   if (!P.on) {
+      return;
+   }
+   double q = P.hasQ ? P.q
+      : R.type == RepSpec::Constant ? R.value
+      : at == ConstraintSpec::Start ? R.from : R.to;
+   if (R.type == RepSpec::Constant && q != R.value) {
+      ctx.fail("pin contradicts the constant rep's value");
+   }
+   if (R.hasBounds && (q < R.min || q > R.max)) {
+      ctx.fail("pin lies outside the rep's [min, max]");
+   }
+   ConstraintSpec K;
+   K.dof = R.dof;
+   K.at = at;
+   K.fromPin = true;
+   K.quantity = ConstraintSpec::Val;
+   K.equals = q;
+   out.push_back(K);
+   K.quantity = ConstraintSpec::Dot;
+   K.equals = P.hasQdot ? P.qdot : 0;
+   out.push_back(K);
 }
 
 ImpulseSpec parseImpulse(const Node &n, const Ctx &ctx, bool topLevel) {
@@ -416,6 +613,17 @@ StageSpec parseStage(const Node &n, const Ctx &ctx) {
          S.constraints.push_back(parseConstraint(cs[i], ctx.item("constraints", i), false));
       }
    }
+
+   // pins lower to ordinary constraints, placed ahead of any explicit
+   // ones: rep document order, start before end, q before qdot
+   vector<ConstraintSpec> pins;
+   for (size_t i = 0; i < S.reps.size(); i ++) {
+      const RepSpec &R = S.reps[i];
+      Ctx rc = ctx.item("reps", i).sub("pin");
+      desugarPin(R, R.pinStart, ConstraintSpec::Start, pins, rc);
+      desugarPin(R, R.pinEnd, ConstraintSpec::End, pins, rc);
+   }
+   S.constraints.insert(S.constraints.begin(), pins.begin(), pins.end());
    return S;
 }
 
@@ -481,6 +689,11 @@ ScenarioSpec parseScenario(const Node &root, const Ctx &ctx) {
    const Node *links = opt(f, "links"), *chain = opt(f, "chain");
    if (links && chain) {
       ctx.fail("give either links or chain, not both");
+   }
+   if (!links && !chain && S.stages.size() > 1) {
+      // consecutive stages link by default; opt out with chain: false
+      // or an explicit links: list
+      S.chainLinks = true;
    }
    if (chain) {
       Ctx cc = ctx.sub("chain");
@@ -553,7 +766,58 @@ string newt::ReadFile(const string &path) {
 
 // --- cross-reference validation ------------------------------------------
 
-void newt::Validate(const ScenarioSpec &S, const CreatureSpec &C) {
+namespace {
+
+// "q at start", "qdot at slice 3 t=0.5" -- for structural diagnostics
+string conWhere(const ConstraintSpec &K) {
+   std::ostringstream o;
+   o << (K.quantity == ConstraintSpec::Val ? "q" : "qdot") << " at ";
+   switch (K.at) {
+   case ConstraintSpec::Start:
+      o << "start";
+      break;
+   case ConstraintSpec::End:
+      o << "end";
+      break;
+   case ConstraintSpec::Explicit:
+      o << "slice " << K.slice << " t=" << K.t;
+      break;
+   }
+   return o.str();
+}
+
+bool sameLocation(const ConstraintSpec &a, const ConstraintSpec &b) {
+   return a.dof == b.dof && a.quantity == b.quantity && a.at == b.at &&
+      (a.at != ConstraintSpec::Explicit ||
+       (a.slice == b.slice && a.t == b.t));
+}
+
+// the boundary value a stage commits to for (dof, quantity), if any:
+// a constant rep, or an equality constraint at that boundary
+bool boundaryValue(const StageSpec &st,
+                   const vector<const ConstraintSpec *> &cons,
+                   const string &dof, ConstraintSpec::Quantity q,
+                   ConstraintSpec::At at, double &val) {
+   for (size_t i = 0; i < st.reps.size(); i ++) {
+      if (st.reps[i].dof == dof && st.reps[i].type == RepSpec::Constant) {
+         val = q == ConstraintSpec::Val ? st.reps[i].value : 0;
+         return true;
+      }
+   }
+   for (size_t i = 0; i < cons.size(); i ++) {
+      const ConstraintSpec &K = *cons[i];
+      if (K.dof == dof && K.quantity == q && K.at == at && !K.isRange) {
+         val = K.equals;
+         return true;
+      }
+   }
+   return false;
+}
+
+}  // namespace
+
+void newt::Validate(const ScenarioSpec &S, const CreatureSpec &C,
+                    std::vector<std::string> *warnings) {
    Ctx ctx(S.name);
 
    // creature-internal name tables
@@ -723,6 +987,137 @@ void newt::Validate(const ScenarioSpec &S, const CreatureSpec &C) {
                 (K.slice < 0 || K.slice >= S.stages[j].pieces)) {
                ctx.fail("constraint slice out of range for stage '" + K.stage + "'");
             }
+         }
+      }
+   }
+
+   // --- structural soundness ------------------------------------------
+
+   // the effective constraint list per stage: nested entries (pins are
+   // already lowered into those) plus top-level entries targeting it
+   vector<vector<const ConstraintSpec *> > cons(S.stages.size());
+   map<string, size_t> stageIx;
+   for (size_t i = 0; i < S.stages.size(); i ++) {
+      stageIx[S.stages[i].name] = i;
+      for (size_t j = 0; j < S.stages[i].constraints.size(); j ++) {
+         cons[i].push_back(&S.stages[i].constraints[j]);
+      }
+   }
+   for (size_t i = 0; i < S.constraints.size(); i ++) {
+      cons[stageIx[S.constraints[i].stage]].push_back(&S.constraints[i]);
+   }
+
+   for (size_t i = 0; i < S.stages.size(); i ++) {
+      const StageSpec &st = S.stages[i];
+      Ctx sc = ctx.sub("stage " + st.name);
+
+      // a constraint must not contradict a constant rep (q: the value,
+      // qdot: zero)
+      for (size_t j = 0; j < cons[i].size(); j ++) {
+         const ConstraintSpec &K = *cons[i][j];
+         const RepSpec *R = 0;
+         for (size_t r = 0; r < st.reps.size(); r ++) {
+            if (st.reps[r].dof == K.dof) {
+               R = &st.reps[r];
+            }
+         }
+         if (!R || R->type != RepSpec::Constant) {
+            continue;
+         }
+         double want = K.quantity == ConstraintSpec::Val ? R->value : 0;
+         bool clash = K.isRange ? (want < K.min || want > K.max)
+                                : K.equals != want;
+         if (clash) {
+            sc.fail("constraint '" + K.dof + " " + conWhere(K) +
+                    "' contradicts the constant rep");
+         }
+      }
+
+      // same-location constraints must agree (identical redundancy is
+      // fine -- a pin plus the matching explicit row, say)
+      for (size_t j = 0; j < cons[i].size(); j ++) {
+         for (size_t k = j + 1; k < cons[i].size(); k ++) {
+            const ConstraintSpec &a = *cons[i][j], &b = *cons[i][k];
+            if (!sameLocation(a, b)) {
+               continue;
+            }
+            bool clash;
+            if (!a.isRange && !b.isRange) {
+               clash = a.equals != b.equals;
+            } else if (a.isRange && b.isRange) {
+               clash = a.min > b.max || b.min > a.max;     // disjoint
+            } else {
+               const ConstraintSpec &eq = a.isRange ? b : a;
+               const ConstraintSpec &rg = a.isRange ? a : b;
+               clash = eq.equals < rg.min || eq.equals > rg.max;
+            }
+            if (clash) {
+               sc.fail("conflicting constraints on '" + a.dof + " " +
+                       conWhere(a) + "'");
+            }
+         }
+      }
+   }
+
+   // facing boundaries across a link must agree: what stage A commits
+   // to at its end (constant rep or equality constraint) must equal
+   // what stage B commits to at its start
+   vector<std::pair<string, string> > links = S.links;
+   if (S.chainLinks) {
+      for (size_t i = 0; i + 1 < S.stages.size(); i ++) {
+         links.push_back(std::make_pair(S.stages[i].name,
+                                        S.stages[i + 1].name));
+      }
+   }
+   for (size_t l = 0; l < links.size(); l ++) {
+      size_t a = stageIx[links[l].first], b = stageIx[links[l].second];
+      for (set<string>::const_iterator d = dofs.begin();
+           d != dofs.end(); d ++) {
+         for (int q = 0; q < 2; q ++) {
+            ConstraintSpec::Quantity quantity = q == 0
+               ? ConstraintSpec::Val : ConstraintSpec::Dot;
+            double endV, startV;
+            if (boundaryValue(S.stages[a], cons[a], *d, quantity,
+                              ConstraintSpec::End, endV) &&
+                boundaryValue(S.stages[b], cons[b], *d, quantity,
+                              ConstraintSpec::Start, startV) &&
+                endV != startV) {
+               std::ostringstream o;
+               o << "link " << links[l].first << "->" << links[l].second
+                 << ": DOF '" << *d << "' "
+                 << (q == 0 ? "q" : "qdot") << " ends at " << endV
+                 << " but starts at " << startV;
+               ctx.fail(o.str());
+            }
+         }
+      }
+   }
+
+   // a DOF that is never a constant and never gets a position
+   // constraint has no absolute anchor anywhere -- almost certainly an
+   // authoring slip, but conceivably intended, hence a warning
+   if (warnings) {
+      for (set<string>::const_iterator d = dofs.begin();
+           d != dofs.end(); d ++) {
+         bool anchored = false;
+         for (size_t i = 0; i < S.stages.size() && !anchored; i ++) {
+            for (size_t r = 0; r < S.stages[i].reps.size(); r ++) {
+               if (S.stages[i].reps[r].dof == *d &&
+                   S.stages[i].reps[r].type == RepSpec::Constant) {
+                  anchored = true;
+               }
+            }
+            for (size_t j = 0; j < cons[i].size() && !anchored; j ++) {
+               if (cons[i][j]->dof == *d &&
+                   cons[i][j]->quantity == ConstraintSpec::Val) {
+                  anchored = true;
+               }
+            }
+         }
+         if (!anchored) {
+            warnings->push_back("DOF '" + *d + "' has no position "
+                                "constraint or constant rep on any stage; "
+                                "its absolute position is unanchored");
          }
       }
    }

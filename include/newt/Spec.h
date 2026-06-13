@@ -51,6 +51,15 @@ struct RepSpec {
    double from = 0, to = 0;         // the others
    bool hasBounds = false;
    double min = 0, max = 0;
+
+   // pin sugar: lowered to ConstraintSpecs at the end of parseStage.
+   // q defaults to from/to (value for Constant), qdot to 0
+   struct Pin {
+      bool on = false;
+      bool hasQ = false, hasQdot = false;
+      double q = 0, qdot = 0;
+   };
+   Pin pinStart, pinEnd;
 };
 
 struct MuscleSpec {
@@ -77,6 +86,7 @@ struct ConstraintSpec {
    double t = 0;                    // Explicit only
    bool isRange = false;
    double equals = 0, min = 0, max = 0;
+   bool fromPin = false;            // desugared from a rep's pin: entry
 };
 
 struct StageSpec {

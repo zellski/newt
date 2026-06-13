@@ -21,7 +21,25 @@ Link::Link(Stage *const a, Stage *const b) : A(a), B(b) {
       }
    }
    cerr << "Claiming a total of " << cnt << " constraints.\n";
+   // every DOF constant (and agreeing) on both stages -> nothing to
+   // enforce; claim no rows and stay unregistered so Evaluate is never
+   // called. chain-by-default makes such links the common case.
+   if (cnt == 0) {
+      cIx = -1;
+      return;
+   }
    cIx = A->claimCons(cnt);
+   int ix = cIx;
+   for (int i = A->W->DOFs.size()-1; i >= 0; i --) {
+      DOF *D = A->W->DOFs[i];
+      if (!D->Rep(A->sIx)->isConstant() ||
+          !D->Rep(B->sIx)->isConstant()) {
+         string prefix = string("link ") + A->Name + "->" + B->Name +
+            ": " + D->Name;
+         A->W->LabelCon(ix ++, prefix + " continuity");
+         A->W->LabelCon(ix ++, prefix + " momentum");
+      }
+   }
    A->Register((Constraint * const) this);
 }
 

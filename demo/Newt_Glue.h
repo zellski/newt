@@ -17,6 +17,10 @@ extern std::string Newt_ScenarioPath;
 extern std::string Newt_ScenarioYaml;
 extern std::string Newt_CreatureYaml;
 
+// stashed by Scenario::setup for newt_census (includes the cross-check
+// against the built World's totals)
+extern std::string Newt_CensusText;
+
 // configured record_dt from the scenario file (newt_open_run's dt
 // argument overrides when positive, falls back to this when 0)
 extern double Newt_RecordDt;

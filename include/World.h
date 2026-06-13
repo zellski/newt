@@ -1,5 +1,6 @@
 # pragma once
 
+# include <string>
 # include <vector>
 # include <Omu_Variables.h>
 # include "adolc.h"
@@ -22,6 +23,14 @@ public:
 
    int xIx, cIx;        // allocation indices into Omu_VariableVec x and c
 
+   // one human-readable label per claimed row, parallel to x and c;
+   // legacy unlabeled claims read "?"
+   std::vector<std::string> xLabels, cLabels;
+
+   // the constraint bounds as set by Initialize, snapshotted for
+   // residual reporting (Omu owns the live vectors)
+   std::vector<double> cMins, cMaxs;
+
    const double G;
 
    World(double g);
@@ -29,8 +38,12 @@ public:
    void Update(const adoublev &x, adoublev &c, adouble &f0);
    void Initialize(Omu_VariableVec &x, Omu_VariableVec &c);
 
-   int claimVars(int n);
-   int claimCons(int n);
+   int claimVars(int n, const std::string &label = "?");
+   int claimCons(int n, const std::string &label = "?");
+
+   // refine a single row of a block claim after the fact
+   void LabelVar(int ix, const std::string &label);
+   void LabelCon(int ix, const std::string &label);
 
    int Register(Creature *C);
    int Register(DOF *D);

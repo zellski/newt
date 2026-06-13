@@ -9,8 +9,9 @@
 # include "Fun.h"
 # include "Integrator.h"
 
-Stage::Stage(World *w, Integrator *i, int n, double t) :
+Stage::Stage(World *w, const char *name, Integrator *i, int n, double t) :
    W(w),
+   Name(name),
    Muscles(),
    Forces(),
    Funs(),
@@ -31,9 +32,10 @@ Stage::Stage(World *w, Integrator *i, int n, double t) :
    assert(T > 0);
 };
 
-Stage::Stage(World *w, Integrator *i,
+Stage::Stage(World *w, const char *name, Integrator *i,
              int n, double min, double max, double start) :
    W(w),
+   Name(name),
    Muscles(),
    Forces(),
    Funs(),
@@ -45,7 +47,7 @@ Stage::Stage(World *w, Integrator *i,
    torqueContribution(0.0),
    N(n),
    sIx(w->Register(this)),
-   tIx(w->claimVars(1)),
+   tIx(w->claimVars(1, std::string(name) + ": duration")),
    T(start),
    h(start/n)
 {
@@ -55,12 +57,16 @@ Stage::Stage(World *w, Integrator *i,
    cerr << "Stage " << sIx << " claiming time ix " << tIx << "\n";
 }
 
-int Stage::claimVars(int n) {
-   return W->claimVars(n);
+int Stage::claimVars(int n, const std::string &label) {
+   return W->claimVars(n, label);
 }
 
-int Stage::claimCons(int n) {
-   return W->claimCons(n);
+int Stage::claimCons(int n, const std::string &label) {
+   return W->claimCons(n, label);
+}
+
+std::string ClaimLabel(Stage *s, DOF *d, const char *what) {
+   return std::string(s->Name) + ": " + d->Name + " " + what;
 }
 
 

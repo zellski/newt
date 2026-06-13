@@ -42,6 +42,8 @@ SRCS = AVec.C \
 	GaussianIntegrator.C \
 	SpecParser.C \
 	SpecBuilder.C \
+	Census.C \
+	Residuals.C \
 	Recorder.C \
 	Sweep.C
 #	VRMLVisualizer.C

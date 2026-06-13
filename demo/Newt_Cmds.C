@@ -13,18 +13,24 @@
 */
 
 # include <tcl.h>
+# include <algorithm>
 # include <cmath>
 # include <cstdio>
+# include <sstream>
+# include <utility>
+# include <vector>
 
 # include "Newt_Glue.h"
 # include "World.h"
 # include "DOF.h"
 # include "newt/Sweep.h"
+# include "newt/Residuals.h"
 # include "newt/Recorder.h"
 
 std::string Newt_ScenarioPath;
 std::string Newt_ScenarioYaml;
 std::string Newt_CreatureYaml;
+std::string Newt_CensusText;
 double Newt_RecordDt = 0;
 
 static newt::Recorder *Rec = 0;
@@ -144,6 +150,73 @@ static int CmdGrdL(ClientData, Tcl_Interp *interp,
    return TCL_OK;
 }
 
+// newt_residuals ?N? -- re-evaluate at the current iterate and report
+// the N largest constraint violations against their labeled rows
+static int CmdResiduals(ClientData, Tcl_Interp *interp,
+                        int objc, Tcl_Obj *const objv[]) {
+   int top = 10;
+   if (objc > 2 ||
+       (objc == 2 && Tcl_GetIntFromObj(interp, objv[1], &top) != TCL_OK)) {
+      return error(interp, "usage: newt_residuals ?N?");
+   }
+   World *W = World::Active;
+   if (!W) {
+      return error(interp, "newt_residuals: no World yet (run prg_setup first)");
+   }
+
+   newt::Residuals::requested = true;
+   if (Tcl_Eval(interp, "prg_update_fbd") != TCL_OK) {
+      newt::Residuals::requested = false;
+      return error(interp, std::string("newt_residuals: prg_update_fbd failed: ")
+                   + Tcl_GetStringResult(interp));
+   }
+   if (!newt::Residuals::valid) {
+      return error(interp, "newt_residuals: capture did not run");
+   }
+   newt::Residuals::valid = false;
+
+   const std::vector<double> &c = newt::Residuals::c;
+   std::vector<std::pair<double, int> > viol;
+   for (size_t i = 0; i < c.size(); i ++) {
+      // meschach's max() macro shadows std::max here
+      double below = W->cMins[i] - c[i], above = c[i] - W->cMaxs[i];
+      double v = below > above ? below : above;
+      if (v > 0) {
+         viol.push_back(std::make_pair(v, (int) i));
+      }
+   }
+   std::sort(viol.begin(), viol.end());
+   std::reverse(viol.begin(), viol.end());
+
+   std::ostringstream o;
+   if (viol.empty()) {
+      o << "no constraint violations at the current iterate";
+   } else {
+      o << viol.size() << " of " << c.size()
+        << " constraint rows violated; the largest:\n";
+      for (size_t i = 0; i < viol.size() && i < (size_t) top; i ++) {
+         char num[32];
+         std::snprintf(num, sizeof num, "  %9.3g  ", viol[i].first);
+         o << num << W->cLabels[viol[i].second] << "\n";
+      }
+   }
+   Tcl_SetObjResult(interp, Tcl_NewStringObj(o.str().c_str(), -1));
+   return TCL_OK;
+}
+
+static int CmdCensus(ClientData, Tcl_Interp *interp,
+                     int objc, Tcl_Obj *const objv[]) {
+   if (objc != 1) {
+      return error(interp, "usage: newt_census");
+   }
+   if (Newt_CensusText.empty()) {
+      return error(interp, "newt_census: no scenario set up");
+   }
+   Tcl_SetObjResult(interp,
+                    Tcl_NewStringObj(Newt_CensusText.c_str(), -1));
+   return TCL_OK;
+}
+
 static int CmdFinish(ClientData, Tcl_Interp *interp,
                      int objc, Tcl_Obj *const objv[]) {
    if (objc != 2) {
@@ -164,6 +237,8 @@ extern "C" int Newt_Init(Tcl_Interp *interp) {
    Tcl_CreateObjCommand(interp, "newt_open_run", CmdOpenRun, 0, 0);
    Tcl_CreateObjCommand(interp, "newt_record", CmdRecord, 0, 0);
    Tcl_CreateObjCommand(interp, "newt_grdl", CmdGrdL, 0, 0);
+   Tcl_CreateObjCommand(interp, "newt_census", CmdCensus, 0, 0);
+   Tcl_CreateObjCommand(interp, "newt_residuals", CmdResiduals, 0, 0);
    Tcl_CreateObjCommand(interp, "newt_finish", CmdFinish, 0, 0);
    return TCL_OK;
 }

@@ -56,6 +56,25 @@ newt/runs/ (ADOL-C drops fixed-name tape files into the cwd, so
 concurrent runs need the isolation -- and with it, you can launch
 several runs at once, e.g. for multi-start experiments).
 
+Passing `check` instead of an iteration cap sets the problem up,
+prints a census -- the per-DOF/per-stage table of representations and
+boundary-constraint coverage, the link list, and a breakdown of where
+every optimizer variable and constraint row comes from, cross-checked
+against what the build actually claimed -- and exits without solving:
+
+    ./run ../scenarios/human.yaml check
+
+When a solve ends in anything but `optimal`, the driver prints the
+largest constraint violations at the final iterate by name, e.g.
+
+    316 of 560 constraint rows violated; the largest:
+           7.37  S2: ULAngle FEM equation[9]
+           5.6   S2: Y FEM equation[11]
+
+so a misbehaving scenario points at its own trouble spots instead of
+dying with a bare `infeasible`. (The same report is available any time
+from the Tcl prompt as `newt_residuals ?N?`.)
+
 Results land in a per-project SQLite database, newt.db at the repo
 root (override with the NEWT_DB environment variable). One row per
 run, one row per accepted SQP iterate: objective, infeasibility, the
@@ -96,8 +115,26 @@ plus optional nested `impulses` (`{point, direction: [x, y]}`, add
 `magnitude` to fix it instead of letting the optimizer choose) and
 `constraints` (`{dof, quantity: q|qdot, at: start|end|{slice, t},
 equals | min/max}`). Top-level `impulses` and `constraints` (with a
-`stage` key) and `links: [[A, B], ...]` (inter-stage continuity +
-impulse handling) round it off.
+`stage` key) round it off.
+
+Any float-valued field accepts a constant expression: number literals,
+`pi`/`PI`, `+ - * /`, unary minus, parentheses and `sqrt()`, so
+`from: 3*pi/11` and `duration: sqrt(1.5*2.0/9.81)` document themselves
+where a 17-digit literal once needed a comment. This is a frozen
+calculator, not a language -- no variables, no references to other
+fields, no user-defined names.
+
+Boundary conditions usually restate a rep's own endpoints, so reps
+take a `pin` key as shorthand: `pin: start | end | both` constrains q
+to the rep's from/to (a constant rep's value) and qdot to zero at the
+named boundary, and the mapping form `pin: {start: {q: ..., qdot:
+...}, end: ...}` overrides the defaults. Pins lower to ordinary
+constraints during parsing -- the human backflip's twenty boundary
+constraint lines are now five `pin: start` and five `pin: end` tokens.
+
+Consecutive stages are linked (continuity + impulse momentum transfer)
+by default. Opt out with `chain: false`, or give an explicit
+`links: [[A, B], ...]` list for non-consecutive topologies.
 
 One sharp edge worth knowing: construction order follows document
 order, and optimizer variable indices follow construction order. The
@@ -108,7 +145,12 @@ but can perturb the optimizer's path.
 
 Validation is strict -- unknown keys, missing DOF representations,
 dangling references and non-power-of-two Hermlet stages are all
-rejected with a path to the offending entry.
+rejected with a path to the offending entry. So are structural
+contradictions: a constraint that disagrees with a constant rep, two
+constraints at the same location with irreconcilable values, or linked
+stages whose facing boundary commitments differ. A DOF whose absolute
+position is never anchored anywhere (no constant rep, no q constraint)
+draws a warning -- the optimizer would be free to slide it.
 
 ## Roll Your Own
 
