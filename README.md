@@ -26,6 +26,12 @@ The code presented here absolutely relies on the HQP/Omuses optimization package
 
 and is distributed under the Gnu Library General Public License. Compile and install this package.
 
+For a reproducible build, `scripts/get-hqp.sh` fetches and builds HQP/Omuses (and ADOL-C, which it uses for derivatives) at known-good pinned revisions into a single prefix, and prints the matching `make` invocation:
+
+    scripts/get-hqp.sh --prefix ~/newtdeps
+
+It is tuned for Debian/Ubuntu; see the prerequisite `apt-get` line and the overridable variables at the top of the script. Pass `--without-adolc` to build an ADOL-C-free HQP.
+
 - - -
 
 Next, type 'make' in the newt/src subdirectory. If all goes well, the code will compile and turn into a library called libnewt.so. If not, you'll have to tinker a bit with src/Makefile.
