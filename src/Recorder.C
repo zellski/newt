@@ -45,6 +45,17 @@ static const char *DDL =
    "  frames        BLOB NOT NULL,"          // n_frames*n_dofs*2 float64
    "  stage_bounds  TEXT NOT NULL,"          // JSON cumulative stage end times
    "  PRIMARY KEY (run_id, k)"
+   ") WITHOUT ROWID;"
+   // a generic, optional per-iterate diagnostics channel: one row per
+   // (iterate, named metric). scalar is always present; blob carries an
+   // optional matrix payload (little-endian float64, row-major)
+   "CREATE TABLE IF NOT EXISTS iter_diagnostics ("
+   "  run_id        INTEGER NOT NULL REFERENCES runs(id) ON DELETE CASCADE,"
+   "  k             INTEGER NOT NULL,"
+   "  name          TEXT NOT NULL,"
+   "  scalar        REAL,"
+   "  blob          BLOB,"
+   "  PRIMARY KEY (run_id, k, name)"
    ") WITHOUT ROWID;";
 
 // the strings we store are identifiers and ISO numbers; escape minimally
@@ -218,6 +229,47 @@ void Recorder::UpdateNormGrdL(int k, double normGrdL) {
       std::fprintf(stderr, "Recorder: %s\n", sqlite3_errmsg(db));
    }
    sqlite3_finalize(st);
+}
+
+// shared INSERT for the diagnostics channel; blob NULL when count == 0
+static void insertDiag(sqlite3 *db, long long run, int k, const string &name,
+                       double scalar, const double *blob, size_t count) {
+   sqlite3_stmt *st = 0;
+   const char *sql =
+      "INSERT OR REPLACE INTO iter_diagnostics (run_id, k, name, scalar, blob)"
+      " VALUES (?,?,?,?,?);";
+   if (sqlite3_prepare_v2(db, sql, -1, &st, 0) != SQLITE_OK) {
+      std::fprintf(stderr, "Recorder: %s\n", sqlite3_errmsg(db));
+      return;
+   }
+   sqlite3_bind_int64(st, 1, run);
+   sqlite3_bind_int(st, 2, k);
+   sqlite3_bind_text(st, 3, name.c_str(), -1, SQLITE_TRANSIENT);
+   sqlite3_bind_double(st, 4, scalar);
+   if (count > 0) {
+      sqlite3_bind_blob64(st, 5, blob, count * sizeof(double), SQLITE_TRANSIENT);
+   } else {
+      sqlite3_bind_null(st, 5);
+   }
+   if (sqlite3_step(st) != SQLITE_DONE) {
+      std::fprintf(stderr, "Recorder: %s\n", sqlite3_errmsg(db));
+   }
+   sqlite3_finalize(st);
+}
+
+void Recorder::RecordDiagnostic(int k, const string &name, double scalar) {
+   insertDiag(db, run, k, name, scalar, 0, 0);
+}
+
+void Recorder::RecordDiagnosticMatrix(int k, const string &name,
+                                      const vector<double> &matrix) {
+   double fro = 0;
+   for (size_t i = 0; i < matrix.size(); i ++) {
+      fro += matrix[i] * matrix[i];
+   }
+   fro = std::sqrt(fro);
+   insertDiag(db, run, k, name, fro,
+              matrix.empty() ? 0 : &matrix[0], matrix.size());
 }
 
 void Recorder::Finish(const string &status) {

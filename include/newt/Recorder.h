@@ -53,6 +53,19 @@ public:
    // available at the next iteration's QP update; this backfills it
    void UpdateNormGrdL(int k, double normGrdL);
 
+   // a named scalar diagnostic for one accepted iterate, written to the
+   // sibling iter_diagnostics table (blob left NULL)
+   void RecordDiagnostic(int k, const std::string &name, double scalar);
+
+   // a named matrix diagnostic: stores the Frobenius norm as the scalar and
+   // the matrix itself as the blob (little-endian float64, row-major -- the
+   // frames/x blob convention; recover n from the run's n_vars). The channel
+   // for a curvature-accuracy diagnostic later, e.g. an exact Hessian minus
+   // the solver's approximation; it records whatever dense matrix it is
+   // handed and does not produce one.
+   void RecordDiagnosticMatrix(int k, const std::string &name,
+                               const std::vector<double> &matrix);
+
    // stamps status/finished_at/final_iter on the runs row
    void Finish(const std::string &status);
 

@@ -26,6 +26,12 @@ The code presented here absolutely relies on the HQP/Omuses optimization package
 
 and is distributed under the Gnu Library General Public License. Compile and install this package.
 
+For a reproducible build, `scripts/get-hqp.sh` fetches and builds HQP/Omuses (and ADOL-C, which it uses for derivatives) at known-good pinned revisions into a single prefix, and prints the matching `make` invocation:
+
+    scripts/get-hqp.sh --prefix ~/newtdeps
+
+It is tuned for Debian/Ubuntu; see the prerequisite `apt-get` line and the overridable variables at the top of the script. Pass `--without-adolc` to build an ADOL-C-free HQP.
+
 - - -
 
 Next, type 'make' in the newt/src subdirectory. If all goes well, the code will compile and turn into a library called libnewt.so. If not, you'll have to tinker a bit with src/Makefile.
@@ -64,6 +70,17 @@ against what the build actually claimed -- and exits without solving:
 
     ./run ../scenarios/human.yaml check
 
+Adding `derivs` (`./run ../scenarios/human.yaml check derivs`) also brings
+the problem to its initial iterate and prints a finite-difference check of
+the derivatives the solver will use -- the constraint Jacobian, the
+objective gradient and the gradient of the Lagrangian, each compared
+against central differences of the residuals/objective -- reporting the
+per-block largest absolute and relative error. It reads the assembled
+linear approximation out of the QP, so it grades whatever derivative path
+is in place. The same check is available at any iterate from the Tcl
+prompt as `newt_dcheck ?tol?`. Standard AD hygiene: run it after touching
+the dynamics, integrators, or AD setup.
+
 When a solve ends in anything but `optimal`, the driver prints the
 largest constraint violations at the final iterate by name, e.g.
 
@@ -90,6 +107,25 @@ frames, x columns); dof_names and stage_bounds are JSON. The scenario
 and creature YAML are snapshotted into the runs row, so a database is
 self-describing. Multiple processes can write concurrently (WAL mode),
 and readers never block -- a viewer can follow a run live.
+
+A sibling `iter_diagnostics(run_id, k, name, scalar, blob)` table holds
+optional named metrics per accepted iterate. Setting `NEWT_DCHECK=1`
+turns on a per-iterate derivative check (the `newt_dcheck` metric) and
+records its largest absolute and relative error as `fd_max_abs_err` /
+`fd_max_rel_err`, so the health of the derivatives can be tracked across
+a whole solve:
+
+    NEWT_DB=/tmp/run.db NEWT_DCHECK=1 ./run ../scenarios/needle.yaml
+    sqlite3 /tmp/run.db \
+      "SELECT k, scalar FROM iter_diagnostics WHERE name='fd_max_rel_err'"
+
+It is off by default for cost, not correctness -- the check re-evaluates
+the problem about 2n times per iterate. It is non-invasive: it restores
+the iterate and the QP, so a solve is bit-identical whether or not the
+check runs. The `blob` column carries an optional matrix payload
+(Frobenius norm in `scalar`, the matrix as little-endian float64,
+row-major, n=n_vars), a channel for recording a curvature-accuracy
+diagnostic later.
 
 ## Scenario Files
 
