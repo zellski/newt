@@ -115,7 +115,8 @@ build_hqp() {
 build_hqp
 
 say "done -- dependencies installed under $PREFIX"
-cat <<EOF
+if [ "$ADOLC" = 1 ]; then
+  cat <<EOF
 Build NewT against this prefix:
 
   make -C src \\
@@ -125,7 +126,14 @@ Build NewT against this prefix:
     ADOLC_INC=$PREFIX/include ADOLC_LIB=$PREFIX/lib64 \\
     HQP_INC=$PREFIX/include/hqp HQP_LIB=$PREFIX/lib \\
     TCL_INC=$TCL_INCLUDE_DIR
-
-(With --without-adolc, libomu/libhqp link no ADOL-C; the -ladolc and the
-ADOLC_* paths above are then unnecessary.)
 EOF
+else
+  cat <<EOF
+This built an ADOL-C-free HQP/Omuses under $PREFIX.
+
+NewT itself currently needs ADOL-C: src/Makefile and demo/Makefile force
+-DOMU_WITH_ADOLC=1 and -ladolc, so they will not link against this prefix
+as-is. Re-run without --without-adolc to build NewT (the default), or edit
+those Makefiles first if you are deliberately building an ADOL-C-free NewT.
+EOF
+fi
