@@ -2,26 +2,34 @@
 
 .SUFFIXES: .c .C .o .so
 
-# objects to link with to create an executable
-#MACH_OBJS = -ltcl8.4 -ldl -lm
-MACH_OBJS ?= -framework Tcl
+# Dependency locations, Tcl linkage and include paths. Override any of these on
+# the make command line. Defaults are selected per platform (macOS/Apple clang
+# vs Linux/GNU).
 
-# Change these to point to include directories for HQP, Omuses, AdolC
-# etc, or override them on the make command line
-
-ADOLC_INC ?= /usr/local/include/adolc
-ADOLC_LIB ?= /usr/local/lib64
-HQP_INC ?= /usr/local/include/hqp
-HQP_LIB ?= /usr/local/lib
-
-# Change these according to your system!
+UNAME := $(shell uname)
+ifeq ($(UNAME),Darwin)
+  ADOLC_INC ?= /usr/local/include/adolc
+  ADOLC_LIB ?= /usr/local/lib64
+  HQP_INC   ?= /usr/local/include/hqp
+  HQP_LIB   ?= /usr/local/lib
+  TCL_INC   ?= /opt/homebrew/opt/tcl-tk@8/include/tcl-tk
+  MACH_OBJS ?= -framework Tcl
+else
+  ADOLC_INC ?= /opt/newtdeps/include
+  ADOLC_LIB ?= /opt/newtdeps/lib64
+  HQP_INC   ?= /opt/newtdeps/include/hqp
+  HQP_LIB   ?= /opt/newtdeps/lib
+  TCL_INC   ?= /usr/include/tcl8.6
+  MACH_OBJS ?= -ltcl8.6 -ldl -lm
+endif
 
 CXX = g++
 CC = gcc
 
 DEPFLAGS = -MMD -MP
-INCFLAGS = -I../include -I../include/vendor -I${HQP_INC} -I${ADOLC_INC}
-CFLAGS = -g -W\#warnings -O3 -fPIC -DOMU_WITH_ADOLC=1 ${DEPFLAGS} ${INCFLAGS}
+INCFLAGS = -I../include -I../include/vendor -I${HQP_INC} -I${ADOLC_INC} -I${TCL_INC}
+# See ../src/Makefile for why the standard headers are force-included first.
+CFLAGS = -g -O3 -fPIC -DOMU_WITH_ADOLC=1 -include ../stdprelude.h ${DEPFLAGS} ${INCFLAGS}
 
 LDFLAGS = -L../src -Wl,-rpath,../src -Wl,-rpath,${HQP_LIB} -Wl,-rpath,${ADOLC_LIB} -L${HQP_LIB} -L${ADOLC_LIB} -ladolc -lhqp -lomu
 
