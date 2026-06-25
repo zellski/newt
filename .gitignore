@@ -14,6 +14,7 @@ demo/*.d
 tests/test_avec
 tests/test_quadrature
 tests/test_dynamics
+tests/test_derivs
 tests/*.dSYM/
 demo/ADOLC-*.tap
 tests/test_specparser

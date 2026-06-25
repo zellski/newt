@@ -6,7 +6,8 @@
 CXX = g++
 CXXFLAGS = -g -O2 -Wall -Istub -I../include
 
-TESTS = test_avec test_quadrature test_dynamics test_specparser test_recorder
+TESTS = test_avec test_quadrature test_dynamics test_derivs \
+	test_specparser test_recorder
 
 test: $(TESTS)
 	@for t in $(TESTS); do ./$$t || exit 1; done
@@ -25,6 +26,10 @@ DYN_SRCS = ../src/AVec.C ../src/AnchorPoint.C ../src/RigidBody.C \
 test_dynamics: test_dynamics.C $(DYN_SRCS) stub/adoublev.h stub/Stage.h \
 		stub/World.h stub/Omu_Variables.h
 	$(CXX) $(CXXFLAGS) -o $@ test_dynamics.C $(DYN_SRCS)
+
+test_derivs: test_derivs.C $(DYN_SRCS) stub/adoublev.h stub/Stage.h \
+		stub/World.h stub/Omu_Variables.h
+	$(CXX) $(CXXFLAGS) -o $@ test_derivs.C $(DYN_SRCS)
 
 # the spec parser and census are solver-free std C++; no stubs involved
 test_specparser: test_specparser.C ../src/SpecParser.C ../src/Census.C \
