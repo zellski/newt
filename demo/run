@@ -2,10 +2,11 @@
 #
 # NewT run driver: per-run scratch isolation + SQLite iterate recording.
 #
-#   ./run <scenario.yaml | ProgramClass> [max_iters | check]
+#   ./run <scenario.yaml | ProgramClass> [max_iters | check [derivs]]
 #
 # `check` sets up the problem, prints the constraint census and exits
-# without solving.
+# without solving. `check derivs` additionally initializes the solver and
+# prints a finite-difference derivative check at the initial iterate.
 #
 # Every run gets its own scratch directory under <repo>/runs/ -- ADOL-C
 # drops its tape files (fixed names!) into the cwd, so concurrent runs
@@ -50,10 +51,14 @@ sqp_qp_solver Franke
 qp_max_iters 5000
 sqp_max_iters 5000
 set checkOnly 0
+set checkDerivs 0
 if {[llength $argv] > 1} {
   set arg2 [lindex $argv 1]
   if {$arg2 == "check"} {
     set checkOnly 1
+    if {[lindex $argv 2] == "derivs"} {
+      set checkDerivs 1
+    }
   } else {
     sqp_max_iters $arg2
   }
@@ -76,6 +81,14 @@ prg_setup
 # check mode: print the census and stop before any solving
 if {$checkOnly} {
   puts [newt_census]
+  if {$checkDerivs} {
+    # bring the problem to its initial iterate (states + solver) and
+    # report the assembled derivatives there, still without any step
+    prg_simulate
+    sqp_init
+    puts ""
+    puts [newt_dcheck]
+  }
   exit
 }
 

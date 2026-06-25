@@ -64,6 +64,17 @@ against what the build actually claimed -- and exits without solving:
 
     ./run ../scenarios/human.yaml check
 
+Adding `derivs` (`./run ../scenarios/human.yaml check derivs`) also brings
+the problem to its initial iterate and prints a finite-difference check of
+the derivatives the solver will use -- the constraint Jacobian, the
+objective gradient and the gradient of the Lagrangian, each compared
+against central differences of the residuals/objective -- reporting the
+per-block largest absolute and relative error. It reads the assembled
+linear approximation out of the QP, so it grades whatever derivative path
+is in place. The same check is available at any iterate from the Tcl
+prompt as `newt_dcheck ?tol?`. Standard AD hygiene: run it after touching
+the dynamics, integrators, or AD setup.
+
 When a solve ends in anything but `optimal`, the driver prints the
 largest constraint violations at the final iterate by name, e.g.
 
