@@ -212,6 +212,17 @@ DCheckResult RunDcheck(Tcl_Interp *interp) {
    for (int j = 0; j < me; j ++) yv->ve[j] = haveMult ? y[j] : 0.0;
    for (int j = 0; j < mi; j ++) zv->ve[j] = haveMult ? z[j] : 0.0;
 
+   // Snapshot the derivative QP before we reassemble it. The solver keeps
+   // the previous iterate's c/A/C here between a step and the next QP
+   // update, where it reads them to form the old Lagrangian gradient for
+   // its BFGS curvature delta (Hqp_SqpSolver::qp_update). update_fbd only
+   // touches values, but our update() below overwrites the derivatives, so
+   // we must put them back or we corrupt that delta and perturb the solve.
+   VEC *cBak = v_copy(qp->c, VNULL);
+   SPMAT *aBak = sp_copy(qp->A);
+   SPMAT *cmBak = sp_copy(qp->C);
+   SPMAT *qBak = sp_copy(qp->Q);
+
    // assemble the analytic linear approximation at x0
    prg->update(yv, zv);
 
@@ -268,11 +279,17 @@ DCheckResult RunDcheck(Tcl_Interp *interp) {
       }
    }
 
-   // restore the iterate and leave b/d/f consistent with it
+   // put the solver back exactly: x and the values (f/b/d) via update_fbd,
+   // and the derivative QP (c/A/C/Q) from the snapshot above
    prg->set_x(x0);
    prg->update_fbd();
+   v_copy(cBak, qp->c);
+   sp_copy2(aBak, qp->A);
+   sp_copy2(cmBak, qp->C);
+   sp_copy2(qBak, qp->Q);
 
    v_free(x0); v_free(xw); v_free(yv); v_free(zv); v_free(gradf);
+   v_free(cBak); sp_free(aBak); sp_free(cmBak); sp_free(qBak);
    R.ok = true;
    return R;
 }
@@ -427,10 +444,11 @@ static int CmdRecord(ClientData, Tcl_Interp *interp,
    R.valid = false;
 
    // a derivative-health metric for this accepted iterate, opt-in with
-   // NEWT_DCHECK=1. Off by default: the check's extra evaluations perturb
-   // the solve trajectory at the last bit, and a plain solve is meant to
-   // stay bit-for-bit reproducible. Runs after the sweep so the frames are
-   // captured at the true iterate; RunDcheck restores x before returning.
+   // NEWT_DCHECK=1. Off by default for cost, not correctness: the check
+   // re-evaluates the problem ~2n times per iterate. It is non-invasive --
+   // RunDcheck restores x and the full QP, so the solve is bit-identical
+   // whether or not it runs -- and goes after the sweep so the frames are
+   // still captured at the true iterate.
    const char *flag = std::getenv("NEWT_DCHECK");
    if (flag && *flag && std::string(flag) != "0") {
       DCheckResult D = RunDcheck(interp);

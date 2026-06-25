@@ -119,11 +119,13 @@ a whole solve:
     sqlite3 /tmp/run.db \
       "SELECT k, scalar FROM iter_diagnostics WHERE name='fd_max_rel_err'"
 
-It is off by default: the check's extra evaluations perturb the solve at
-the last bit, and a plain run is meant to stay bit-for-bit reproducible.
-The `blob` column carries an optional matrix payload (Frobenius norm in
-`scalar`, the matrix as little-endian float64, row-major, n=n_vars), a
-channel for recording a curvature-accuracy diagnostic later.
+It is off by default for cost, not correctness -- the check re-evaluates
+the problem about 2n times per iterate. It is non-invasive: it restores
+the iterate and the QP, so a solve is bit-identical whether or not the
+check runs. The `blob` column carries an optional matrix payload
+(Frobenius norm in `scalar`, the matrix as little-endian float64,
+row-major, n=n_vars), a channel for recording a curvature-accuracy
+diagnostic later.
 
 ## Scenario Files
 
