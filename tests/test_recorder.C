@@ -87,6 +87,15 @@ int main() {
       delete R2;
    }
    R->UpdateNormGrdL(2, 0.625);   // gradient-norm backfill
+
+   // diagnostics channel: a scalar metric (blob NULL) and a matrix payload
+   // whose scalar is its Frobenius norm
+   R->RecordDiagnostic(0, "fd_max_rel_err", 1.5e-7);
+   vector<double> hess;           // 2x2, Frobenius norm sqrt(10)
+   hess.push_back(1); hess.push_back(2);
+   hess.push_back(2); hess.push_back(1);
+   R->RecordDiagnosticMatrix(1, "hessian_delta", hess);
+
    R->Finish("optimal");
    delete R;
 
@@ -144,6 +153,31 @@ int main() {
    sqlite3_step(st);
    check("total iterations", sqlite3_column_int(st, 0) == 4);
    sqlite3_finalize(st);
+
+   // --- diagnostics channel round-trip ---
+   sqlite3_prepare_v2(db,
+      "SELECT scalar, blob FROM iter_diagnostics"
+      " WHERE run_id=1 AND k=0 AND name='fd_max_rel_err';", -1, &st, 0);
+   check("diag scalar row", sqlite3_step(st) == SQLITE_ROW);
+   check("diag scalar value", sqlite3_column_double(st, 0) == 1.5e-7);
+   check("diag scalar blob null", sqlite3_column_type(st, 1) == SQLITE_NULL);
+   sqlite3_finalize(st);
+
+   sqlite3_prepare_v2(db,
+      "SELECT scalar, blob FROM iter_diagnostics"
+      " WHERE run_id=1 AND k=1 AND name='hessian_delta';", -1, &st, 0);
+   check("diag matrix row", sqlite3_step(st) == SQLITE_ROW);
+   check("diag frobenius",
+         std::fabs(sqlite3_column_double(st, 0) - std::sqrt(10.0)) < 1e-12);
+   check("diag blob size", sqlite3_column_bytes(st, 1) == 4*8);
+   {
+      double back[4];
+      memcpy(back, sqlite3_column_blob(st, 1), 4*8);
+      check("diag blob bytes",
+            back[0] == 1 && back[1] == 2 && back[2] == 2 && back[3] == 1);
+   }
+   sqlite3_finalize(st);
+
    sqlite3_close(db);
 
    // --- schema version guard: a too-new file must be refused ---

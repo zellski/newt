@@ -16,6 +16,8 @@
 # include <algorithm>
 # include <cmath>
 # include <cstdio>
+# include <cstdlib>
+# include <iostream>
 # include <sstream>
 # include <string>
 # include <utility>
@@ -126,6 +128,20 @@ struct DCheckResult {
    }
 };
 
+// silence the dynamics' per-evaluation stage logging while the FD sweep
+// re-evaluates the problem ~2n times; without this the duration-variable
+// stages would bury the report (and the solve) under their cerr chatter
+struct CerrSilencer {
+   std::streambuf *saved;
+   CerrSilencer() : saved(std::cerr.rdbuf()) {
+      static struct Sink : std::streambuf {
+         int overflow(int c) { return c; }
+      } sink;
+      std::cerr.rdbuf(&sink);
+   }
+   ~CerrSilencer() { std::cerr.rdbuf(saved); }
+};
+
 // read an If_RealVec interface variable (e.g. sqp_y) as plain doubles;
 // false if the eval fails or the length is not what we expect, which is
 // the normal "solver not initialized yet" case
@@ -176,6 +192,8 @@ DCheckResult RunDcheck(Tcl_Interp *interp) {
    int n = qp->c->dim, me = qp->b->dim, mi = qp->d->dim;
    R.n = n; R.me = me; R.mi = mi;
    R.jacEq.rows = me; R.jacIneq.rows = mi;
+
+   CerrSilencer hush;
 
    // the iterate to check, kept so we can put the solver back exactly
    VEC *x0 = v_get(n);
@@ -407,6 +425,20 @@ static int CmdRecord(ClientData, Tcl_Interp *interp,
    }
    Rec->RecordIteration(k, obj, inf, grdL, R.x, R.times, R.frames, R.stageEnds);
    R.valid = false;
+
+   // a derivative-health metric for this accepted iterate, opt-in with
+   // NEWT_DCHECK=1. Off by default: the check's extra evaluations perturb
+   // the solve trajectory at the last bit, and a plain solve is meant to
+   // stay bit-for-bit reproducible. Runs after the sweep so the frames are
+   // captured at the true iterate; RunDcheck restores x before returning.
+   const char *flag = std::getenv("NEWT_DCHECK");
+   if (flag && *flag && std::string(flag) != "0") {
+      DCheckResult D = RunDcheck(interp);
+      if (D.ok) {
+         Rec->RecordDiagnostic(k, "fd_max_rel_err", D.maxRel());
+         Rec->RecordDiagnostic(k, "fd_max_abs_err", D.maxAbs());
+      }
+   }
    return TCL_OK;
 }
 

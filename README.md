@@ -102,6 +102,23 @@ and creature YAML are snapshotted into the runs row, so a database is
 self-describing. Multiple processes can write concurrently (WAL mode),
 and readers never block -- a viewer can follow a run live.
 
+A sibling `iter_diagnostics(run_id, k, name, scalar, blob)` table holds
+optional named metrics per accepted iterate. Setting `NEWT_DCHECK=1`
+turns on a per-iterate derivative check (the `newt_dcheck` metric) and
+records its largest absolute and relative error as `fd_max_abs_err` /
+`fd_max_rel_err`, so the health of the derivatives can be tracked across
+a whole solve:
+
+    NEWT_DB=/tmp/run.db NEWT_DCHECK=1 ./run ../scenarios/needle.yaml
+    sqlite3 /tmp/run.db \
+      "SELECT k, scalar FROM iter_diagnostics WHERE name='fd_max_rel_err'"
+
+It is off by default: the check's extra evaluations perturb the solve at
+the last bit, and a plain run is meant to stay bit-for-bit reproducible.
+The `blob` column carries an optional matrix payload (Frobenius norm in
+`scalar`, the matrix as little-endian float64, row-major, n=n_vars), a
+channel for recording a curvature-accuracy diagnostic later.
+
 ## Scenario Files
 
 Scenarios live in newt/scenarios as two YAML files: a creature (the
